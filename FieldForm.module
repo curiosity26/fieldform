@@ -6,15 +6,19 @@
 
 define('FIELDFORM_PROPERTY_STRING', 'string');
 define('FIELDFORM_PROPERTY_TEXT', 'text');
-define('FIELDFORM_PROPERTY_ARRAY', 'array');
+define('FIELDFORM_PROPERTY_MARKUP', 'html_markup');
+define('FIELDFORM_PROPERTY_SELECT', 'select');
+define('FIELDFORM_PROPERTY_TABLE', 'table');
+define('FIELDFORM_PROPERTY_RADIOS', 'radios');
+define('FIELDFORM_PROPERTY_CHECKBOXES', 'checkboxes');
 define('FIELDFORM_PROPERTY_BOOL', 'boolean');
 define('FIELDFORM_PROPERTY_DATE', 'date');
 define('FIELDFORM_PROPERTY_NONE', 'none');
 
-module_load_include('inc', 'careerapp', 'entity/fieldform.class');
-module_load_include('inc', 'careerapp', 'entity/fieldform.controller');
-module_load_include('inc', 'careerapp', 'entity/fieldformresult.class');
-module_load_include('inc', 'careerapp', 'entity/fieldformresult.controller');
+module_load_include('inc', 'fieldform', 'entity/fieldform.class');
+module_load_include('inc', 'fieldform', 'entity/fieldform.controller');
+module_load_include('inc', 'fieldform', 'entity/fieldformresult.class');
+module_load_include('inc', 'fieldform', 'entity/fieldformresult.controller');
 
 function fieldform_hook_info() {
   return array(
@@ -203,13 +207,10 @@ function fieldform_result_access($op, $entity, $account = NULL) {
 function fieldform_get_info($elementType = NULL) {
   $static = &drupal_static(__FUNCTION__);
 
-  if (empty($static) || empty($static[$elementType])) {
+  if (empty($static) || (isset($elementType) && empty($static[$elementType]))) {
 
     $cache = cache_get('fieldform_info');
-    if (!$cache->isEmpty()) {
-      $cache = $cache->get();
-      $static = $cache['fieldform_info']->data;
-    }
+    $static = $cache->data;
 
     if (empty($static) || (!isset($elementType) && empty($static[$elementType]))) {
       $static = array();
@@ -280,12 +281,12 @@ function fieldform_element_controller($elementType) {
     new $info['element controller']($elementType) : new FieldFormElementController($elementType);
 }
 
-function fieldform_element_ui_controller($elementType, $view = 'form') {
+function fieldform_element_ui_controller($elementType, $view_mode = 'full') {
   $info = fieldform_get_info($elementType);
-  _fieldform_process_info_files($info['element ui'][$view]);
-  return isset($info['element ui'][$view]['controller']) &&
-  in_array('FieldFormElementUIController', class_implements($info['element controller'])) ?
-    new $info['element ui'][$view]['controller']($elementType) : new FieldFormElementUIController($elementType);
+  _fieldform_process_info_files($info['element ui'][$view_mode]);
+  return isset($info['element ui'][$view_mode]['controller']) &&
+  in_array('FieldFormElementUIInterface', class_implements($info['element ui'][$view_mode]['controller'])) ?
+    new $info['element ui'][$view_mode]['controller']($elementType) : new FieldFormElementUIController($elementType);
 }
 
 function element_get_from_elements($key, array &$elements) {
@@ -474,6 +475,7 @@ function fieldform_element_load($entity, $elementName) {
 function fieldform_forms($form_id, $args) {
   $forms = array();
   $info = fieldform_get_info();
+  $entityInfo = entity_get_info();
 
   foreach ($info as $elementType => $element) {
     $forms['fieldform_'.$elementType.'_add_form'] = array(
@@ -489,7 +491,68 @@ function fieldform_forms($form_id, $args) {
     );
   }
 
+  foreach ($entityInfo as $type => $i) {
+    $controller = entity_get_controller($type);
+
+    if (method_exists($controller, 'hookForms')) {
+      $forms += $controller->hookForms();
+    }
+  }
+
   return $forms;
+}
+
+function fieldform_element_info() {
+  return array(
+    'tableset' => array(
+      '#input' => TRUE,
+      '#tree' => TRUE,
+      '#process' => array('form_tableset_process'),
+      '#pre_render' => array('form_tableset_pre_render'),
+      '#header' => array(),
+      '#rows' => array(),
+      '#attributes' => array(),
+      '#caption' => NULL,
+      '#title_display' => 'invisible'
+    ),
+    'namevalue_table' => array(
+      '#input' => TRUE,
+      '#tree' => TRUE,
+      '#process' => array('form_namevalue_table_process'),
+      '#pre_render' => array('form_tableset_pre_render'),
+      '#submit' => array('form_namevalue_table_submit'),
+      '#option' => array(),
+      '#title_display' => 'invisible'
+    )
+  );
+}
+
+function fieldform_view_form($form, &$form_state, $entity_type, Entity $entity) {
+  return entity_get_controller($entity_type)::buildForm($entity, $form, $form_state);
+}
+
+function fieldform_view_form_validate(&$form, &$form_state) {
+  $entity = $form_state[$form_state['entity_type']];
+  $entity->validate($form, $form_state);
+}
+
+function fieldform_view_form_submit(&$form, &$form_state) {
+  $entity = $form_state[$form_state['entity_type']];
+  $entity->submit($form, $form_state);
+}
+
+function fieldform_view_wrapper($form, &$form_state, $entity_type, $entity) {
+  $form_id = "fieldform_".$entity->entityType()."_".$entity->identifier()."_form";
+  $form_state = array(
+    'entity_type' => $entity->entityType(),
+    'build_info' => array(
+      'args' => array($entity->entityType(), $entity)
+    )
+  );
+
+  $form_state[$entity_type] = $entity;
+
+  return drupal_retrieve_form($form_id, $form_state);
 }
 
 function fieldform_element_operations_form($op = 'add', Entity $entity, FieldFormElement $element = NULL) {
@@ -560,6 +623,7 @@ function fieldform_element_settings_form_validate(&$form, &$form_state) {
 
 function fieldform_element_settings_form_submit($form, &$form_state) {
   list($entity_type, $entity, $element_type, $element) = $form_state['build_info']['args'];
+  $controller = fieldform_element_controller($element_type);
   $values = $form_state['values'];
   $values['type'] = $element_type;
   $values['attributes'] = fieldform_element_attributes($values['attributes']) + $values['class'];
@@ -569,16 +633,16 @@ function fieldform_element_settings_form_submit($form, &$form_state) {
   $entity_element = array_merge_recursive($entity_element, $values);
   $element = fieldform_element_create($element_type, $entity_element);
 
+  if (method_exists($controller, 'settingsSubmitForm')) {
+    $controller->settingsSubmitForm($form, $form_state, $entity_type, $entity, $element_type, $element);
+  }
+
   if (!(elements_update($entity, $element))) {
     elements_add($entity, $element);
   }
   elseif ($element->name !== $name) {
     // Name has changed to protect the innocent (not really)
     element_change_name($name, $element->name, $entity->elements);
-  }
-  $controller = fieldform_element_controller($element_type);
-  if (method_exists($controller, 'settingsSubmitForm')) {
-    $controller->settingsSubmitForm($form, $form_state, $entity_type, $entity, $element_type, $element);
   }
   entity_save($entity_type, $entity);
 
@@ -601,6 +665,205 @@ function fieldform_element_delete_form_submit($form, &$form_state) {
     entity_save($entity_type, $entity);
   }
   drupal_redirect_form($form_state);
+}
+
+function form_tableset_pre_render($element, &$form_state) {
+  foreach($element['#rows'] as &$row) {
+    foreach($row as &$col) {
+      $col['data'] = drupal_render($col['#data']);
+      unset($col['#data']);
+      if (!empty($col['#attributes'])) {
+        $col += $col['#attributes'];
+        unset($col['#attributes']);
+      }
+    }
+  }
+  return $element;
+}
+
+function form_tableset_process($element, &$form_state, $complete_form) {
+  foreach ($element['#rows'] as $key => &$row) {
+    if (is_array($row)) {
+      foreach ($row as &$col) {
+        $default = array('#parents' => array_merge($element['#parents'], array($key)));
+        if (!is_array($col)) {
+          $name = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', $col));
+          $default['#parents'][] = $name;
+          $col['#data']  = array($name => array('#value' => $col)) + $default;
+          drupal_process_form($complete_form['form_id']['#value'], $col['#data'][$name], $form_state);
+        }
+        else {
+          if (!empty($col['data'])) {
+            $col['#data'] = $col['data'];
+            unset($col['data']);
+            if (is_array($col['#data'])) {
+              $name = array_keys($col['#data'])[0];
+              $default['#parents'][] = $name;
+              $col['#data'][$name] += $default;
+              drupal_process_form($complete_form['form_id']['#value'], $col['#data'][$name], $form_state);
+            }
+            else {
+              $name = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '_', (string)$col['#data']));
+              $default['#parents'][] = $name;
+              $col['#data'] = array($name => array('#value' => $col['#data'])) +  $default;
+              drupal_process_form($complete_form['form_id']['#value'], $col['#data'][$name], $form_state);
+            }
+          }
+          else {
+            $col['#data'] = array();
+            foreach(element_children($col) as $child) {
+              $default['#parents'][] = $child;
+              if (is_array($col[$child])) {
+                $col['#data'][$child] = $col[$child] + $default;
+                unset($col[$child]);
+                drupal_process_form($complete_form['form_id']['#value'], $col['#data'][$child], $form_state);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return $element;
+}
+
+function form_namevalue_table_process($element, &$form_state, $complete_form) {
+  $options = array_filter($element['#options']);
+  $options = !empty($options) ? $options : array(array('name' => ''));
+  unset($element['#options']);
+
+  $element['#headers'] = array(
+    'ID',
+    'Name',
+    'Value',
+    'Weight'
+  );
+
+  $element['#attributes'] = array('id' => 'namevalue_table-'.$element['#name']);
+
+  foreach ($options as $i => $option) {
+    foreach ($option as $name => $value) {
+      $element['#rows'][$i] = _namevalue_table_blank_row();
+      $element['#rows'][$i]['#data']['name']['#default_value'] = $name;
+      $element['#rows'][$i]['#data']['value']['#default_value'] = $value;
+    }
+  }
+
+  $element['actions'] = array(
+    '#type' => 'actions'
+  );
+
+  $element_id = implode('--', $element['#parents']).'--'.$element['#name'];
+
+  $element['actions']['add_'.$element_id] = array(
+    '#type' => 'button',
+    '#value' => '+',
+    '#executes_submit_callback' => FALSE,
+    '#ajax' => array(
+      'wrapper' => 'namevalue-table-wrapper-'.$element['#name'],
+      'callback' => '_namevalue_table_ajax'
+    )
+  );
+
+  $element['actions']['remove_'.$element_id] = array(
+    '#type' => 'button',
+    '#value' => '-',
+    '#executes_submit_callback' => FALSE,
+    '#ajax' => array(
+      'wrapper' => 'namevalue-table-wrapper-'.$element['#name'],
+      'callback' => '_namevalue_table_ajax'
+    )
+  );
+
+  return $element;
+}
+
+function _namevalue_table_blank_row() {
+  return array(
+    '#data' => array(
+      'id' => array(
+        '#type' => 'hidden',
+        '#value' => $i,
+        '#attributes' => array(
+          'class' => array('namevalue-id')
+        )
+      ),
+      'name' => array(
+        '#type' => 'textfield',
+        '#title_display' => 'invisible',
+      ),
+      'value' => array(
+        '#type' => 'textfield',
+        '#title_display' => 'invisible',
+      ),
+      'weight' => array(
+        '#type' => 'hidden',
+        '#value' => $i,
+        '#attributes' => array(
+          'class' => array('namevalue-weight')
+        )
+      ),
+    ),
+    'class' => array('draggable', 'tabledrag-root')
+  );
+}
+
+function _namevalue_table_ajax($form, $form_state) {
+  /*$form_build_id = $_POST['form_build_id'];
+  $form_state = array('storage' => NULL, 'submitted' => FALSE);
+  $form = form_get_cache($form_build_id, $form_state);
+
+  $args = $form['#parameters'];
+  $form_id = array_shift($args);
+  $form['#post'] = $_POST;
+  $form['#redirect'] = FALSE;
+  $form['#programmed'] = FALSE;
+  $form_state['post'] = $_POST;
+
+  drupal_process_form($form_id, $form, $form_state);
+  $form = drupal_rebuild_form($form_id, $form_state, $args, $form_build_id);*/
+  $op_button = $form_state['values']['op'];
+  $op = preg_match('/^[^_]+', $op_button);
+  $element_string = str_replace($op.'_', '', $op_button);
+  $element_name = str_replace('-', '][', $element_string);
+  $element = $form[$element_name];
+  unset($element['actions'], $element['#printed']);
+
+  $i = count($element['#rows']);
+
+  if ($op == 'add') {
+
+  }
+  elseif ($op == 'remove') {
+    if ($i > 1) {
+      --$i;
+      unset($element['#rows'][$i]);
+    }
+    else {
+      unset($element['#rows']);
+      $element['#rows'][0] = _namevalue_table_blank_row();
+    }
+  }
+
+  /*foreach (element_children($element) as &$row) {
+    foreach ($row['#data'] as &$col) {
+      unset($col['#printed']);
+      drupal_process_form($form_id, $fieldset, $form_state);
+    }
+  }*/
+  return $element;
+  //drupal_json_output(array('success' => TRUE, 'data' => drupal_render($element)));
+}
+
+function form_namevalue_table_submit(&$element, &$form_state) {
+  $rows = $element['#value'];
+  $values = array();
+  foreach ($rows as $value) {
+    $values[$value['name']] = $value['value'];
+  }
+
+  $element['#value'] = $values;
 }
 
 /* Helpers */
@@ -644,6 +907,14 @@ function fieldform_theme() {
     'render element' => 'form'
   );
 
+  $themes['tableset'] = array(
+    'render element' => 'element'
+  );
+
+  $themes['namevalue_table'] = array(
+    'render element' => 'element'
+  );
+
   return $themes;
 }
 
@@ -684,7 +955,7 @@ function theme_fieldform_elements_list($variables) {
         'data' => array(
           $indent.drupal_render($element['title']),
           drupal_render($element['name']),
-          drupal_render($element['title']),
+          drupal_render($element['type']),
           drupal_render($element['id']),
           drupal_render($element['parents']),
           drupal_render($element['weight']),
@@ -704,12 +975,11 @@ function theme_fieldform_elements_list($variables) {
     'data' => array(
       drupal_render($form['elements']['add_new_element']['title']),
       drupal_render($form['elements']['add_new_element']['name']),
-      drupal_render($form['elements']['add_new_element']['title']),
+      drupal_render($form['elements']['add_new_element']['type']),
       drupal_render($form['elements']['add_new_element']['id']),
       drupal_render($form['elements']['add_new_element']['parents']),
-      drupal_render($form['elements']['add_new_element']['weight']),
-      drupal_render($form['elements']['add_new_element']['edit']),
-      drupal_render($form['elements']['add_new_element']['delete'])
+      array('data' => drupal_render($form['elements']['add_new_element']['weight']),
+        'colspan' => 3)
     ),
     'class' => array('draggable', 'tabledrag-root')
   );
@@ -725,6 +995,37 @@ function theme_fieldform_elements_list($variables) {
   // the drupal_add_tabledrag function again, instructing it to update the
   // weight field as items at the same level are re-ordered.
   drupal_add_tabledrag($table_id, 'order', 'sibling', 'elements-list-weight', NULL, NULL, FALSE);
+
+  return $output;
+}
+
+function theme_tableset($variables) {
+  $element = $variables['element'];
+  $output = theme('table', array(
+    'header' => $element['#header'],
+    'rows' => $element['#rows'],
+    'attributes' => $element['#attributes'],
+    'caption' => $element['#caption']
+    )
+  );
+  return theme('form_element', $element, $output);
+}
+
+function theme_namevalue_table($variables) {
+  $element = $variables['element'];
+  $actions = $element['actions'];
+  $output = '<div id="namevalue-table-wrapper-'.$element['#name'].'">';
+  $output .= theme('table', array(
+      'header' => $element['#header'],
+      'rows' => $element['#rows'],
+      'attributes' => $element['#attributes'],
+      'caption' => $element['#caption']
+    )
+  );
+  $output .= '</div>';
+  $output .= drupal_render($actions);
+
+  drupal_add_tabledrag($element['#attributes']['id'], 'order', 'sibling', 'namevalue-weight', NULL, NULL);
 
   return $output;
 }

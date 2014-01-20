@@ -15,7 +15,7 @@ function fieldform_fieldform_info() {
 
   $info['textarea'] = array(
     'label' => t('Textarea'),
-    'element class' => 'TextAreaElement',
+    'element controller' => 'TextAreaElementController',
     'properties' => array(
       'default_value' => array(
         'type' => FIELDFORM_PROPERTY_TEXT
@@ -27,28 +27,33 @@ function fieldform_fieldform_info() {
         'type' => FIELDFORM_PROPERTY_STRING
       )
     ),
-    'file' => 'textarea.inc'
+    'file' => 'textarea.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
   $info['select'] = array(
     'label' => t('Select'),
-    'element class' => 'SelectElement',
     'properties' => array(
       'options' => array(
-        'type' => FIELDFORM_PROPERTY_ARRAY
+        'type' => FIELDFORM_PROPERTY_TABLE
       ),
       'multiple' => array(
         'type' => FIELDFORM_PROPERTY_BOOL
+      ),
+      'default_value' => array(
+        'type' => FIELDFORM_PROPERTY_SELECT
       )
-    ),
-    'file' => 'select.inc'
+    )
   );
 
   $info['radios'] = array(
     'label' => t('Radio Buttons (Multiple)'),
     'properties' => array(
       'options' => array(
-        'type' => FIELDFORM_PROPERTY_ARRAY,
+        'type' => FIELDFORM_PROPERTY_TABLE,
+      ),
+      'default_value' => array(
+        'type' => FIELDFORM_PROPERTY_RADIOS
       )
     )
   );
@@ -72,10 +77,10 @@ function fieldform_fieldform_info() {
     'label' => t('Checkboxes (Multiple)'),
     'properties' => array(
       'options' => array(
-        'type' => FIELDFORM_PROPERTY_ARRAY
+        'type' => FIELDFORM_PROPERTY_TABLE
       ),
       'default_value' => array(
-        'type' => FIELDFORM_PROPERTY_ARRAY
+        'type' => FIELDFORM_PROPERTY_CHECKBOXES
       )
     )
   );
@@ -97,17 +102,15 @@ function fieldform_fieldform_info() {
 
   $info['markup'] = array(
     'label' => t('HTML Markup'),
-    'element class' => 'MarkupElement',
     'properties' => array(
       'markup' => array(
         'title' => t('HTML Code'),
-        'type' => FIELDFORM_PROPERTY_TEXT
+        'type' => FIELDFORM_PROPERTY_MARKUP
       ),
       'default_value' => array(
         'type' => FIELDFORM_PROPERTY_NONE
       )
-    ),
-    'file' => 'markup.inc'
+    )
   );
 
   $info['date'] = array(
@@ -120,6 +123,15 @@ function fieldform_fieldform_info() {
         'title' => t('Use Current Date'),
         'type' => FIELDFORM_PROPERTY_BOOL
       )
+    )
+  );
+
+  $info['file'] = array(
+    'label' => t('File'),
+    'properties' => array(
+      'default_value' => array(
+        'type' => FIELDFORM_PROPERTY_NONE
+      ),
     )
   );
 

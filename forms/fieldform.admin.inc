@@ -157,24 +157,22 @@ function fieldform_elements_list_submit($form, &$form_state) {
   $entity = $form_state['fieldform'];
   $values = $form_state['values'];
   $elements = $values['elements'];
-  $add_element = $elements['add_new_element'];
-  unset($elements['add_new_element']);
+  uasort($elements, 'drupal_sort_weight');
 
   foreach ($elements as $name => $element) {
     $element['parents'] = explode(':', $element['parents']);
-    $old_element = element_get_from_elements($name, $entity->elements);
-    $element = array_merge_recursive($old_element, $element);
-    $old_element = fieldform_element_create($old_element['type'], $old_element);
-    $new_element = fieldform_element_create($element['type'], $element);
-    elements_delete($entity, $old_element);
+    if ($name === 'add_new_element') {
+      $new_element = fieldform_element_create($element['type'], $element);
+      $form_state['redirect'] = $entity->uri().'/manage/'.$entity->identifier().'/elements/'.$new_element->name.'/edit';
+    }
+    else {
+      $old_element = element_get_from_elements($name, $entity->elements);
+      $element = array_merge_recursive($old_element, $element);
+      $old_element = fieldform_element_create($old_element['type'], $old_element);
+      $new_element = fieldform_element_create($element['type'], $element);
+      elements_delete($entity, $old_element);
+    }
     elements_add($entity, $new_element);
-  }
-
-  if (isset($add_element['name'])) {
-    $add_element['parents'] = explode(':', $add_element['parents']);
-    $new = fieldform_element_create($add_element['type'], $add_element);
-    elements_add($entity, $new);
-    $form_state['redirect'] = $entity->uri().'/manage/'.$entity->identifier().'/elements/'.$new->name.'/edit';
   }
 
   entity_save($entity->entityType(), $entity);

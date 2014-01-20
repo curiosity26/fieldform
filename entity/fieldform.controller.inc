@@ -10,6 +10,80 @@ class FieldFormController extends EntityAPIControllerExportable {
   public function __construct($entityType = NULL) {
     parent::__construct('fieldform');
   }
+
+  public function hookForms() {
+    $forms = array();
+
+    $entities = fieldform_load_multiple();
+
+    foreach ($entities as $entity) {
+      $forms['fieldform_'.$entity->entityType().'_'.$entity->identifier().'_form'] = array(
+        'callback' => 'entity_view',
+        'callback arguments' => array($entity->entityType(), array($entity->identifier()))
+      );
+    }
+
+    return $forms;
+  }
+
+  static protected function processElements($entity, $elements, $view_mode = 'full') {
+    $ret = array();
+
+    foreach ($elements as $name => $settings) {
+      if (!empty($settings['type'])) {
+        $element = fieldform_element_create($settings['type'], $settings);
+        $ret[$name] = $element->buildContent($view_mode);
+      }
+    }
+    return $ret;
+  }
+
+  static public function buildForm($entity, $form, &$form_state, $view_mode = 'full', $langcode = NULL) {
+    $form += self::processElements($entity, $entity->elements, $view_mode);
+
+    $form_state += array(
+      'build_info' => array(
+        'args' => array($entity)
+      ),
+      'entity_type' => $entity->entityType()
+    );
+
+    $form_state[$entity->entityType()] = $entity;
+
+    return $form;
+  }
+
+  public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $content = array()) {
+
+    $form_state = array();
+    $form = array();
+    $form = self::buildForm($entity, $form, $form_state, $view_mode, $langcode);
+
+    drupal_process_form('fieldform_'.$entity->entityType().'_'.$entity->identifier().'_form', $form, $form_state);
+
+    $content[] = $form;
+    return parent::buildContent($entity, $view_mode, $langcode, $content);
+  }
+
+  public function validate($entity, &$form, &$form_state) {
+    foreach ($entity->elements as $name => $settings) {
+      $settings['name'] = $name;
+      $element = fieldform_element_create($settings);
+      $element->value = $form_state['values'][$element->formKey()];
+      $element->validate($form, $form_state);
+    }
+  }
+
+  public function submit($entity, &$form, &$form_state) {
+    foreach ($entity->elements as $name => $settings) {
+      $settings['name'] = $name;
+      $element = fieldform_element_create($settings);
+      $element->value = $form_state['values'][$element->formKey()];
+      $element->submit($form, $form_state);
+    }
+
+    // TODO: Create a new Result or catch the result to update from session and save new results
+  }
 }
 
 class FieldFormAdminUIController extends EntityDefaultUIController {
@@ -98,12 +172,12 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
   public function create($values = array()) {
     $class = isset($this->elementInfo['element class']) && class_implements('FieldFormElement') ?
       $this->elementInfo['element class'] : 'FieldFormElement';
-    return new $class($values, $this->elementType);
+    return new $class($this->elementType, $values);
   }
 
   public function settingsForm($form, &$form_state, FieldFormElement $element = NULL, $op = NULL) {
     $i = 0;
-    $values = $form_state['values'];
+    $values = !empty($form_state['values']) ? $form_state['values'] : get_object_vars($element);
     $properties = $element->elementInfo()['properties'];
 
     $form['title'] = array(
@@ -144,9 +218,23 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
           case FIELDFORM_PROPERTY_TEXT:
             $form[$name]['#type'] = 'textarea';
             break;
-          case FIELDFORM_PROPERTY_ARRAY:
-            $form[$name]['#type'] = 'namevaluetable';
-            // TODO: include the table form element from Drupal 6 module
+          case FIELDFORM_PROPERTY_MARKUP:
+            $form[$name]['#type'] = 'text_format';
+            break;
+          case FIELDFORM_PROPERTY_SELECT:
+            $form[$name]['#type'] = 'select';
+            $form[$name]['#options'] = isset($value) ? $values : $form['options']['#options'];
+            break;
+          case FIELDFORM_PROPERTY_RADIOS:
+            $form[$name]['#type'] = 'radios';
+            $form[$name]['#options'] = isset($value) ? $values : $form['options']['#options'];
+            break;
+          case FIELDFORM_PROPERTY_CHECKBOXES:
+            $form[$name]['#type'] = 'checkboxes';
+            $form[$name]['#options'] = isset($value) ? $values : $form['options']['#options'];
+            break;
+          case FIELDFORM_PROPERTY_TABLE:
+            $form[$name]['#type'] = 'namevalue_table';
             break;
           case FIELDFORM_PROPERTY_DATE:
             $form[$name]['#type'] = 'date';
@@ -168,7 +256,6 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       }
     }
 
-
     $form['details'] = array(
       '#type' => 'fieldset',
       '#title' => t('Element Details'),
@@ -180,13 +267,13 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     $form['details']['class'] = array(
       '#type' => 'textfield',
       '#title' => t('Class'),
-      '#default_value' => fieldform_element_attributes_to_string($values['attributes']['class'])
+      '#default_value' => $values['class']
     );
 
     $form['details']['attributes'] = array(
-      '#type' => 'textarea',
+      '#type' => 'namevalue_table',
       '#title' => t('Attributes'),
-      '#default_value' => fieldform_element_attributes_to_string($values['attributes'])
+      '#default_value' => $values['attributes']
     );
 
     $form['details']['title_display'] = array(
@@ -202,31 +289,13 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
 
     return $form;
   }
-}
 
-interface FieldFormUIInterface {
-  public function buildContent(FieldFormElement $element);
-  public function view(FieldFormElement $element);
-}
 
-class FieldFormElementUIController implements FieldFormUIInterface {
-  protected $elementType;
-  protected $elementInfo;
-
-  public function __construct($elementType) {
-    $this->elementType = $elementType;
-    $this->elementInfo = fieldform_get_info($elementType);
+  public function validate(&$form, &$form_state, $element) {
+    // TODO: Process validation per the element
   }
 
-  public function buildContent(FieldFormElement $element, $view_mode = 'full', $content = array()) {
-    $element->content = $content;
-
-    return $content;
-  }
-
-  public function view(FieldFormElement $element, $view_mode = 'full') {
-    $content = $this->buildContent($element, $view_mode);
-
-    return drupal_render($content);
+  public function submit(&$form, &$form_state, $element) {
+    // TODO: Handle any pre-save processes on the element value
   }
 }
