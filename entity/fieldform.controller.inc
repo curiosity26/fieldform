@@ -7,7 +7,7 @@
  */
 
 class FieldFormController extends EntityAPIControllerExportable {
-  public function __construct() {
+  public function __construct($entityType = NULL) {
     parent::__construct('fieldform');
   }
 }
@@ -83,7 +83,6 @@ class FieldFormAdminUIController extends EntityDefaultUIController {
 }
 
 interface FieldFormElementControllerInterface {
-  public function settings();
   public function settingsForm($form, &$form_state);
 }
 
@@ -102,85 +101,73 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     return new $class($values, $this->elementType);
   }
 
-  public function settings(FieldFormElement $element = NULL) {
-    $info = element_info($this->elementType);
-    $settings = array();
-
-    if ($info['#input'] === TRUE) {
-      $exclude = array(
-        '#type' => NULL,
-        '#id' => NULL,
-        '#theme' => NULL,
-        '#process' => NULL,
-        '#processed' => NULL,
-        '#action'=> NULL,
-        '#defaults_loaded' => NULL,
-        '#access' => NULL,
-        '#after_build' => NULL,
-        '#after_build_done' => NULL,
-        '#sorted' => NULL,
-        '#input' => NULL,
-        '#machine_name' => NULL
-      );
-
-      $info = array_diff_key($info, $exclude);
-
-      foreach ($info as $key => $setting) {
-          $name = str_replace('#', '', $key);
-          $settings[$name] = $setting;
-        }
-    }
-
-    if ($element) {
-      $vars = get_object_vars($element);
-      $settings = array_merge($settings, $vars);
-    }
-
-    return $settings;
-  }
-
   public function settingsForm($form, &$form_state, FieldFormElement $element = NULL, $op = NULL) {
-    $settings = $this->settings($element);
-    $attributes = $settings['attributes'];
-
     $i = 0;
+    $values = $form_state['values'];
+    $properties = $element->elementInfo()['properties'];
 
     $form['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Title'),
       '#required' => TRUE,
-      '#default_value' => empty($form['title']) ?
-        $settings['title'] : $form['title']['#default_value'],
+      '#default_value' => $values['title'],
       '#weight' => $i
     );
 
     $form['name'] = array(
       '#type' => 'machine_name',
       '#machine_name' => array(
-        'source' => 'title'
+        'source' => array('title')
       ),
+      '#weight' => $i++
+    );
+
+    $form['required'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Required'),
+      '#default_value' => (int)($values['required'] == 1),
       '#weight' => $i++
     );
 
     $form['description'] = array(
       '#type' => 'textarea',
       '#title' => t('Description'),
-      '#default_value' => empty($form['description']) ?
-          $settings['description'] : $form['description']['#default_value']
+      '#default_value' => $values['description']
     );
 
-    unset($settings['title'], $settings['name'], $settings['description'], $settings['attributes']);
+    foreach ($properties as $name => $property) {
+      if ($property['type'] !== FIELDFORM_PROPERTY_NONE) {
+        $value = isset($values[$name]) ? $values[$name] : $property['value'];
 
-    foreach ($settings as $name => $setting) {
-      $default_value = empty($form[$name]) ? $setting : $form[$name]['#default_value'];
-      $form[$name] = array(
-        '#type' => 'textfield',
-        '#title' => t(str_replace('_', ' ', ucwords($name))),
-        '#default_value' => !empty($form_state['values'][$name]) ?
-            $form_state['values'][$name] : $default_value,
-        '#weight' => $i++
-      );
+        $form[$name] = array();
+        switch ($property['type']) {
+          case FIELDFORM_PROPERTY_TEXT:
+            $form[$name]['#type'] = 'textarea';
+            break;
+          case FIELDFORM_PROPERTY_ARRAY:
+            $form[$name]['#type'] = 'namevaluetable';
+            // TODO: include the table form element from Drupal 6 module
+            break;
+          case FIELDFORM_PROPERTY_DATE:
+            $form[$name]['#type'] = 'date';
+            $form[$name]['#default_value'] = isset($value) ?
+              $value : array('month' => date('n'), 'day' => array('j'), 'year' => date('Y'));
+            break;
+          case FIELDFORM_PROPERTY_BOOL:
+            $form[$name]['#type'] = 'checkbox';
+            $form[$name]['#checked'] = ($property['value'] === TRUE);
+            break;
+        }
+
+        $form[$name] += array(
+          '#type' => 'textfield',
+          '#title' => isset($property['title']) ? $property['title'] : t(ucwords(str_replace('_', ' ', $name))),
+          '#default_value' => $value,
+          '#weight' => $i++
+        );
+      }
     }
+
 
     $form['details'] = array(
       '#type' => 'fieldset',
@@ -193,20 +180,24 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     $form['details']['class'] = array(
       '#type' => 'textfield',
       '#title' => t('Class'),
-      '#default_value' => fieldform_element_attributes_to_string($attributes)
+      '#default_value' => fieldform_element_attributes_to_string($values['attributes']['class'])
     );
 
     $form['details']['attributes'] = array(
       '#type' => 'textarea',
       '#title' => t('Attributes'),
-      '#default_value' => fieldform_element_attributes_to_string($attributes)
+      '#default_value' => fieldform_element_attributes_to_string($values['attributes'])
     );
 
-    $form['details']['required'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Required'),
-      '#default_value' => (int)(empty($form['required']) ? $settings['required'] :
-          $form['required']['#default_value'])
+    $form['details']['title_display'] = array(
+      '#type' => 'select',
+      '#title' => t('Title Display'),
+      '#options' => array(
+        'before' => t('Before'),
+        'after' => t('Inline'),
+        'invisible' => t('Hide Label')
+      ),
+      '#default_value' => $values['title_display']
     );
 
     return $form;

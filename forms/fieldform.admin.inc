@@ -101,6 +101,7 @@ function fieldform_elements_list($form, &$form_state, $entity) {
 }
 
 function _fieldform_element_form_row(&$form, $elements, $entity) {
+  $base_url = $entity->entityInfo()['admin ui']['path'];
   foreach ($elements as $name => $element) {
     $pid = !empty($element['parents']) ? implode(':', $element['parents']) : NULL;
 
@@ -134,18 +135,18 @@ function _fieldform_element_form_row(&$form, $elements, $entity) {
     );
 
     $form[$name]['operations']['edit'] = array(
-      '#markup' => l('edit', $entity->uri().'/manage/'.$entity->identifier().'/elements/'.$name.'/edit')
+      '#markup' => l('edit', $base_url.'/manage/'.$entity->identifier().'/elements/'.$name.'/edit')
     );
 
     $form[$name]['operations']['delete'] = array(
-      '#markup' => l('edit', $entity->uri().'/manage/'.$entity->identifier().'/elements/'.$name.'/delete')
+      '#markup' => l('edit', $base_url.'/manage/'.$entity->identifier().'/elements/'.$name.'/delete')
     );
 
     // Hurry along the following iteration
     unset($element['title'], $element['name'], $element['type'], $element['weight'], $element['parents']);
 
     foreach ($element as $n => $item) {
-      if (is_array($item)) {
+      if (is_array($item) && isset($item['name']) && isset($item['type'])) {
         _fieldform_element_form_row($form, array($n => $item), $entity);
       }
     }

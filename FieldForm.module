@@ -4,10 +4,25 @@
 * A description of what your module does.
 */
 
+define('FIELDFORM_PROPERTY_STRING', 'string');
+define('FIELDFORM_PROPERTY_TEXT', 'text');
+define('FIELDFORM_PROPERTY_ARRAY', 'array');
+define('FIELDFORM_PROPERTY_BOOL', 'boolean');
+define('FIELDFORM_PROPERTY_DATE', 'date');
+define('FIELDFORM_PROPERTY_NONE', 'none');
+
 module_load_include('inc', 'careerapp', 'entity/fieldform.class');
 module_load_include('inc', 'careerapp', 'entity/fieldform.controller');
 module_load_include('inc', 'careerapp', 'entity/fieldformresult.class');
 module_load_include('inc', 'careerapp', 'entity/fieldformresult.controller');
+
+function fieldform_hook_info() {
+  return array(
+    'fieldform' => array(
+      'group' => 'fieldform'
+    )
+  );
+}
 
 function fieldform_entity_info() {
   $entities = array();
@@ -197,7 +212,30 @@ function fieldform_get_info($elementType = NULL) {
     }
 
     if (empty($static) || (!isset($elementType) && empty($static[$elementType]))) {
-      $static = module_invoke_all('fieldform_info');
+      $static = array();
+      foreach (module_implements('fieldform_info') as $module) {
+        $hook = module_invoke($module, 'fieldform_info');
+        $static = array_merge_recursive($static,
+          array(
+            'element class' => 'FieldFormElement',
+            'element controller' => 'FieldFormElementController',
+            'element ui' => array(
+              'full' => array(
+                'controller' => 'FieldFormElementUIController',
+                'file' => 'fieldform.ui.inc',
+                'file path' => drupal_get_path('module', 'fieldform').'/forms'
+              )
+            ),
+            'module' => $module,
+            'properties' => array(
+              'default_value' => array(
+                'title' => t('Default Value'),
+                'type' => FIELDFORM_PROPERTY_STRING
+              )
+            ),
+          ),
+          $hook);
+      }
       drupal_alter('fieldform_info', $static);
     }
 
