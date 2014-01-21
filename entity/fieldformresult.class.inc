@@ -10,8 +10,5 @@ class FieldFormResultEntity extends Entity {
   public $data = array();
   public function __construct($values = array()) {
     parent::__construct($values, 'fieldform_result');
-    if (!is_array($this->data)) {
-      $this->data = unserialize($this->data);
-    }
   }
 }

@@ -26,6 +26,11 @@ class FieldFormController extends EntityAPIControllerExportable {
     return $forms;
   }
 
+  public function addElement($entity, FieldFormElement $element) {
+    $entity->elements[$element->formKey()] = get_object_vars($element);
+    $entity->save();
+  }
+
   static protected function processElements($entity, $elements, $view_mode = 'full') {
     $ret = array();
 
@@ -84,6 +89,15 @@ class FieldFormController extends EntityAPIControllerExportable {
 
     // TODO: Create a new Result or catch the result to update from session and save new results
   }
+
+  public function save($entity) {
+    $entity->changed = REQUEST_TIME;
+    if (isset($entity->is_new) || !isset($entity->created)) {
+      $entity->created = REQUEST_TIME;
+    }
+    $entity->module = isset($entity->entityInfo()['module']) ? $entity->entityInfo()['module'] : 'fieldform';
+    return parent::save($entity);
+  }
 }
 
 class FieldFormAdminUIController extends EntityDefaultUIController {
@@ -92,62 +106,52 @@ class FieldFormAdminUIController extends EntityDefaultUIController {
     $id_count = count(explode('/', $this->path));
     $wildcard = isset($this->entityInfo['admin ui']['menu wildcard']) ?
       $this->entityInfo['admin ui']['menu wildcard'] : '%entity_object';
-    $element_wildcard = function_exists($this->entityType."_element_object") ?
+    $element_wildcard = function_exists($this->entityType."_element_object_load") ?
       "%{$this->entityType}_element_object" : "%fieldform_element";
-
     // Add Elements Configuration
 
-    $menu[$this->path."manage/$wildcard/elements"] = array(
+    $menu[$this->path."/manage/$wildcard/elements"] = array(
       'title' => 'Elements',
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('fieldform_elements_list', $id_count + 2),
+      'page arguments' => array('fieldform_elements_list', $id_count + 1),
       'access callback' => 'fieldform_access',
-      'access arguments' => array('view', $id_count + 2),
+      'access arguments' => array('view', $id_count + 1),
       'type' => MENU_LOCAL_TASK
     );
 
-    $menu[$this->path."manage/$wildcard/elements/list"] = array(
+    $menu[$this->path."/manage/$wildcard/elements/list"] = array(
       'title' => 'List',
       'type' => MENU_DEFAULT_LOCAL_TASK,
       'weight' => -10
     );
 
-    $menu[$this->path."manage/$wildcard/elements/add"] = array(
-      'title' => 'Add Elements',
-      'page callback' => 'fieldform_element_operations_form',
-      'page arguments' => array('add', $id_count + 2),
-      'access callback' => 'fieldform_access',
-      'access arguments' => array('create', $id_count + 2),
-      'type' => MENU_LOCAL_TASK
-    );
-
-    $menu[$this->path."manage/$wildcard/elements/$element_wildcard/edit"] = array(
+    $menu[$this->path."/manage/$wildcard/elements/$element_wildcard/edit"] = array(
       'title' => 'Edit Elements',
-      'load arguments' => array($id_count + 4),
+      'load arguments' => array($id_count + 1),
       'page callback' => 'fieldform_element_operations_form',
-      'page arguments' => array('edit', $id_count + 2),
+      'page arguments' => array('edit', $id_count + 1, $id_count + 3),
       'access callback' => 'fieldform_access',
-      'access arguments' => array('update', $id_count + 2),
-      'type' => MENU_LOCAL_TASK
+      'access arguments' => array('update', $id_count + 1),
+      'type' => MENU_CALLBACK
     );
 
-    $menu[$this->path."manage/$wildcard/elements/$element_wildcard/delete"] = array(
+    $menu[$this->path."/manage/$wildcard/elements/$element_wildcard/delete"] = array(
       'title' => 'Delete Elements',
-      'load arguments' => array($id_count + 4),
+      'load arguments' => array($id_count + 1),
       'page callback' => 'fieldform_element_operations_form',
-      'page arguments' => array('delete', $id_count + 2),
+      'page arguments' => array('delete', $id_count + 1, $id_count + 3),
       'access callback' => 'fieldform_access',
-      'access arguments' => array('delete', $id_count + 2),
-      'type' => MENU_LOCAL_TASK
+      'access arguments' => array('delete', $id_count + 1),
+      'type' => MENU_CALLBACK
     );
 
-    if (!empty($this->entityInfo['admin ui']['file'])) {
+    if (isset($this->entityInfo['admin ui']['file'])) {
       // Add in the include file for the entity form.
-      foreach (array("manage/$wildcard/elements", "manage/$wildcard/elements/add",
-                 "manage/$wildcard/elements/$element_wildcard/edit",
-                 "manage/$wildcard/elements/$element_wildcard/delete") as $path_end) {
-        $items[$this->path . $path_end]['file'] = $this->entityInfo['admin ui']['file'];
-        $items[$this->path . $path_end]['file path'] = isset($this->entityInfo['admin ui']['file path']) ?
+      foreach (array("/manage/$wildcard/elements",
+                 "/manage/$wildcard/elements/$element_wildcard/edit",
+                 "/manage/$wildcard/elements/$element_wildcard/delete") as $path_end) {
+        $menu[$this->path . $path_end]['file'] = $this->entityInfo['admin ui']['file'];
+        $menu[$this->path . $path_end]['file path'] = isset($this->entityInfo['admin ui']['file path']) ?
           $this->entityInfo['admin ui']['file path'] : drupal_get_path('module', $this->entityInfo['module']);
       }
     }
@@ -177,7 +181,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
 
   public function settingsForm($form, &$form_state, FieldFormElement $element = NULL, $op = NULL) {
     $i = 0;
-    $values = !empty($form_state['values']) ? $form_state['values'] : get_object_vars($element);
+    $values = isset($form_state['values']) ? $form_state['values'] : get_object_vars($element);
     $properties = $element->elementInfo()['properties'];
 
     $form['title'] = array(
@@ -188,25 +192,27 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       '#weight' => $i
     );
 
-    $form['name'] = array(
+    $form['title']['name'] = array(
       '#type' => 'machine_name',
       '#machine_name' => array(
         'source' => array('title')
       ),
-      '#weight' => $i++
+      '#weight' => $i++,
+      '#disabled' => TRUE
     );
 
     $form['required'] = array(
       '#type' => 'checkbox',
       '#title' => t('Required'),
-      '#default_value' => (int)($values['required'] == 1),
+      '#default_value' => isset($values['required']) ? (int)($values['required'] == 1) : FALSE,
       '#weight' => $i++
     );
 
     $form['description'] = array(
       '#type' => 'textarea',
       '#title' => t('Description'),
-      '#default_value' => $values['description']
+      '#default_value' => $values['description'],
+      '#weight' => $i++
     );
 
     foreach ($properties as $name => $property) {

@@ -11,9 +11,6 @@ class FieldFormEntity extends Entity {
 
   public function __construct($values = array()) {
     parent::__construct($values, 'fieldform');
-    if (!is_array($this->elements)) {
-      $this->elements = unserialize($this->elements);
-    }
   }
 
   public function validate(&$form, &$form_state) {
@@ -45,7 +42,9 @@ class FieldFormElement {
   }
 
   public function formKey() {
-    return implode('][', $this->parents).']['.$this->name;
+    $parents = array_filter($this->parents);
+    $parents = !empty($parents) ? implode('][', $this->parents).'][' : '';
+    return $parents.$this->name;
   }
 
   public function elementInfo() {

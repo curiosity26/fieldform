@@ -19,7 +19,8 @@ function fieldform_form($form, &$form_state, Entity $entity, $op, $entity_type) 
   $form['name'] = array(
     '#type' => 'machine_name',
     '#machine_name' => array(
-      'source' => 'label',
+      'source' => array('label'),
+      'exists' => 'fieldform_name_exists'
     )
   );
 
@@ -31,6 +32,8 @@ function fieldform_form($form, &$form_state, Entity $entity, $op, $entity_type) 
       '#weight' => 100
     )
   );
+
+  $form['#submit'] = array('fieldform_form_submit');
 
   return $form;
 }
@@ -44,14 +47,31 @@ function fieldform_form_submit($form, &$form_state) {
     $entity->$key = $value;
   }
   entity_save($entity_type, $entity);
+  $form_state['redirect'] = 'admin/structure/fieldform';
+  drupal_redirect_form($form_state);
+}
+
+function fieldform_name_exists($value, $element, $form_state) {
+  list($entity) = $form_state['build_info']['args'];
+
+  $query = db_select('fieldform', 'f')->fields('f', array('name', 'fid'))->condition('name', $value);
+  $result = $query->execute();
+  if ($result->rowCount() > 0) {
+    $row = $result->fetchAssoc();
+    return !($entity->name === $value && $entity->fid === $row['fid']);
+  }
+
+  return FALSE;
 }
 
 function fieldform_elements_list($form, &$form_state, $entity) {
   $form_state['fieldform'] = $entity;
-  $values = $form_state['values'];
+  $values = isset($form_state['values']) ? $form_state['values'] : array();
   $elements = $entity->elements;
 
-  $form['elements']['#tree'] = TRUE;
+  $form['elements'] = array(
+    '#tree' => TRUE
+  );
 
   _fieldform_element_form_row($form['elements'], $elements, $entity);
 
@@ -69,15 +89,19 @@ function fieldform_elements_list($form, &$form_state, $entity) {
   $form['elements']['add_new_element']['name'] = array(
     '#type' => 'machine_name',
     '#machine_name' => array(
-      'source' => array('elements', 'add_new_element', 'title')
+      'source' => array('elements', 'add_new_element', 'title'),
+      'exists' => 'fieldform_elements_name_exists'
     )
   );
 
-  $types = fieldform_get_info();
+  $types = array();
+  foreach (fieldform_get_info() as $type => $info) {
+    $types[$type] = $info['label'];
+  }
 
   $form['elements']['add_new_element']['type'] = array(
     '#type' => 'select',
-    '#options' => array_keys($types),
+    '#options' => $types,
     '#default_value' => $values['elements']['add_new_element']['type']
   );
 
@@ -103,11 +127,10 @@ function fieldform_elements_list($form, &$form_state, $entity) {
 function _fieldform_element_form_row(&$form, $elements, $entity) {
   $base_url = $entity->entityInfo()['admin ui']['path'];
   foreach ($elements as $name => $element) {
-    $pid = !empty($element['parents']) ? implode(':', $element['parents']) : NULL;
-
+    $pid = !empty($element['parents']) ? implode('][', $element['parents']) : NULL;
     $form[$name]['id'] = array(
       '#type' => 'hidden',
-      '#value' => $pid.':'.$name
+      '#value' => $name
     );
 
     $form[$name]['title'] = array(
@@ -127,8 +150,6 @@ function _fieldform_element_form_row(&$form, $elements, $entity) {
       '#value' => is_numeric($element['weight']) ? $element['weight'] : 0
     );
 
-    $pid = !empty($element['parents']) ? implode(':', $element['parents']) : NULL;
-
     $form[$name]['parents'] = array(
       '#type' => 'hidden',
       '#value' => $pid
@@ -139,7 +160,7 @@ function _fieldform_element_form_row(&$form, $elements, $entity) {
     );
 
     $form[$name]['operations']['delete'] = array(
-      '#markup' => l('edit', $base_url.'/manage/'.$entity->identifier().'/elements/'.$name.'/delete')
+      '#markup' => l('delete', $base_url.'/manage/'.$entity->identifier().'/elements/'.$name.'/delete')
     );
 
     // Hurry along the following iteration
@@ -153,17 +174,24 @@ function _fieldform_element_form_row(&$form, $elements, $entity) {
   }
 }
 
+function fieldform_elements_name_exists($value, $element, $form_state) {
+  $entity = $form_state['fieldform'];
+  return !(empty($entity->elements) || count(element_get_from_elements($value, $entity->elements)) > 0);
+}
+
 function fieldform_elements_list_submit($form, &$form_state) {
   $entity = $form_state['fieldform'];
+  $base_url = $entity->entityInfo()['admin ui']['path'];
   $values = $form_state['values'];
   $elements = $values['elements'];
   uasort($elements, 'drupal_sort_weight');
-
+  dpm($elements);
   foreach ($elements as $name => $element) {
-    $element['parents'] = explode(':', $element['parents']);
+    $element['parents'] = explode('][', $element['parents']);
     if ($name === 'add_new_element') {
       $new_element = fieldform_element_create($element['type'], $element);
-      $form_state['redirect'] = $entity->uri().'/manage/'.$entity->identifier().'/elements/'.$new_element->name.'/edit';
+      $form_state['redirect'] = $base_url.'/manage/'.$entity->identifier().
+        '/elements/'.$new_element->name.'/edit';
     }
     else {
       $old_element = element_get_from_elements($name, $entity->elements);
