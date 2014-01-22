@@ -192,13 +192,9 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       '#weight' => $i
     );
 
-    $form['title']['name'] = array(
-      '#type' => 'machine_name',
-      '#machine_name' => array(
-        'source' => array('title')
-      ),
-      '#weight' => $i++,
-      '#disabled' => TRUE
+    $form['name'] = array(
+      '#type' => 'hidden',
+      '#value' => $values['name']
     );
 
     $form['required'] = array(
