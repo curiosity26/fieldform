@@ -213,7 +213,9 @@ function fieldform_menu() {
     'page callback' => '_namevalue_table_ajax',
     'page arguments' => array(3, 4),
     'type' => MENU_CALLBACK,
-    'access callback' => TRUE
+    'delivery callback' => 'ajax_deliver',
+    'access callback' => TRUE,
+    //'theme callback' => 'ajax_base_page_theme',
   );
 
   return $menu;
@@ -768,7 +770,6 @@ function form_namevalue_table_process($element, &$form_state, $complete_form) {
   $options = !empty($element['#options']) ? array_filter($element['#options']) : array();
   $options = !empty($options) ? $options : array(array('' => ''));
   unset($element['#options']);
-
   $element['#header'] = array(
     'Name',
     'Value',
@@ -788,11 +789,28 @@ function form_namevalue_table_process($element, &$form_state, $complete_form) {
     }
   }
 
+  $element['row_count'] = array(
+    '#type' => 'hidden',
+    '#value' => count(element_children($element['rows']))
+  );
+
   $element['actions'] = array(
     '#type' => 'actions'
   );
 
   $element_id = implode('--', $element['#parents']);
+
+  $element['actions']['save_'.$element_id] = array(
+    '#type' => 'button',
+    '#value' => 'Save',
+    '#executes_submit_callback' => FALSE,
+    '#ajax' => array(
+      'wrapper' => 'namevalue-table-wrapper-'.$element['#name'],
+      'trigger_as' => array('value' => 'add_'.$element_id),
+      'path' => 'settings/fieldform/namevalue-table/save/'.$complete_form['#form_id'].'/'.$element_id,
+      //'method' => 'html'
+    )
+  );
 
   $element['actions']['add_'.$element_id] = array(
     '#type' => 'button',
@@ -800,7 +818,9 @@ function form_namevalue_table_process($element, &$form_state, $complete_form) {
     '#executes_submit_callback' => FALSE,
     '#ajax' => array(
       'wrapper' => 'namevalue-table-wrapper-'.$element['#name'],
-      'path' => 'settings/fieldform/namevalue-table/add/'.$complete_form['#form_id'].'/'.$element_id
+      'trigger_as' => array('value' => 'add_'.$element_id),
+      'path' => 'settings/fieldform/namevalue-table/add/'.$complete_form['#form_id'].'/'.$element_id,
+      //'method' => 'html'
     )
   );
 
@@ -828,7 +848,7 @@ function _namevalue_table_blank_row() {
       '#title_display' => 'invisible',
     ),
     'weight' => array(
-      '#type' => 'hidden',
+      '#type' => 'weight',
       '#value' => 0,
       '#attributes' => array(
         'class' => array('namevalue-weight')
@@ -837,58 +857,56 @@ function _namevalue_table_blank_row() {
   );
 }
 
-function _namevalue_table_sort_weight($a, $b) {
-  $a_weight = (is_array($a) && isset($a['weight'])) ? $a['weight'] : 0;
-  $b_weight = (is_array($b) && isset($b['weight'])) ? $b['weight'] : 0;
-  if ($a_weight == $b_weight) {
-    return 0;
+function form_extract_element($form, $name) {
+  foreach (element_children($form) as $child) {
+    if ($child === $name) {
+      return $form[$name];
+    }
+
+    if (($element = form_extract_element($form[$child], $name)) !== FALSE) {
+      return $element;
+    }
   }
-  return ($a_weight < $b_weight) ? -1 : 1;
+
+  return FALSE;
 }
 
 function _namevalue_table_ajax($op, $form_id, $element_string) {
-  $form_state = array();
-  $form = drupal_get_form($form_id);
-
-  $form = form_get_cache($form['#build_id'], $form_state);
-  drupal_process_form($form_id, $form, $form_state);
+  list($form, $form_state) = ajax_get_form();
+  drupal_process_form($form['#form_id'], $form, $form_state);
   $element_name = str_replace('--', '][', $element_string);
-  $element = $form[$element_name];
+  $element = form_extract_element($form, $element_name);
+
   unset($element['actions'], $element['#printed']);
+  $count = $form_state['values'][$element_name]['row_count'];
 
-  $i = count(element_children($element['rows']));
+  if ($op == 'add' || $op == 'remove') {
+    $count = max($op == 'add' ? $count + 1 : $count - 1, 1);
+  }
 
-  uasort($element['rows'], 'drupal_sort_weight');
-
-  if ($op == 'add') {
+  $values = isset($form_state['input'][$element_name]['parents']) ? $form_state['input'][$element_name]['parents'] :
+    $form_state['input'][$element_name]['rows'];
+  reset($values);
+  $form_state['values'][$element_name]['rows'] = array();
+  for ($i = 0; $i < $count; $i++) {
     $element['rows'][$i] = _namevalue_table_blank_row();
     $element['rows'][$i]['weight']['#value'] = $i;
+    $form_state['values'][$element_name]['rows'][$i]['weight'] = $i;
+    $value = array_shift($values);
     foreach(element_children($element['rows'][$i]) as $name) {
+      if ($name !== 'weight') {
+        $element['rows'][$i][$name]['#value'] = isset($value[$name]) ? $value[$name] : '';
+        $element['rows'][$i][$name]['#default_value'] = isset($value[$name]) ? $value[$name] : '';
+        $element['rows'][$i][$name]['#default_loaded'] = FALSE;
+        $form_state['values'][$element_name]['rows'][$i][$name] = isset($value[$name]) ? $value[$name] : '';
+      }
       $element['rows'][$i][$name]['#parents'] = array_merge($element['#parents'], array('parents', $i, $name));
-      drupal_process_form($form_id, $element['rows'][$i][$name], $form_state);
+      form_builder($form['#form_id'], $element['rows'][$i][$name], $form_state);
     }
   }
-  elseif ($op == 'remove') {
-    if ($i > 1) {
-      --$i;
-      unset($element['rows'][$i]);
-    }
-    else {
-      unset($element['rows']);
-      $element['rows'][0] = _namevalue_table_blank_row();
-    }
-  }
-
-  foreach (element_children($element['rows']) as $branch) {
-    foreach (element_children($element['rows'][$branch]) as $data) {
-      unset($element['rows'][$branch][$data]['#printed']);
-    }
-  }
-
-  form_set_cache($form['#build_id'], $form, $form_state);
-  $element['#ahah_render'] = TRUE;
-  $output = drupal_render($element);
-  return drupal_json_output(array('data' => $output));
+  $element['row_count']['#value'] = count(element_children($element['rows']));
+  unset($element['row_count']['#printed']);
+  return $element;
 }
 
 function form_namevalue_table_submit($element, &$form_state) {
@@ -1093,16 +1111,10 @@ function theme_namevalue_table($variables) {
     )
   );
 
-  $table = theme('form_element', array('element' => $element));
-
-  if (!isset($element['#ahah_render'])) {
-    $output = '<div id="namevalue-table-wrapper-'.$element['#name'].'">';
-    $output .= $table;
-    $output .= '</div>';
-  }
-  else {
-    $output = $table;
-  }
+  $output = '<div id="namevalue-table-wrapper-'.$element['#name'].'">';
+  $output .= theme('form_element', array('element' => $element));
+  $output .= drupal_render($element['row_count']);
+  $output .= '</div>';
 
   $output .= drupal_render($actions);
 
