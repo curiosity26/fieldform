@@ -26,6 +26,11 @@ function hook_fieldform_info() {
           'type' => FIELDFORM_PROPERTY_STRING
         )
       ),
+      // The following is optional. Overrides $controller->[op]Element (where [op] is add, update, etc)
+      // and default system [op] function
+      'element add callback' => 'callback_function_name',
+      'element update callback' => 'callback_function_name',
+      'element delete callback' => 'callback_function_name',
       // The following are optional file paths to be used for the element classes and callbacks.
       'file' => 'fieldform.inc',
       'file path' => drupal_get_path('module', 'fieldform')
