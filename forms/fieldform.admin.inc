@@ -75,15 +75,11 @@ function fieldform_elements_list($form, &$form_state, $entity) {
 
   _fieldform_element_form_row($form['elements'], $elements, $entity);
 
-  $form['elements']['add_new_element']['id'] = array(
-    '#type' => 'hidden',
-    '#value' => 'add_new_value'
-  );
-
   $form['elements']['add_new_element']['title'] = array(
     '#type' => 'textfield',
     '#size' => 20,
-    '#default_value' => $values['elements']['add_new_element']['title']
+    '#default_value' => isset($values['elements']['add_new_element']) ?
+        $values['elements']['add_new_element']['title'] : NULL
   );
 
   $form['elements']['add_new_element']['name'] = array(
@@ -91,7 +87,8 @@ function fieldform_elements_list($form, &$form_state, $entity) {
     '#machine_name' => array(
       'source' => array('elements', 'add_new_element', 'title'),
       'exists' => 'fieldform_elements_name_exists'
-    )
+    ),
+    '#required' => FALSE
   );
 
   $types = array();
@@ -102,7 +99,8 @@ function fieldform_elements_list($form, &$form_state, $entity) {
   $form['elements']['add_new_element']['type'] = array(
     '#type' => 'select',
     '#options' => $types,
-    '#default_value' => $values['elements']['add_new_element']['type']
+    '#default_value' => isset($values['elements']['add_new_element']) ?
+        $values['elements']['add_new_element']['type'] : NULL
   );
 
   $form['elements']['add_new_element']['parents'] = array(
@@ -128,11 +126,6 @@ function _fieldform_element_form_row(&$form, $elements, $entity) {
   $base_url = $entity->entityInfo()['admin ui']['path'];
   foreach ($elements as $name => $element) {
     $pid = !empty($element['parents']) ? implode('][', $element['parents']) : NULL;
-    $form[$name]['id'] = array(
-      '#type' => 'hidden',
-      '#value' => $name
-    );
-
     $form[$name]['title'] = array(
       '#markup' => $element['title']
     );
@@ -146,7 +139,7 @@ function _fieldform_element_form_row(&$form, $elements, $entity) {
     );
 
     $form[$name]['weight'] = array(
-      '#type' => 'hidden',
+      '#type' => 'weight',
       '#value' => is_numeric($element['weight']) ? $element['weight'] : 0
     );
 
@@ -181,21 +174,19 @@ function fieldform_elements_name_exists($value, $element, $form_state) {
 
 function fieldform_elements_list_submit($form, &$form_state) {
   $entity = $form_state['fieldform'];
-  $base_url = $entity->entityInfo()['admin ui']['path'];
+  $form_state['redirect'] = $entity->entityInfo()['admin ui']['path'].'/manage/'.$entity->identifier().'/elements';
   $values = $form_state['values'];
   $elements = $values['elements'];
-  uasort($elements, 'drupal_sort_weight');
-  dpm($elements);
   foreach ($elements as $name => $element) {
-    $element['parents'] = explode('][', $element['parents']);
-    if ($name === 'add_new_element') {
+    $element['parents'] = isset($element['parents']) ?
+      explode('][', $element['parents']) : $name;
+    if ($name === 'add_new_element' && isset($element['']) && isset($element['name'])) {
       $new_element = fieldform_element_create($element['type'], $element);
-      $form_state['redirect'] = $base_url.'/manage/'.$entity->identifier().
+      $form_state['redirect'] = $entity->entityInfo()['admin ui']['path'].'/manage/'.$entity->identifier().
         '/elements/'.$new_element->name.'/edit';
     }
     else {
       $old_element = element_get_from_elements($name, $entity->elements);
-      $element = array_merge_recursive($old_element, $element);
       $old_element = fieldform_element_create($old_element['type'], $old_element);
       $new_element = fieldform_element_create($element['type'], $element);
       elements_delete($entity, $old_element);

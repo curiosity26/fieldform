@@ -43,8 +43,7 @@ class FieldFormElement {
 
   public function formKey() {
     $parents = array_filter($this->parents);
-    $parents = !empty($parents) ? implode('][', $this->parents).'][' : '';
-    return $parents.$this->name;
+    return !empty($parents) ? implode('][', $this->parents) : $this->name;
   }
 
   public function elementInfo() {

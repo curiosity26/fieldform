@@ -28,6 +28,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
   public function addElement($entity, FieldFormElement $element) {
     $entity->elements[$element->formKey()] = get_object_vars($element);
+    dpm($entity->elements);
     $entity->save();
   }
 
