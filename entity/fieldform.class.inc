@@ -38,7 +38,19 @@ class FieldFormElement {
       }
     }
 
-    $this->type = $elementType;
+    $this->name = preg_replace('/^[^A-Za-z]+[^A-Za-z0-9_-]+$/', '', $this->name);
+
+    if (!is_array($this->parents) || empty($this->parents)) {
+      $this->parents = array($this->name);
+    }
+    elseif (($flip = array_reverse($this->parents)) !== FALSE && current($flip) !== $this->name) {
+      array_unshift($this->parents, $this->name);
+    }
+
+    $this->parents = array_filter($this->parents);
+    if (!isset($this->type)) {
+      $this->type = $elementType;
+    }
   }
 
   public function formKey() {

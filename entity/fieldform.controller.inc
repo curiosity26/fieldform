@@ -27,16 +27,22 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   public function addElement($entity, FieldFormElement $element) {
-    $entity->elements[$element->formKey()] = get_object_vars($element);
-    dpm($entity->elements);
+    if (!empty($entity->elements[$element->formKey()])) {
+      drupal_set_message('Element already exists', 'error');
+      return $this;
+    }
+
+    $entity->elements[implode('][', $element->parents)] = get_object_vars($element);
     $entity->save();
+    return $this;
   }
 
   static protected function processElements($entity, $elements, $view_mode = 'full') {
     $ret = array();
 
     foreach ($elements as $name => $settings) {
-      if (!empty($settings['type'])) {
+      // Parents are only for internal use. The Form API will process parents appropriately
+      if ($name !== 'parents' && !empty($settings['type'])) {
         $element = fieldform_element_create($settings['type'], $settings);
         $ret[$name] = $element->buildContent($view_mode);
       }
@@ -198,6 +204,11 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       '#value' => $values['name']
     );
 
+    $form['type'] = array(
+      '#type' => 'hidden',
+      '#value' => $values['type']
+    );
+
     $form['required'] = array(
       '#type' => 'checkbox',
       '#title' => t('Required'),
@@ -267,16 +278,19 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       '#weight' => $i
     );
 
+    $class = $values['attributes']['class'];
+    unset($values['attributes']['class']);
+
     $form['details']['class'] = array(
       '#type' => 'textfield',
       '#title' => t('Class'),
-      '#default_value' => $values['class']
+      '#default_value' => $class
     );
 
     $form['details']['attributes'] = array(
       '#type' => 'namevalue_table',
       '#title' => t('Attributes'),
-      '#default_value' => $values['attributes']
+      '#options' => $values['attributes']
     );
 
     $form['details']['title_display'] = array(
