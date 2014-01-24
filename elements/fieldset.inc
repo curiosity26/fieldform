@@ -1,0 +1,15 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: alexboyce
+ * Date: 1/24/14
+ * Time: 5:39 PM
+ */
+
+class FieldsetElementController extends FieldFormElementController {
+  static public function settingsForm($form, &$form_state, FieldFormElement $element = NULL, $op = NULL) {
+    $form = parent::settingsForm($form, $form_state, $element, $op);
+    unset($form['details']['title_display']);
+    return $form;
+  }
+}

@@ -104,6 +104,32 @@ function fieldform_fieldform_info() {
     )
   );
 
+  $info['fieldset'] = array(
+    'label' => t('Fieldset'),
+    'element controller' => 'FieldsetElementController',
+    'properties' => array(
+      'collapsible' => array(
+        'type' => FIELDFORM_PROPERTY_BOOL,
+        'default_value' => TRUE
+      ),
+      'collapsed' => array(
+        'type' => FIELDFORM_PROPERTY_BOOL
+      ),
+      'default_value' => array(
+        'type' => FIELDFORM_PROPERTY_NONE
+      ),
+      'required' => array(
+        'type' => FIELDFORM_PROPERTY_NONE
+      ),
+      'description' => array(
+        'type' => FIELDFORM_PROPERTY_NONE
+      )
+    ),
+    'has children' => TRUE,
+    'file' => 'fieldset.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
+  );
+
   $info['markup'] = array(
     'label' => t('HTML Markup'),
     'properties' => array(

@@ -102,6 +102,11 @@ function fieldform_elements_list($form, &$form_state, $entity) {
         $values['elements']['add_new_element']['type'] : NULL
   );
 
+  $form['elements']['add_new_element']['id'] = array(
+    '#type' => 'hidden',
+    '#value' => 'add_new_element'
+  );
+
   $form['elements']['add_new_element']['parents'] = array(
     '#type' => 'hidden',
     '#value' => ''
@@ -128,7 +133,7 @@ function _fieldform_element_form_row(&$form, $elements, $entity) {
     if (!$name) {
       continue;
     }
-    $pid = !empty($element['parents']) ? implode('][', $element['parents']) : $name;
+    $pid = !empty($element['parents']) ? implode('][', $element['parents']).']' : $name;
     $temp['title_label'] = array(
       '#markup' => $element['title']
     );
@@ -154,6 +159,11 @@ function _fieldform_element_form_row(&$form, $elements, $entity) {
     $temp['type'] = array(
       '#type' => 'hidden',
       '#value' => $element['type']
+    );
+
+    $temp['id'] = array(
+      '#type' => 'hidden',
+      '#value' => $element['name']
     );
 
     $temp['weight'] = array(
@@ -196,11 +206,20 @@ function fieldform_elements_name_exists($value, $element, $form_state) {
 function fieldform_elements_list_submit($form, &$form_state) {
   $entity = $form_state['fieldform'];
   $form_state['redirect'] = $entity->entityInfo()['admin ui']['path'].'/manage/'.$entity->identifier().'/elements';
-  $values = $form_state['values'];
+  $values = $form_state['input'];
   $elements = $values['elements'];
-  uasort($elements, 'drupal_sort_weight');
+  //uasort($elements, 'drupal_sort_weight');
 
   foreach ($elements as $name => $element) {
+
+    if (!empty($element['parents']) && $element['parents'] != $name) {
+      $parent = element_get_from_elements($element['parents'], $entity->elements);
+      $parent = fieldform_element_create($parent['type'], $parent);
+      array_push($parent->parents, $element['name']);
+      $element['parents'] = $parent->parents;
+    }
+    dpm($element['id'], 'ID');
+    unset($element['id']);
     $new_element = fieldform_element_create($element['type'], $element);
     if ($name === 'add_new_element' && $new_element !== FALSE) {
       $form_state['redirect'] = $entity->entityInfo()['admin ui']['path'].'/manage/'.$entity->identifier().
