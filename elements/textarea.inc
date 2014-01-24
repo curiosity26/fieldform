@@ -7,7 +7,7 @@
  */
 
 class TextAreaElementController extends FieldFormElementController {
-  public function settingsForm($form, &$form_state, FieldFormElement $element = NULL, $op = NULL) {
+  static public function settingsForm($form, &$form_state, FieldFormElement $element = NULL, $op = NULL) {
     $form = parent::settingsForm($form, $form_state, $element, $op);
     $form['rows']['#size'] = 4;
     $form['cols']['#size'] = 4;

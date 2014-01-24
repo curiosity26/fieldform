@@ -168,7 +168,7 @@ class FieldFormAdminUIController extends EntityDefaultUIController {
 }
 
 interface FieldFormElementControllerInterface {
-  public function settingsForm($form, &$form_state);
+  static public function settingsForm($form, &$form_state);
 }
 
 class FieldFormElementController implements FieldFormElementControllerInterface {
@@ -186,27 +186,28 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     return new $class($this->elementType, $values);
   }
 
-  public function settingsForm($form, &$form_state, FieldFormElement $element = NULL, $op = NULL) {
+  static public function settingsForm($form, &$form_state, FieldFormElement $element = NULL, $op = NULL) {
     $i = 0;
-    $values = isset($form_state['values']) ? $form_state['values'] : get_object_vars($element);
+    $values = isset($form_state['input']) && !empty($form_state['input']) ?
+      $form_state['input'] : get_object_vars($element);
     $properties = $element->elementInfo()['properties'];
 
     $form['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Title'),
       '#required' => TRUE,
-      '#default_value' => $values['title'],
+      '#default_value' => isset($values['title']) ? $values['title'] : '',
       '#weight' => $i
     );
 
     $form['name'] = array(
       '#type' => 'hidden',
-      '#value' => $values['name']
+      '#value' => isset($values['name']) ? $values['name'] : ''
     );
 
     $form['type'] = array(
       '#type' => 'hidden',
-      '#value' => $values['type']
+      '#value' => isset($values['type']) ? $values['type'] : ''
     );
 
     $form['required'] = array(
@@ -219,14 +220,19 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     $form['description'] = array(
       '#type' => 'textarea',
       '#title' => t('Description'),
-      '#default_value' => $values['description'],
+      '#default_value' => isset($values['description']) ? $values['description'] : '',
       '#weight' => $i++
     );
 
     foreach ($properties as $name => $property) {
       if ($property['type'] !== FIELDFORM_PROPERTY_NONE) {
-        $value = isset($values[$name]) ? $values[$name] : $property['value'];
-
+        $value = NULL;
+        if (isset($values[$name])) {
+          $value = $values[$name];
+        }
+        elseif (isset($property['value'])) {
+          $value = $property['value'];
+        }
         $form[$name] = array();
         switch ($property['type']) {
           case FIELDFORM_PROPERTY_TEXT:
@@ -236,19 +242,24 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
             $form[$name]['#type'] = 'text_format';
             break;
           case FIELDFORM_PROPERTY_SELECT:
+            $value = empty($value) ? array() : $value;
             $form[$name]['#type'] = 'select';
-            $form[$name]['#options'] = isset($value) ? $values : $form['options']['#options'];
+            $form[$name]['#options'] = isset($value) ? $value : $form['options']['#options'];
             break;
           case FIELDFORM_PROPERTY_RADIOS:
+            $value = empty($value) ? array() : $value;
             $form[$name]['#type'] = 'radios';
-            $form[$name]['#options'] = isset($value) ? $values : $form['options']['#options'];
+            $form[$name]['#options'] = isset($value) ? $value : $form['options']['#options'];
             break;
           case FIELDFORM_PROPERTY_CHECKBOXES:
+            $value = empty($value) ? array() : $value;
             $form[$name]['#type'] = 'checkboxes';
-            $form[$name]['#options'] = isset($value) ? $values : $form['options']['#options'];
+            $form[$name]['#options'] = isset($value) ? $value : $form['options']['#options'];
             break;
           case FIELDFORM_PROPERTY_TABLE:
+            $value = empty($value) ? array() : $value;
             $form[$name]['#type'] = 'namevalue_table';
+            $form[$name]['#options'] = $value;
             break;
           case FIELDFORM_PROPERTY_DATE:
             $form[$name]['#type'] = 'date';
@@ -257,7 +268,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
             break;
           case FIELDFORM_PROPERTY_BOOL:
             $form[$name]['#type'] = 'checkbox';
-            $form[$name]['#checked'] = ($property['value'] === TRUE);
+            $form[$name]['default_value'] = ($value === TRUE);
             break;
         }
 
@@ -278,8 +289,12 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       '#weight' => $i
     );
 
-    $class = $values['attributes']['class'];
-    unset($values['attributes']['class']);
+    $class = '';
+
+    if (isset($values['attributes']) && isset($values['attributes']['class'])) {
+      $class = $values['attributes']['class'];
+      unset($values['attributes']['class']);
+    }
 
     $form['details']['class'] = array(
       '#type' => 'textfield',
@@ -290,7 +305,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     $form['details']['attributes'] = array(
       '#type' => 'namevalue_table',
       '#title' => t('Attributes'),
-      '#options' => $values['attributes']
+      '#options' => isset($values['attributes']) ? $values['attributes'] : array()
     );
 
     $form['details']['title_display'] = array(
@@ -301,18 +316,22 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
         'after' => t('Inline'),
         'invisible' => t('Hide Label')
       ),
-      '#default_value' => $values['title_display']
+      '#default_value' => isset($values['title_display']) ? $values['title_display'] : 'before'
     );
 
     return $form;
   }
 
+  static public function settingsSubmitForm(&$form, &$form_state, $entity_type, $entity, $element_type, $element) {
+    $form_state['input']['attributes'] = $form_state['input']['attributes'] +
+      array('class' => $form_state['input']['class']);
+  }
 
-  public function validate(&$form, &$form_state, $element) {
+  static public function validate(&$form, &$form_state, $element) {
     // TODO: Process validation per the element
   }
 
-  public function submit(&$form, &$form_state, $element) {
+  static public function submit(&$form, &$form_state, $element) {
     // TODO: Handle any pre-save processes on the element value
   }
 }

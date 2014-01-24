@@ -33,8 +33,10 @@ function fieldform_fieldform_info() {
 
   $info['select'] = array(
     'label' => t('Select'),
+    'element controller' => 'SelectElementController',
     'properties' => array(
       'options' => array(
+        'title' => t('Values'),
         'type' => FIELDFORM_PROPERTY_TABLE
       ),
       'multiple' => array(
@@ -43,7 +45,9 @@ function fieldform_fieldform_info() {
       'default_value' => array(
         'type' => FIELDFORM_PROPERTY_SELECT
       )
-    )
+    ),
+    'file' => 'select.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
   $info['radios'] = array(
