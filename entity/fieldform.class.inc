@@ -13,27 +13,95 @@ class FieldFormEntity extends Entity {
     parent::__construct($values, 'fieldform');
   }
 
+  public function addElement($element) {
+    $class = entity_get_controller($this->entityType);
+    return $class::addElement($this, $element);
+  }
+
+  public function updateElement($element) {
+    $class = entity_get_controller($this->entityType);
+    return $class::updateElement($this, $element);
+  }
+
+  public function deleteElement($element) {
+    $class = entity_get_controller($this->entityType);
+    return $class::deleteElement($this, $element);
+  }
+
+  public function hasElement($element) {
+    $class = entity_get_controller($this->entityType);
+    return $class::hasElement($this, $element);
+  }
+
+  public function findElementByID($id) {
+    $class = entity_get_controller($this->entityType);
+    return $class::findElementByID($this, $id);
+  }
+
+  public function findElementByName($name) {
+    $class = entity_get_controller($this->entityType);
+    return $class::findElementByName($this, $name);
+  }
+
   public function validate(&$form, &$form_state) {
-    entity_get_controller($this->entityType)->validate($this, $form, $form_state);
+    $class = entity_get_controller($this->entityType);
+    $class::validate($this, $form, $form_state);
   }
 
   public function submit(&$form, &$form_state) {
-    entity_get_controller($this->entityType)->submit($this, $form, $form_state);
+    $class = entity_get_controller($this->entityType);
+    $class::submit($this, $form, $form_state);
   }
 }
 
-class FieldFormElement {
+interface FieldFormElementInterface {
+  public function elementInfo();
+  public function elementType();
+  public function formKey();
+  public function addElement($child);
+  public function buildElement($view_mode);
+  public function updateElement($values);
+  public function deleteElement(FieldFormElementInterface $child);
+  public function toArray();
+  public function hasChild($id);
+  public function hasChildren();
+  public function findChildByID($id);
+  public function findChildByName($name);
+  public function save();
+}
+
+class FieldFormElement implements FieldFormElementInterface {
   protected $elementType;
   protected $elementInfo = array();
+  public $_id;
   public $name;
   public $parents = array();
+  public $children = array();
 
   public function __construct($elementType, $values = array()) {
     $this->elementType = $elementType;
     $this->elementInfo = fieldform_get_info($elementType);
+    $this->create($values);
+  }
+
+  protected function create($values) {
+    $children = array();
 
     if (!empty($values)) {
+      $info = fieldform_get_info();
+      $types = array_keys($info);
+
+
       foreach($values as $key => $value) {
+        if (is_array($value) && isset($value['type']) && in_array($value['type'], $types)) {
+          $value['name'] = isset($value['name']) ? $value['name'] : $key;
+          $children[] = $value;
+          continue;
+        }
+        elseif (is_object($value) && in_array('FieldFormElementInterface', class_implements($value))) {
+          $children[$value->_id] = $value; // Try to retain order by adding it in the order it came in
+          continue;
+        }
         $this->$key = $value;
       }
     }
@@ -46,10 +114,27 @@ class FieldFormElement {
     elseif (($flip = array_reverse($this->parents)) !== FALSE && current($flip) !== $this->name) {
       array_unshift($this->parents, $this->name);
     }
-
     $this->parents = array_filter($this->parents);
-    if (!isset($this->type)) {
-      $this->type = $elementType;
+    $this->parents = array_unique($this->parents);
+
+    $this->type = $this->elementType;
+    if (!isset($this->_id)) {
+      $this->_id = date('mdyhis').$this->type.$this->name;
+    }
+
+    if (!empty($children)) {
+      // Process children after the parent has been processed
+      foreach ($children as $child) {
+        if (is_array($child)) {
+          $child['parents'] = array_merge($this->parents, array($child['name']));
+          $element = fieldform_element_controller($child['type'])->create($child);
+        }
+        else {
+          $element = $child;
+        }
+
+        $this->children[$element->_id] = $element;
+      }
     }
   }
 
@@ -59,6 +144,7 @@ class FieldFormElement {
   }
 
   public function elementInfo() {
+    _fieldform_process_info_files($this->elementInfo);
     return $this->elementInfo;
   }
 
@@ -66,31 +152,63 @@ class FieldFormElement {
     return $this->elementType;
   }
 
-  public function buildContent($view_mode = 'full') {
-    return fieldform_element_controller($this->elementType, $view_mode)->buildContent($this);
+  public function buildElement($view_mode = 'full') {
+    $class = fieldform_element_controller($this->elementType);
+    return $class::buildElement($this, $view_mode);
   }
 
-  public function hasChild($name) {
-    $types = array_keys(fieldform_get_info());
-    return isset($this->$name['name']) && (isset($this->$name['type']) && in_array($this->$name['type'], $types));
+  public function toArray() {
+    $class = fieldform_element_controller($this->elementType);
+    return $class::toArray($this);
+  }
+
+  public function addElement($child) {
+    $class = fieldform_element_controller($this->elementType);
+    return $class::addElement($this, $child);
+  }
+
+  public function updateElement($values) {
+    $class = fieldform_element_controller($this->elementType);
+    return $class::updateElement($this, $values);
+  }
+
+  public function deleteElement(FieldFormElementInterface $child) {
+    $class = fieldform_element_controller($this->elementType);
+    return $class::deleteElement($this, $child);
+  }
+
+  public function hasChild($id) {
+    $class = fieldform_element_controller($this->elementType);
+    return $class::hasChild($this, $id);
   }
 
   public function hasChildren() {
-    $keys = get_object_vars($this);
-    $types = array_keys(fieldform_get_info());
-    foreach ($keys as $value) {
-      if (is_array($value) && isset($value['name']) && (isset($value['type']) && in_array($value['type'], $types))) {
-        return TRUE;
-      }
-    }
-    return FALSE;
+    $class = fieldform_element_controller($this->elementType);
+    return $class::hasChildren($this);
+  }
+
+  public function findChildByID($id) {
+    $class = fieldform_element_controller($this->elementType);
+    return $class::findChildByID($this, $id);
+  }
+
+  public function findChildByName($name) {
+    $class = fieldform_element_controller($this->elementType);
+    return $class::findChildByName($this, $name);
   }
 
   public function validate(&$form, &$form_state) {
-    fieldform_element_controller($this->elementType)->validate($this, $form, $form_state);
+    $class = fieldform_element_controller($this->elementType);
+    $class::validate($this, $form, $form_state);
   }
 
   public function submit(&$form, &$form_state) {
-    fieldform_element_controller($this->elementType)->submit($this, $form, $form_state);
+    $class = fieldform_element_controller($this->elementType);
+    $class::submit($this, $form, $form_state);
+  }
+
+  public function save() {
+    $class = fieldform_element_controller($this->elementType);
+    return $class::save($this);
   }
 }

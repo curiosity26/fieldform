@@ -11,7 +11,23 @@ class FieldFormController extends EntityAPIControllerExportable {
     parent::__construct('fieldform');
   }
 
-  public function hookForms() {
+  public function load($ids = array(), $conditions = array()) {
+    $entities = parent::load($ids, $conditions);
+    foreach ($entities as $entity) {
+      if (!empty($entity->elements) && is_array(current($entity->elements))) {
+        $elements = array();
+        foreach ($entity->elements as $value) {
+          $element = is_array($value) ? fieldform_element_create($value['type'], $value) : $value;
+          $elements[$element->_id] = $element;
+        }
+        $entity->elements = $elements;
+      }
+    }
+
+    return $entities;
+  }
+
+  static public function hookForms() {
     $forms = array();
 
     $entities = fieldform_load_multiple();
@@ -26,33 +42,131 @@ class FieldFormController extends EntityAPIControllerExportable {
     return $forms;
   }
 
-  public function addElement($entity, FieldFormElement $element) {
-    if (!empty($entity->elements[$element->formKey()])) {
-      drupal_set_message('Element already exists', 'error');
-      return $this;
+  static public function sortWeights($a, $b) {
+    $a_weight = (is_object($a) && isset($a->weight)) ? $a->weight : 0;
+    $b_weight = (is_object($b) && isset($b->weight)) ? $b->weight : 0;
+    if ($a_weight == $b_weight) {
+      return 0;
+    }
+    return ($a_weight < $b_weight) ? -1 : 1;
+  }
+
+  static public function addElement(FieldFormEntity $entity, $element) {
+    if (is_array($element)) {
+      $element = fieldform_element_create($element['type'], $element);
     }
 
-    $entity->elements[implode('][', $element->parents)] = get_object_vars($element);
-    $entity->save();
-    return $this;
+    if (empty($entity->elements) || empty($element->parents) || count($element->parents) == 1) {
+      if ($element->_id) {
+        $entity->elements[$element->_id] = $element;
+        //uasort($entity->elements, 'self::sortWeights');
+        return TRUE;
+      }
+      return FALSE;
+    }
+
+    reset($entity->elements);
+    while (($object = current($entity->elements))) {
+      if (($object->addElement($element)) !== FALSE) {
+        return TRUE;
+      }
+      next($entity->elements);
+    }
+    return FALSE;
+  }
+
+  static public function updateElement(FieldFormEntity $entity, FieldFormElement $element) {
+    if (($old = $entity->findElementByID($element->_id))) {
+      $old->updateElement($element->toArray());
+    }
+  }
+
+  static public function deleteElement(FieldFormEntity $entity, FieldFormElement $element) {
+    if (empty($entity->elements)) {
+      return FALSE;
+    }
+
+    if (array_key_exists($element->_id, $entity->elements)) {
+      unset($entity->elements[$element->_id]);
+      return TRUE;
+    }
+
+    foreach ($entity->elements as &$child) {
+      if ($child->deleteElement($element) === TRUE) {
+        return TRUE;
+      }
+    }
+
+    return FALSE;
+  }
+
+  static public function hasElement(FieldFormEntity $entity, $id) {
+    if (empty($entity->elements)) {
+      return FALSE;
+    }
+    if (in_array($id, array_keys($entity->elements))) {
+      return TRUE;
+    }
+    reset($entity->elements);
+    while (($element = current($entity->elements))) {
+      if (($element->hasChild($id)) !== FALSE) {
+        return TRUE;
+      }
+      next($entity->elements);
+    }
+    return FALSE;
+  }
+
+  static public function findElementByID(FieldFormEntity $entity, $id) {
+    if (empty($entity->elements)) {
+      return FALSE;
+    }
+
+    if (in_array($id, array_keys($entity->elements))) {
+      return $entity->elements[$id];
+    }
+
+    reset($entity->elements);
+    while ($element = current($entity->elements)) {
+      if (($found = $element->findChildByID($id)) !== FALSE) {
+        return $found;
+      }
+      next($entity->elements);
+    }
+
+    return FALSE;
+  }
+
+  static public function findElementByName(FieldFormEntity $entity, $name) {
+    if (empty($entity->elements)) {
+      return FALSE;
+    }
+    reset($entity->elements);
+    while ($element = current($entity->elements)) {
+      if ($element->name === $name) {
+        return $element;
+      }
+
+      if (($found = $element->findChildByName($name)) !== FALSE) {
+        return $found;
+      }
+      next($entity->elements);
+    }
+
+    return FALSE;
   }
 
   static protected function processElements($entity, $elements, $view_mode = 'full') {
-    $ret = array();
+    $form = array();
 
-    foreach ($elements as $name => $settings) {
-      // Parents are only for internal use. The Form API will process parents appropriately
-      if ($name !== 'parents' && !empty($settings['type'])) {
-        $element = fieldform_element_create($settings['type'], $settings);
-        $ret[$name] = $element->buildContent($view_mode);
-      }
+    foreach ($elements as $element) {
+      $form[$element->name] = $element->buildElement($view_mode);
     }
-    return $ret;
+    return $form;
   }
 
   static public function buildForm($entity, $form, &$form_state, $view_mode = 'full', $langcode = NULL) {
     $form += self::processElements($entity, $entity->elements, $view_mode);
-
     $form_state += array(
       'build_info' => array(
         'args' => array($entity)
@@ -67,11 +181,12 @@ class FieldFormController extends EntityAPIControllerExportable {
 
   public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $content = array()) {
 
-    $form_state = array();
+    $form_state = form_state_defaults();
     $form = array();
     $form = self::buildForm($entity, $form, $form_state, $view_mode, $langcode);
 
-    drupal_process_form('fieldform_'.$entity->entityType().'_'.$entity->identifier().'_form', $form, $form_state);
+    drupal_prepare_form('fieldform_'.$entity->identifier().'_form', $form, $form_state);
+    drupal_process_form('fieldform_'.$entity->identifier().'_form', $form, $form_state);
 
     $content[] = $form;
     return parent::buildContent($entity, $view_mode, $langcode, $content);
@@ -103,7 +218,30 @@ class FieldFormController extends EntityAPIControllerExportable {
       $entity->created = REQUEST_TIME;
     }
     $entity->module = isset($entity->entityInfo()['module']) ? $entity->entityInfo()['module'] : 'fieldform';
-    return parent::save($entity);
+
+    /*
+    Convert the elements array from an array of FieldFormElementInterface items to a general array.
+    This is useful for at least two reasons:
+
+    1. Compression - Reduces the size of data saved in the database
+    2. More accessible to a wider variety of database drivers. MongoDB in specific.
+    */
+
+    $clone = $entity->elements;
+
+    if (!empty($clone->elements)) {
+      $elements = array();
+      foreach ($clone->elements as $element) {
+        $elements[$element->name] = $element->save();
+      }
+
+      $entity->elements = $elements;
+    }
+
+    $return = parent::save($entity);
+
+    $entity->elements = $clone; // Keep the in-memory element the same as it was
+    return $return;
   }
 }
 
@@ -168,7 +306,17 @@ class FieldFormAdminUIController extends EntityDefaultUIController {
 }
 
 interface FieldFormElementControllerInterface {
+  static public function addElement(FieldFormElementInterface $element, $child);
+  static public function updateElement(FieldFormElementInterface $element, array $values);
+  static public function deleteElement(FieldFormElementInterface $element, FieldFormElementInterface $child);
+  static public function buildElement(FieldFormElementInterface $element, $view_mode);
+  static public function toArray(FieldFormElementInterface $element);
+  static public function hasChild(FieldFormElementInterface $element, $id);
+  static public function hasChildren(FieldFormElementInterface $element);
+  static public function findChildByID(FieldFormElementInterface $element, $id);
+  static public function findChildByName(FieldFormElementInterface $element, $name);
   static public function settingsForm($form, &$form_state);
+  static public function save(FieldFormElementInterface $element);
 }
 
 class FieldFormElementController implements FieldFormElementControllerInterface {
@@ -186,7 +334,137 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     return new $class($this->elementType, $values);
   }
 
-  static public function settingsForm($form, &$form_state, FieldFormElement $element = NULL, $op = NULL) {
+  static public function isElementArray(array $element) {
+    $types = array_keys(fieldform_get_info());
+    return isset($element['type']) && in_array($element['type'], $types);
+  }
+
+  static public function sortWeights($a, $b) {
+    $a_weight = (is_object($a) && isset($a->weight)) ? $a->weight : 0;
+    $b_weight = (is_object($b) && isset($b->weight)) ? $b->weight : 0;
+    if ($a_weight == $b_weight) {
+      return 0;
+    }
+    return ($a_weight < $b_weight) ? -1 : 1;
+  }
+
+  static public function addElement(FieldFormElementInterface $element, $child) {
+    if (is_array($child)) {
+      if (!self::isElementArray($child)) {
+        return FALSE;
+      }
+      $child = fieldform_element_create($child['type'], $child);
+    }
+
+    if (empty($child->parents)) {
+      // If the parents haven't been set, add it here
+      $child->parents = $element->parents;
+      $child->parents[] = $child->name;
+      $element->children[$child->_id] = $child;
+      uasort($element->children, 'self::sortWeights');
+      return $element;
+    }
+
+    $child_parents = $child->parents;
+    array_pop($child_parents);
+    if ($element->parents === $child_parents && !in_array($child->_id, $element->children)) {
+      $element->children[$child->_id] = $child;
+      uasort($element->children, 'self::sortWeights');
+      return $element;
+    }
+    elseif (count($child_parents) > $element->parents) {
+      // Child is a grandchild or deeper
+      foreach ($element->children as $next) {
+        if (($found = $next->addElement($child)) !== FALSE) {
+          return $found;
+        }
+      }
+    }
+
+    return FALSE;
+  }
+
+  static public function updateElement(FieldFormElementInterface $element, array $values) {
+    unset($values['name'], $values['type'], $values['_id'], $values['children']); // Prevent overriding important keys
+    foreach ($values as $key => $value) {
+      $element->$key = $value;
+    }
+    return $element;
+  }
+
+  static public function deleteElement(FieldFormElementInterface $element, FieldFormElementInterface $child) {
+    if ($element->hasChildren() && in_array($child->_id, $element->children)) {
+      unset($element->children[$child->_id]);
+      return TRUE;
+    }
+    elseif ($element->hasChildren()) {
+      foreach ($element->children as $_id => &$kid) {
+        if ($kid->deleteElement($child) === TRUE) {
+          return TRUE;
+        }
+      }
+    }
+
+    return FALSE;
+  }
+
+  static public function buildElement(FieldFormElementInterface $element, $view_mode = 'full') {
+    $array = $element->toArray();
+    $form = array();
+    foreach ($array as $key => $value) {
+      $form['#'.$key] = $value;
+    }
+
+    if ($element->hasChildren()) {
+      foreach ($element->children as $child) {
+        $form[$child->name] = $child->buildElement($child, $view_mode);
+      }
+    }
+
+    return $form;
+  }
+
+  static public function toArray(FieldFormElementInterface $element) {
+    $children = $element->children;
+    $array = get_object_vars($element);
+    unset($array['_id'], $array['parents'], $array['children']);
+    return $array;
+  }
+
+  static public function hasChild(FieldFormElementInterface $element, $id) {
+    return !empty($element->children[$id]);
+  }
+
+  static public function hasChildren(FieldFormElementInterface $element) {
+    return !empty($element->children);
+  }
+
+  static public function findChildByID(FieldFormElementInterface $element, $id) {
+    if ($element->hasChild($id)) {
+      return $element->children[$id];
+    }
+
+    foreach ($element->children as $child) {
+      if (($found = $child->findChildById($id)) !== FALSE) {
+        return $found;
+      }
+    }
+    return FALSE;
+  }
+
+  static public function findChildByName(FieldFormElementInterface $element, $name) {
+    foreach ($element->children as $child) {
+      if ($child->name === $name) {
+        return $child;
+      }
+      if (($found = $child->findChildByName($name)) !== FALSE) {
+        return $found;
+      }
+    }
+    return FALSE;
+  }
+
+  static public function settingsForm($form, &$form_state, FieldFormElementInterface $element = NULL, $op = NULL) {
     $i = 0;
     $values = isset($form_state['input']) && !empty($form_state['input']) ?
       $form_state['input'] : get_object_vars($element);
@@ -322,7 +600,14 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     return $form;
   }
 
+  static public function settingsValidateForm(&$form, &$form_state, $entity_type, $entity, $element_type, $element) {
+    // Just a placeholder function to extend
+  }
+
   static public function settingsSubmitForm(&$form, &$form_state, $entity_type, $entity, $element_type, $element) {
+   if (isset($form_state['input']['attributes']['values'])) {
+     $form_state['input']['attributes'] = $form_state['input']['attributes']['values'];
+   }
     $form_state['input']['attributes'] = $form_state['input']['attributes'] +
       array('class' => $form_state['input']['class']);
   }
@@ -333,5 +618,15 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
 
   static public function submit(&$form, &$form_state, $element) {
     // TODO: Handle any pre-save processes on the element value
+  }
+
+  static public function save(FieldFormElementInterface $element) {
+    $array = $element->toArray();
+    if ($element->hasChildren()) {
+      foreach ($element->children as $child) {
+        $array[$child->name] = $child->save();
+      }
+    }
+    return $array;
   }
 }

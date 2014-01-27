@@ -9,6 +9,8 @@
 class FieldsetElementController extends FieldFormElementController {
   static public function settingsForm($form, &$form_state, FieldFormElement $element = NULL, $op = NULL) {
     $form = parent::settingsForm($form, $form_state, $element, $op);
+    unset($form['required']);
+    unset($form['description']);
     unset($form['details']['title_display']);
     return $form;
   }

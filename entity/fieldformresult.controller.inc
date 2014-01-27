@@ -7,7 +7,11 @@
  */
 
 class FieldFormResultController extends EntityAPIController {
-  public function __construct() {
+  public function __construct($entity_type) {
     parent::__construct('fieldform_result');
+  }
+
+  static public function submit($result = NULL, $form, $form_state) {
+
   }
 }

@@ -33,7 +33,7 @@ function fieldform_fieldform_info() {
 
   $info['select'] = array(
     'label' => t('Select'),
-    'element controller' => 'SelectElementController',
+    'element controller' => 'OptionsElementController',
     'properties' => array(
       'options' => array(
         'title' => t('Values'),
@@ -46,12 +46,13 @@ function fieldform_fieldform_info() {
         'type' => FIELDFORM_PROPERTY_SELECT
       )
     ),
-    'file' => 'select.inc',
+    'file' => 'options.inc',
     'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
   $info['radios'] = array(
     'label' => t('Radio Buttons (Multiple)'),
+    'element controller' => 'OptionsElementController',
     'properties' => array(
       'options' => array(
         'type' => FIELDFORM_PROPERTY_TABLE,
@@ -59,7 +60,9 @@ function fieldform_fieldform_info() {
       'default_value' => array(
         'type' => FIELDFORM_PROPERTY_RADIOS
       )
-    )
+    ),
+    'file' => 'options.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
   $info['radio'] = array(
@@ -68,17 +71,16 @@ function fieldform_fieldform_info() {
       'return_value' => array(
         'type' => FIELDFORM_PROPERTY_STRING
       ),
-      'checked' => array(
-        'type' => FIELDFORM_PROPERTY_BOOL
-      ),
       'default_value' => array(
-        'type' => FIELDFORM_PROPERTY_NONE
+        'title' => t('Checked'),
+        'type' => FIELDFORM_PROPERTY_BOOL
       )
     )
   );
 
   $info['checkboxes'] = array(
     'label' => t('Checkboxes (Multiple)'),
+    'element controller' => 'OptionsElementController',
     'properties' => array(
       'options' => array(
         'type' => FIELDFORM_PROPERTY_TABLE
@@ -86,7 +88,9 @@ function fieldform_fieldform_info() {
       'default_value' => array(
         'type' => FIELDFORM_PROPERTY_CHECKBOXES
       )
-    )
+    ),
+    'file' => 'options.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
   $info['checkbox'] = array(
@@ -95,11 +99,9 @@ function fieldform_fieldform_info() {
       'return_value' => array(
         'type' => FIELDFORM_PROPERTY_STRING
       ),
-      'checked' => array(
-        'type' => FIELDFORM_PROPERTY_BOOL
-      ),
       'default_value' => array(
-        'type' => FIELDFORM_PROPERTY_NONE
+        'title' => t('Checked'),
+        'type' => FIELDFORM_PROPERTY_BOOL
       )
     )
   );
