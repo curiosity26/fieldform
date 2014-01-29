@@ -27,7 +27,8 @@ function fieldform_form($form, &$form_state, Entity $entity, $op, $entity_type) 
   $form['settings'] = array(
     '#type' => 'fieldset',
     '#tree' => TRUE,
-    '#collapsible' => TRUE
+    '#collapsible' => TRUE,
+    '#title' => t('Form Settings')
   );
 
   $form['settings']['completed_behavior'] = array(
@@ -37,7 +38,8 @@ function fieldform_form($form, &$form_state, Entity $entity, $op, $entity_type) 
       0 => t('Display a message'),
       1 => t('Redirect to another URL')
     ),
-    '#default_value' => !empty($form_state['values']['settings']['completed_behavior']) ?
+    '#default_value' => !empty($form_state['values']['settings']) &&
+      isset($form_state['values']['settings']['completed_behavior']) ?
         $form_state['values']['settings']['completed_behavior'] : $entity->settings['completed_behavior'],
     '#description' => t('What action you would like to take once the form is completed.'),
     '#ajax' => array(
