@@ -9,15 +9,9 @@
 function hook_fieldform_info() {
   return array(
     'textfield' => array(
+      'label' => t('Textfield'),
       'element class' => 'FieldFormElement',
       'element controller' => 'FieldFormElementController',
-      'element ui' => array(
-        'full' => array(
-          'controller' => 'FieldFormElementUIController',
-          'file' => 'fieldform.ui.inc',
-          'file path' => drupal_get_path('module', 'fieldform').'/forms'
-        )
-      ),
       'module' => 'fieldform',
       'properties' => array(
         'default_value' => array(
@@ -26,6 +20,7 @@ function hook_fieldform_info() {
           'type' => FIELDFORM_PROPERTY_STRING
         )
       ),
+      'has children' => FALSE, // Can the element have child elements, i.e. Fieldset
       // The following is optional. Overrides $controller->[op]Element (where [op] is add, update, etc)
       // and default system [op] function
       'element add callback' => 'callback_function_name',

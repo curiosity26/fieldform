@@ -43,6 +43,11 @@ class FieldFormEntity extends Entity {
     return $class::findElementByName($this, $name);
   }
 
+  public function findElementsByType($type) {
+    $class = entity_get_controller($this->entityType);
+    return $class::findElementsByType($this, $type);
+  }
+
   public function validate(&$form, &$form_state) {
     $class = entity_get_controller($this->entityType);
     $class::validate($this, $form, $form_state);
@@ -67,6 +72,7 @@ interface FieldFormElementInterface {
   public function hasChildren();
   public function findChildByID($id);
   public function findChildByName($name);
+  public function findChildrenByType($type);
   public function save();
 }
 
@@ -195,6 +201,11 @@ class FieldFormElement implements FieldFormElementInterface {
   public function findChildByName($name) {
     $class = fieldform_element_controller($this->elementType);
     return $class::findChildByName($this, $name);
+  }
+
+  public function findChildrenByType($name) {
+    $class = fieldform_element_controller($this->elementType);
+    return $class::findChildrenByType($this, $name);
   }
 
   public function validate(&$form, &$form_state) {

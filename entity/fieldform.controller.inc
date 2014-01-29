@@ -22,6 +22,12 @@ class FieldFormController extends EntityAPIControllerExportable {
         }
         $entity->elements = $elements;
       }
+
+      $entity->settings += array(
+        'submit_button_text' => t('Submit'),
+        'continue_button_text' => t('Continue'),
+        'back_button_text' => t('Back')
+      );
     }
 
     return $entities;
@@ -156,17 +162,68 @@ class FieldFormController extends EntityAPIControllerExportable {
     return FALSE;
   }
 
+  static public function findElementsByType(FieldFormEntity $entity, $type) {
+    $children = &drupal_static(__FUNCTION__, array());
+
+    if (empty($children) || empty($children[$type])) {
+      if (empty($entity->elements)) {
+        return $children;
+      }
+
+      reset($entity->elements);
+      while ($element = current($entity->elements)) {
+        if ($element->entityType() === $type) {
+          $children[$type][$element->_id] = $element;
+        }
+
+        $found = $element->findChildrenByType($type);
+        $children[$type] += $found;
+
+        next($entity->elements);
+      }
+    }
+
+    return $children[$type];
+  }
+
   static protected function processElements($entity, $elements, $view_mode = 'full') {
     $form = array();
 
-    foreach ($elements as $element) {
-      $form[$element->name] = $element->buildElement($view_mode);
+    $page = isset($entity->separator) ? $entity->separator : 0;
+    $separators = $entity->findElementsByType('separator');
+    $iterator = new ArrayIterator($elements);
+
+    if (!empty($separators)) {
+      $current_separator = array_search($page, $elements);
+      $iterator->seek(array_search($current_separator, $elements));
     }
+
+    while($iterator->valid()) {
+      $element = $iterator->current();
+      if ($element->elementType() === 'separator') {
+        $element->page = ++$page;
+        $form[$element->name] = $element->buildElement($view_mode);
+        break;
+      }
+      else {
+        $form[$element->name] = $element->buildElement($view_mode);
+      }
+      $iterator->next();
+    }
+
+    $form += array(
+      'submit' => array(
+        '#type' => 'submit',
+        '#value' => $entity->settings['submit_button_text']
+      )
+    );
+
     return $form;
   }
 
   static public function buildForm($entity, $form, &$form_state, $view_mode = 'full', $langcode = NULL) {
     $form += self::processElements($entity, $entity->elements, $view_mode);
+
     $form_state += array(
       'build_info' => array(
         'args' => array($entity)
@@ -202,14 +259,46 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   public function submit($entity, &$form, &$form_state) {
-    foreach ($entity->elements as $name => $settings) {
-      $settings['name'] = $name;
-      $element = fieldform_element_create($settings);
-      $element->value = $form_state['values'][$element->formKey()];
-      $element->submit($form, $form_state);
+    $entity->separator = NULL;
+    $values = $form_state['values'];
+    unset($values['form_id'], $values['form_build_id'], $values['form_token'], $values['op']);
+    $result = isset($form_state['result']) ? $form_state['result'] : entity_create('fieldform_result', array(
+      'uid' => $GLOBALS['user']->uid,
+      'hostname' => $GLOBALS['user']->hostname
+    ));
+
+    foreach ($values as $name => $value) {
+      if (($element = $entity->findElementByName($name)) !== FALSE) {
+        $element->value = $form_state['values'][$element->formKey()];
+        $element->submit($form, $form_state);
+        $result->addElement($element);
+        if ($element->elementType() === 'separator') {
+          $entity->separator = $element->_id;
+        }
+      }
     }
 
-    // TODO: Create a new Result or catch the result to update from session and save new results
+    entity_save($result->entityType(), $result);
+    $form_state['result'] = $result;
+
+    if (isset($entity->separator)) {
+      $form_state['rebuild'] = TRUE;
+      $form['#rebuild'] = TRUE;
+      $form = $entity->buildForm($form, $form_state, $entity, $entity->elements);
+    }
+    elseif ($entity->settings['completed_behavior'] === 0) {
+      $form_state['rebuild'] = TRUE;
+      $form['#rebuild'] = TRUE;
+      $form = array(
+        'complete_message' => array(
+          '#markup' => $entity->settings['completed_behavior_0']
+        )
+      );
+    }
+    else {
+      $form_state['redirect'] = $entity->settings['completed_behavior_1'];
+      drupal_redirect_form($form_state);
+    }
   }
 
   public function save($entity) {
@@ -315,6 +404,7 @@ interface FieldFormElementControllerInterface {
   static public function hasChildren(FieldFormElementInterface $element);
   static public function findChildByID(FieldFormElementInterface $element, $id);
   static public function findChildByName(FieldFormElementInterface $element, $name);
+  static public function findChildrenByType(FieldFormElementInterface $element, $type);
   static public function settingsForm($form, &$form_state);
   static public function save(FieldFormElementInterface $element);
 }
@@ -464,6 +554,18 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     return FALSE;
   }
 
+  static public function findChildrenByType(FieldFormElementInterface $element, $type) {
+    $children = array();
+    foreach ($element->children as $child) {
+      if ($child->elementType() === $type) {
+        $children[$child->_id] = $child;
+      }
+      $found = $child->findChildrenByType($type);
+      $children += $found;
+    }
+    return $children;
+  }
+
   static public function settingsForm($form, &$form_state, FieldFormElementInterface $element = NULL, $op = NULL) {
     $i = 0;
     $values = isset($form_state['input']) && !empty($form_state['input']) ?
@@ -508,8 +610,8 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
         if (isset($values[$name])) {
           $value = $values[$name];
         }
-        elseif (isset($property['value'])) {
-          $value = $property['value'];
+        elseif (isset($property['default_value'])) {
+          $value = $property['default_value'];
         }
         $form[$name] = array();
         switch ($property['type']) {
@@ -546,7 +648,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
             break;
           case FIELDFORM_PROPERTY_BOOL:
             $form[$name]['#type'] = 'checkbox';
-            $form[$name]['default_value'] = ($value === TRUE);
+            $form[$name]['#default_value'] = ($value === TRUE);
             break;
         }
 

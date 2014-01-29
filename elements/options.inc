@@ -112,7 +112,8 @@ class OptionsElementController extends FieldFormElementController {
     foreach(element_children($form['default_value']) as $child) {
       unset($form['default_value'][$child]);
     }
-    drupal_process_form($form['#form_id'], $form['default_value'], $form_state);
+    unset($form_state['complete_form']['default_value']);
+    form_builder($form['#form_id'], $form['default_value'], $form_state);
     unset($form['default_value']['#printed']);
     return render($form['default_value']);
   }

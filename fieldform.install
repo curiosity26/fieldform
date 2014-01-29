@@ -47,6 +47,11 @@ function fieldform_schema() {
         'default' => 0x01,
         'size' => 'tiny'
       ),
+      'settings' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'serialize' => TRUE,
+      ),
       'elements' => array(
         'type' => 'text',
         'not null' => FALSE,
@@ -65,10 +70,21 @@ function fieldform_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE
       ),
+      'form_name' => array(
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE
+      ),
       'uid' => array(
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE
+      ),
+      'hostname' => array(
+        'description' => 'The IP Address or hostname of the user',
+        'type' => 'varchar',
+        'length' => 15,
+        'not null' => FALSE,
       ),
       'created' => array(
         'type' => 'int',
@@ -94,6 +110,10 @@ function fieldform_schema() {
       )
     ),
     'foreign keys' => array(
+      'form_name' => array(
+        'table' => 'fieldform',
+        'form_name' => 'name'
+      ),
       'uid' => array(
         'table' => 'user',
         'uid' => 'uid'
@@ -103,4 +123,38 @@ function fieldform_schema() {
   );
 
   return $schema;
+}
+
+function fieldform_update_7001() {
+  db_add_field('fieldform', 'settings',
+    array(
+      'type' => 'text',
+      'not null' => FALSE,
+      'serialize' => TRUE,
+    )
+  );
+
+  db_add_field('fieldform_result', 'hostname',
+    array(
+      'type' => 'varchar',
+      'length' => 15,
+      'not null' => FALSE,
+    )
+  );
+
+  db_add_field('fieldform_result', 'form_name',
+    array(
+      'type' => 'varchar',
+      'length' => 64,
+      'not null' => TRUE
+    ),
+    array(
+      'foreign keys' => array(
+        'form_name' => array(
+          'table' => 'fieldform',
+          'form_name' => 'name'
+        )
+      )
+    )
+  );
 }

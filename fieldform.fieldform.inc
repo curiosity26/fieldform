@@ -167,5 +167,29 @@ function fieldform_fieldform_info() {
     )
   );
 
+  $info['separator'] = array(
+    'label' => t('Page Separator'),
+    'element controller' => 'SeparatorElementController',
+    'properties' => array(
+      'default_value' => array(
+        'type' => FIELDFORM_PROPERTY_NONE
+      )
+    ),
+    'file' => 'separator.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
+  );
+
+  return $info;
+}
+
+function fieldform_result_info() {
+  $info = array();
+
+  $info['default'] = array(
+    'result class' => 'FieldFormResultData',
+    'result controller' => 'FieldFormResultDataController',
+    'module' => 'fieldform'
+  );
+
   return $info;
 }

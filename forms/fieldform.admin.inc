@@ -24,6 +24,50 @@ function fieldform_form($form, &$form_state, Entity $entity, $op, $entity_type) 
     )
   );
 
+  $form['settings'] = array(
+    '#type' => 'fieldset',
+    '#tree' => TRUE,
+    '#collapsible' => TRUE
+  );
+
+  $form['settings']['completed_behavior'] = array(
+    '#type' => 'radios',
+    '#title' => t('Completed Form Behavior'),
+    '#options' => array(
+      0 => t('Display a message'),
+      1 => t('Redirect to another URL')
+    ),
+    '#default_value' => !empty($form_state['values']['settings']['completed_behavior']) ?
+        $form_state['values']['settings']['completed_behavior'] : $entity->settings['completed_behavior'],
+    '#description' => t('What action you would like to take once the form is completed.'),
+    '#ajax' => array(
+      'callback' => 'fieldform_completed_behavior_change',
+      'wrapper' => '#completed-behavior'
+    ),
+    '#suffix' => '<div id="completed-behavior"></div>'
+  );
+
+  $form['settings']['submit_button_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Submit Button Text'),
+    '#default_value' => !empty($form_state['values']['settings']['submit_button_text']) ?
+        $form_state['values']['settings']['submit_button_text'] : $entity->settings['submit_button_text']
+  );
+
+  $form['settings']['continue_button_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Continue Button Text'),
+    '#default_value' => !empty($form_state['values']['settings']['continue_button_text']) ?
+        $form_state['values']['settings']['continue_button_text'] : $entity->settings['continue_button_text']
+  );
+
+  $form['settings']['back_button_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Back Button Text'),
+    '#default_value' => !empty($form_state['values']['settings']['back_button_text']) ?
+        $form_state['values']['settings']['back_button_text'] : $entity->settings['back_button_text']
+  );
+
   $form += array(
     'submit' => array(
       '#type' => 'submit',
@@ -38,6 +82,23 @@ function fieldform_form($form, &$form_state, Entity $entity, $op, $entity_type) 
   return $form;
 }
 
+function fieldform_completed_behavior_change($form, $form_state) {
+  $parents = $form_state['triggering_element']['#array_parents'];
+  $parents_string = implode('][', $parents).']';
+  $value = $form_state[$parents_string];
+  array_pop($parents);
+  array_push($parents, 'completed_behavior_'.$value);
+  $value_parents = implode('][', $parents).']';
+
+  $form[$value_parents] = array(
+    '#default_value' => $form_state[$value_parents]
+  );
+
+  $form[$value_parents]['#type'] = $value === 0 ? 'text_format' : 'textfield';
+  form_builder($form['#form_id'],$form[$value_parents], $form_state);
+  return $form[$value_parents];
+}
+
 function fieldform_form_submit($form, &$form_state) {
   $entity_type = $form_state['entity_type'];
   $entity = $form_state[$entity_type];
@@ -47,7 +108,10 @@ function fieldform_form_submit($form, &$form_state) {
     $entity->$key = $value;
   }
   entity_save($entity_type, $entity);
-  $form_state['redirect'] = 'admin/structure/fieldform';
+  $form_state['redirect'] = $entity->entityInfo()['admin ui']['path'];
+  if ($form_state['build_args']['args'][3] == 'add') {
+    $form_state['redirect'] .= '/manage/'.$entity->identifier();
+  }
   drupal_redirect_form($form_state);
 }
 
