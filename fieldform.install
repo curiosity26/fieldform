@@ -51,6 +51,7 @@ function fieldform_schema() {
         'type' => 'text',
         'not null' => FALSE,
         'serialize' => TRUE,
+        'default' => array()
       ),
       'elements' => array(
         'type' => 'text',
@@ -131,6 +132,7 @@ function fieldform_update_7001() {
       'type' => 'text',
       'not null' => FALSE,
       'serialize' => TRUE,
+      'default' => array()
     )
   );
 

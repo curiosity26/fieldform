@@ -23,6 +23,10 @@ class FieldFormController extends EntityAPIControllerExportable {
         $entity->elements = $elements;
       }
 
+      if (!is_array($entity->settings)) {
+        $entity->settings = array();
+      }
+
       $entity->settings += array(
         'submit_button_text' => t('Submit'),
         'continue_button_text' => t('Continue'),
@@ -171,8 +175,9 @@ class FieldFormController extends EntityAPIControllerExportable {
       }
 
       reset($entity->elements);
+      $children[$type] = array();
       while ($element = current($entity->elements)) {
-        if ($element->entityType() === $type) {
+        if ($element->elementType() === $type) {
           $children[$type][$element->_id] = $element;
         }
 
