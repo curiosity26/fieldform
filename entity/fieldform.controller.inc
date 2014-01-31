@@ -28,6 +28,9 @@ class FieldFormController extends EntityAPIControllerExportable {
       }
 
       $entity->settings += array(
+        'completed_behavior' => 'message',
+        'completed_behavior_message' => array('value' => '', 'format' => NULL),
+        'completed_behavior_url' => '',
         'submit_button_text' => t('Submit'),
         'continue_button_text' => t('Continue'),
         'back_button_text' => t('Back')
@@ -39,13 +42,11 @@ class FieldFormController extends EntityAPIControllerExportable {
 
   static public function hookForms() {
     $forms = array();
-
     $entities = fieldform_load_multiple();
 
     foreach ($entities as $entity) {
-      $forms['fieldform_'.$entity->entityType().'_'.$entity->identifier().'_form'] = array(
-        'callback' => 'entity_view',
-        'callback arguments' => array($entity->entityType(), array($entity->identifier()))
+      $forms['fieldform_'.$entity->identifier().'_form'] = array(
+        'callback' => 'fieldform_view_form',
       );
     }
 
@@ -69,7 +70,6 @@ class FieldFormController extends EntityAPIControllerExportable {
     if (empty($entity->elements) || empty($element->parents) || count($element->parents) == 1) {
       if ($element->_id) {
         $entity->elements[$element->_id] = $element;
-        //uasort($entity->elements, 'self::sortWeights');
         return TRUE;
       }
       return FALSE;
@@ -191,47 +191,70 @@ class FieldFormController extends EntityAPIControllerExportable {
     return $children[$type];
   }
 
-  static protected function processElements($entity, $elements, $view_mode = 'full') {
-    $form = array();
-
-    $page = isset($entity->separator) ? $entity->separator : 0;
-    $separators = $entity->findElementsByType('separator');
+  static protected function processElements($entity, $elements, &$form, &$form_state) {
+    $page = isset($form_state['form_separator']) ? $form_state['form_separator'] : NULL;
+    $separators = array_keys($entity->findElementsByType('separator'));
     $iterator = new ArrayIterator($elements);
 
-    if (!empty($separators)) {
-      $current_separator = array_search($page, $elements);
-      $iterator->seek(array_search($current_separator, $elements));
+    if (isset($page) && !empty($separators)) {
+      if ($form_state['op'] === $entity->settings['back_button_text']) {
+        $index = array_search($page, $separators);
+        unset($page);
+        if ($index > 0) {
+          $index--;
+          $page = $separators[$index];
+        }
+      }
+      if (isset($page)) {
+        $iterator->seek(array_search($page, $elements));
+      }
     }
 
     while($iterator->valid()) {
       $element = $iterator->current();
+      $form[$element->name] = $element->buildElement();
       if ($element->elementType() === 'separator') {
-        $element->page = ++$page;
-        $form[$element->name] = $element->buildElement($view_mode);
+        $form_state['form_separator'] = $element->_id;
         break;
-      }
-      else {
-        $form[$element->name] = $element->buildElement($view_mode);
       }
       $iterator->next();
     }
 
-    $form += array(
-      'submit' => array(
+    $form['actions'] = array(
+      '#type' => 'actions'
+    );
+
+    if ($iterator->valid() && $iterator->current()->elementType() === 'separator') {
+      // If the last element processed was a form separator
+      // Process the Continue / Back buttons
+      if (isset($page)) {
+        $form['actions']['back'] = array(
+          '#type' => 'button',
+          '#value' => $entity->settings['back_button_text']
+        );
+      }
+
+      $form['actions']['continue'] = array(
+        '#type' => 'submit',
+        '#value' => $entity->settings['continue_button_text']
+      );
+    }
+    else {
+      $form['actions']['submit'] = array(
         '#type' => 'submit',
         '#value' => $entity->settings['submit_button_text']
-      )
-    );
+      );
+    }
 
     return $form;
   }
 
-  static public function buildForm($entity, $form, &$form_state, $view_mode = 'full', $langcode = NULL) {
-    $form += self::processElements($entity, $entity->elements, $view_mode);
+  static public function buildForm($entity, $form, &$form_state) {
+    self::processElements($entity, $entity->elements, $form, $form_state);
 
     $form_state += array(
       'build_info' => array(
-        'args' => array($entity)
+        'args' => array($entity->entityType(), $entity)
       ),
       'entity_type' => $entity->entityType()
     );
@@ -242,66 +265,45 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $content = array()) {
-
-    $form_state = form_state_defaults();
-    $form = array();
-    $form = self::buildForm($entity, $form, $form_state, $view_mode, $langcode);
-
-    drupal_prepare_form('fieldform_'.$entity->identifier().'_form', $form, $form_state);
-    drupal_process_form('fieldform_'.$entity->identifier().'_form', $form, $form_state);
-
-    $content[] = $form;
-    return parent::buildContent($entity, $view_mode, $langcode, $content);
+    $form_state = array(
+      'build_info' => array(
+        'args' => array($entity->entityType(), $entity)
+      )
+    );
+    return drupal_build_form('fieldform_'.$entity->identifier().'_form', $form_state);
   }
 
   public function validate($entity, &$form, &$form_state) {
-    foreach ($entity->elements as $name => $settings) {
-      $settings['name'] = $name;
-      $element = fieldform_element_create($settings);
-      $element->value = $form_state['values'][$element->formKey()];
+    foreach ($entity->elements as $element) {
       $element->validate($form, $form_state);
     }
   }
 
   public function submit($entity, &$form, &$form_state) {
     $entity->separator = NULL;
-    $values = $form_state['values'];
-    unset($values['form_id'], $values['form_build_id'], $values['form_token'], $values['op']);
-    $result = isset($form_state['result']) ? $form_state['result'] : entity_create('fieldform_result', array(
-      'uid' => $GLOBALS['user']->uid,
-      'hostname' => $GLOBALS['user']->hostname
-    ));
 
-    foreach ($values as $name => $value) {
-      if (($element = $entity->findElementByName($name)) !== FALSE) {
-        $element->value = $form_state['values'][$element->formKey()];
-        $element->submit($form, $form_state);
-        $result->addElement($element);
-        if ($element->elementType() === 'separator') {
-          $entity->separator = $element->_id;
-        }
-      }
+    foreach ($entity->elements as $element) {
+      $element->submit($form, $form_state);
     }
-
-    entity_save($result->entityType(), $result);
-    $form_state['result'] = $result;
 
     if (isset($entity->separator)) {
       $form_state['rebuild'] = TRUE;
       $form['#rebuild'] = TRUE;
       $form = $entity->buildForm($form, $form_state, $entity, $entity->elements);
     }
-    elseif ($entity->settings['completed_behavior'] === 0) {
+    elseif ($entity->settings['completed_behavior'] === 'message') {
       $form_state['rebuild'] = TRUE;
       $form['#rebuild'] = TRUE;
       $form = array(
         'complete_message' => array(
-          '#markup' => $entity->settings['completed_behavior_0']
+          '#markup' => $entity->settings['completed_behavior_message']['value']
         )
       );
     }
     else {
-      $form_state['redirect'] = $entity->settings['completed_behavior_1'];
+      $form_state['rebuild'] = FALSE;
+      $form['#rebuild'] = FALSE;
+      $form_state['redirect'] = $entity->settings['completed_behavior_url'];
       drupal_redirect_form($form_state);
     }
   }
@@ -403,7 +405,7 @@ interface FieldFormElementControllerInterface {
   static public function addElement(FieldFormElementInterface $element, $child);
   static public function updateElement(FieldFormElementInterface $element, array $values);
   static public function deleteElement(FieldFormElementInterface $element, FieldFormElementInterface $child);
-  static public function buildElement(FieldFormElementInterface $element, $view_mode);
+  static public function buildElement(FieldFormElementInterface $element);
   static public function toArray(FieldFormElementInterface $element);
   static public function hasChild(FieldFormElementInterface $element, $id);
   static public function hasChildren(FieldFormElementInterface $element);
@@ -503,7 +505,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     return FALSE;
   }
 
-  static public function buildElement(FieldFormElementInterface $element, $view_mode = 'full') {
+  static public function buildElement(FieldFormElementInterface $element) {
     $array = $element->toArray();
     $form = array();
     foreach ($array as $key => $value) {
@@ -512,7 +514,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
 
     if ($element->hasChildren()) {
       foreach ($element->children as $child) {
-        $form[$child->name] = $child->buildElement($child, $view_mode);
+        $form[$child->name] = $child->buildElement($child);
       }
     }
 
@@ -719,12 +721,14 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       array('class' => $form_state['input']['class']);
   }
 
-  static public function validate(&$form, &$form_state, $element) {
+  static public function validate(FieldFormElementInterface $element, &$form, &$form_state) {
     // TODO: Process validation per the element
+    return NULL;
   }
 
-  static public function submit(&$form, &$form_state, $element) {
+  static public function submit(FieldFormElementInterface $element, &$form, &$form_state) {
     // TODO: Handle any pre-save processes on the element value
+    return NULL;
   }
 
   static public function save(FieldFormElementInterface $element) {

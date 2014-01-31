@@ -64,7 +64,7 @@ interface FieldFormElementInterface {
   public function elementType();
   public function formKey();
   public function addElement($child);
-  public function buildElement($view_mode);
+  public function buildElement();
   public function updateElement($values);
   public function deleteElement(FieldFormElementInterface $child);
   public function toArray();
@@ -158,9 +158,9 @@ class FieldFormElement implements FieldFormElementInterface {
     return $this->elementType;
   }
 
-  public function buildElement($view_mode = 'full') {
+  public function buildElement() {
     $class = fieldform_element_controller($this->elementType);
-    return $class::buildElement($this, $view_mode);
+    return $class::buildElement($this);
   }
 
   public function toArray() {

@@ -17,14 +17,14 @@ class FieldFormResultEntity extends Entity {
     return $class::user($this);
   }
 
-  public function add(FieldFormElementInterface $element) {
+  public function add($data) {
     $class = $this->entityInfo['controller class'];
-    $class::add($this, $element);
+    $class::add($this, $data);
   }
 
-  public function update(FieldFormElementInterface $element) {
+  public function update($data) {
     $class = $this->entityInfo['controller class'];
-    return $class::update($this, $element);
+    return $class::update($this, $data);
   }
 }
 
@@ -35,6 +35,7 @@ interface FieldFormResultDataInterface {
   public function value($set = NULL);
   public function render($view_mode = 'full');
   public function save();
+  public function buildElement($element);
 }
 
 class FieldFormResultData implements FieldFormResultDataInterface {
@@ -50,7 +51,9 @@ class FieldFormResultData implements FieldFormResultDataInterface {
     }
 
     $this->resultType = $resultType;
-    $this->resultInfo = fieldform_result_get_info($resultType);
+    if (($this->resultInfo = fieldform_result_get_info($resultType)) === FALSE) {
+      $this->resultInfo = fieldform_result_get_info('default');
+    }
     $this->_id = date('mdyhis').$this->resultType.$this->name;
   }
 
@@ -86,5 +89,10 @@ class FieldFormResultData implements FieldFormResultDataInterface {
   public function save() {
     $class = $this->resultInfo['result controller'];
     return $class::save($this);
+  }
+
+  public function buildElement($element) {
+    $class = $this->resultInfo['result controller'];
+    return $class::buildElement($this, $element);
   }
 }

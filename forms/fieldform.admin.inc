@@ -35,18 +35,52 @@ function fieldform_form($form, &$form_state, Entity $entity, $op, $entity_type) 
     '#type' => 'radios',
     '#title' => t('Completed Form Behavior'),
     '#options' => array(
-      0 => t('Display a message'),
-      1 => t('Redirect to another URL')
+      'message' => t('Display a message'),
+      'url' => t('Redirect to another URL')
     ),
     '#default_value' => !empty($form_state['values']['settings']) &&
       isset($form_state['values']['settings']['completed_behavior']) ?
         $form_state['values']['settings']['completed_behavior'] : $entity->settings['completed_behavior'],
-    '#description' => t('What action you would like to take once the form is completed.'),
-    '#ajax' => array(
-      'callback' => 'fieldform_completed_behavior_change',
-      'wrapper' => '#completed-behavior'
-    ),
-    '#suffix' => '<div id="completed-behavior"></div>'
+    '#description' => t('What action you would like to take once the form is completed.')
+  );
+
+  $form['settings']['completed_behavior_message_container'] = array(
+    '#type' => 'container',
+    '#tree' => FALSE,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="settings[completed_behavior]"]' => array('value' => 'message')
+      )
+    )
+  );
+
+  $form['settings']['completed_behavior_message_container']['completed_behavior_message'] = array(
+    '#type' => 'text_format',
+    '#title' => t('Message'),
+    '#default_value' => isset($form_state['values']['settings']['completed_behavior_message']) ?
+        $form_state['values']['settings']['completed_behavior_message']['value']
+        : $entity->settings['completed_behavior_message']['value'],
+    '#parents' => array('settings', 'completed_behavior_message')
+  );
+
+  $format = isset($form_state['values']['settings']['completed_behavior_message']) ?
+    $form_state['values']['settings']['completed_behavior_message']['format']
+    : $entity->settings['completed_behavior_message']['format'];
+
+  if (isset($format)) {
+    $form['settings']['completed_behavior_message_container']['completed_behavior_message']['#format'] = $format;
+  }
+
+  $form['settings']['completed_behavior_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL or Path'),
+    '#default_value' => isset($form_state['values']['settings']['completed_behavior_url']) ?
+        $form_state['values']['settings']['completed_behavior_url'] : $entity->settings['completed_behavior_url'],
+    '#states' => array(
+      'visible' => array(
+        ':input[name="settings[completed_behavior]"]' => array('value' => 'url')
+      )
+    )
   );
 
   $form['settings']['submit_button_text'] = array(
@@ -84,23 +118,6 @@ function fieldform_form($form, &$form_state, Entity $entity, $op, $entity_type) 
   return $form;
 }
 
-function fieldform_completed_behavior_change($form, $form_state) {
-  $parents = $form_state['triggering_element']['#array_parents'];
-  $parents_string = implode('][', $parents).']';
-  $value = $form_state[$parents_string];
-  array_pop($parents);
-  array_push($parents, 'completed_behavior_'.$value);
-  $value_parents = implode('][', $parents).']';
-
-  $form[$value_parents] = array(
-    '#default_value' => $form_state[$value_parents]
-  );
-
-  $form[$value_parents]['#type'] = $value === 0 ? 'text_format' : 'textfield';
-  form_builder($form['#form_id'],$form[$value_parents], $form_state);
-  return $form[$value_parents];
-}
-
 function fieldform_form_submit($form, &$form_state) {
   $entity_type = $form_state['entity_type'];
   $entity = $form_state[$entity_type];
@@ -111,7 +128,7 @@ function fieldform_form_submit($form, &$form_state) {
   }
   entity_save($entity_type, $entity);
   $form_state['redirect'] = $entity->entityInfo()['admin ui']['path'];
-  if ($form_state['build_args']['args'][3] == 'add') {
+  if ($form_state['build_info']['args'][1] == 'add') {
     $form_state['redirect'] .= '/manage/'.$entity->identifier();
   }
   drupal_redirect_form($form_state);

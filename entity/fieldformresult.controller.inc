@@ -14,6 +14,9 @@ class FieldFormResultController extends EntityAPIController {
   public function load($ids = array(), $conditions = array()) {
     foreach ($ids as $entity) {
       $entity->form = fieldform_load($entity->form_name);
+      if (!isset($entity->module)) {
+        $entity->module = 'fieldform';
+      }
       if (!empty($entity->data)) {
         $data = $entity->data;
         $tmp = array();
@@ -27,12 +30,24 @@ class FieldFormResultController extends EntityAPIController {
   }
 
   public function save($entity) {
-    $data = $entity->data;
-    $tmp = array();
-    foreach ($data as $name => $value) {
-      $tmp[$name] = $value->save();
+    if ($entity->is_new) {
+      $entity->created = REQUEST_TIME;
     }
-    $entity->data = $tmp;
+    $entity->changed = REQUEST_TIME;
+
+    if (!isset($entity->module)) {
+      $entity->module = 'fieldform';
+    }
+
+    $data = $entity->data;
+    if (!empty($data)) {
+      $tmp = array();
+      foreach ($data as $name => $value) {
+        $tmp[$name] = $value->save();
+      }
+      $entity->data = $tmp;
+    }
+
     parent::save($entity);
     $entity->data = $data;
   }
@@ -51,30 +66,25 @@ class FieldFormResultController extends EntityAPIController {
     return user_load($entity->uid);
   }
 
-  static public function add(FieldFormResultEntity $entity, FieldFormElementInterface $element) {
-    $data = array(
-      'name' => $element->name,
-      'type' => $element->elementType(),
-      'title' => $element->label(),
-      'value' => $element->value,
-      'element' => $element
-    );
-    $result = fieldform_result_create($data['type'], $data);
-    $entity->data[$data['name']] = $result;
+  static public function add(FieldFormResultEntity $entity, $data) {
+    if (is_array($data) && isset($data['name']) && isset($data['type'])) {
+      $data = fieldform_result_create($data['type'], $data);
+    }
+    dpm($data, 'Add Data');
+    if (isset($data->name) && isset($data->value)) {
+      $entity->data[$data->name] = $data;
+    }
   }
 
-  static public function update(FieldFormResultEntity $entity, FieldFormElementInterface $element) {
-    if (!empty($entity->data[$element->name])) {
-      $data = array(
-        'name' => $element->name,
-        'type' => $element->elementType(),
-        'title' => $element->label(),
-        'value' => $element->value,
-        'element' => $element
-      );
+  static public function update(FieldFormResultEntity $entity, $data) {
+    dpm($data, 'Update Data');
+    if (is_array($data) && isset($data['name']) && isset($data['type'])) {
+      $data = fieldform_result_create($data['type'], $data);
+    }
+    if (!empty($entity->data[$data->name])) {
 
       foreach ($data as $key => $value) {
-        $entity->data[$element->name][$key] = $value;
+        $entity->data[$data->name][$key] = $value;
       }
       return $entity;
     }
@@ -83,6 +93,57 @@ class FieldFormResultController extends EntityAPIController {
 
   static public function reset(FieldFormResultEntity $entity) {
     $entity->data = array();
+  }
+
+  static public function buildForm(FieldFormResultEntity $entity, FieldFormEntity $fieldform, &$form, &$form_state) {
+    if (!empty($entity->data)) {
+      foreach ($entity->data as $result) {
+        $element = $fieldform->findElementByName($result->name);
+        if (is_array($element->parents)) {
+          $ret = drupal_array_get_nested_value($form, $element->parents);
+        }
+        else {
+          $ret = &$form[$element->name];
+        }
+        $result->buildElement($ret);
+      }
+    }
+  }
+
+  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form, $form_state) {
+    foreach ($fieldform->elements as $element) {
+      $child = $form[$element->name];
+      $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
+      dpm($element, 'Element');
+      dpm($value, 'Value');
+      $data = array(
+        'name' => $element->name,
+        'type' => $element->type,
+        'value' => $value,
+        'title' => $element->label()
+      );
+      // TODO : Need to process the value per the ResultData controller.
+      if (self::update($entity, $data) === FALSE) {
+        self::add($entity, $data);
+      }
+      dpm($entity, 'Result');
+
+      if ($element['#tree'] !== TRUE && count(element_children($element)) > 0) {
+        self::processResults($entity, $fieldform, $element, $form_state);
+      }
+    }
+  }
+
+  static public function buildResult(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form, $form_state) {
+    $entity->form_name = $fieldform->identifier();
+    if (!isset($entity->uid)) {
+      $entity->uid = $GLOBALS['user']->uid;
+      $entity->hostname = $GLOBALS['user']->hostname;
+    }
+
+    self::processResults($entity, $fieldform, $form, $form_state);
+
+    return $entity;
   }
 }
 
@@ -94,6 +155,7 @@ interface FieldFormResultDataControllerInterface {
   static public function value(FieldFormResultDataInterface $result, $set = NULL);
   static public function render(FieldFormResultDataInterface $result, $view_mode = 'full');
   static public function save(FieldFormResultDataInterface $result);
+  static public function buildElement(FieldFormResultDataInterface $result, &$element);
 }
 
 class FieldFormResultDataController implements FieldFormResultDataControllerInterface {
@@ -102,7 +164,9 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
 
   public function __construct($resultType) {
     $this->resultType = $resultType;
-    $this->resultInfo = fieldform_result_get_info($resultType);
+    if ($this->resultInfo = fieldform_result_get_info($resultType) === FALSE) {
+      $this->resultInfo = fieldform_result_get_info('default');
+    }
   }
 
   public function create($resultType, $values = array()) {
@@ -120,12 +184,6 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
 
   static public function data(FieldFormResultDataInterface $result) {
     $ret = get_object_vars($result);
-
-    if (in_array('FieldFormElementInterface', class_implements($result->element))) {
-      $element = $result->element->toArray();
-      $ret['element'] = $element;
-    }
-
     return $ret;
   }
 
@@ -134,11 +192,8 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
   }
 
   static public function render(FieldFormResultDataInterface $result, $view_mode = 'full') {
-    $title = in_array('FieldFormElementInterface', class_implements($result->element)) ?
-      $result->element->label() : $result->title;
-
     return array(
-      '#title' => $title,
+      '#title' => $result->title,
       '#result' => $result,
       '#theme' => 'fieldform_result'
     );
@@ -146,8 +201,14 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
 
   static public function save(FieldFormResultDataInterface $result) {
     $data = self::data($result);
-    unset($data['element']);
     $data['value'] = $result->value();
     return $data;
+  }
+
+  static public function buildElement(FieldFormResultDataInterface $result, &$element) {
+    $value = $result->value();
+    if (isset($value)) {
+      $element['#default_value'] = $value;
+    }
   }
 }
