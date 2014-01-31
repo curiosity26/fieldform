@@ -8,7 +8,6 @@
 
 function fieldform_schema() {
   $schema['fieldform'] = array(
-    'description' => st('Form entities for use within fields'),
     'fields' => array(
       'fid' => array(
         'type' => 'serial',
@@ -36,7 +35,6 @@ function fieldform_schema() {
         'not null' => TRUE
       ),
       'module' => array(
-        'description' => 'The name of the providing module if the entity has been defined in code.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => FALSE,
@@ -51,7 +49,6 @@ function fieldform_schema() {
         'type' => 'text',
         'not null' => FALSE,
         'serialize' => TRUE,
-        'default' => array()
       ),
       'elements' => array(
         'type' => 'text',
@@ -60,11 +57,13 @@ function fieldform_schema() {
         'size' => 'medium'
       )
     ),
-    'primary key' => array('fid')
+    'primary key' => array('fid'),
+    'unique keys' => array(
+      'name' => array('name'),
+    )
   );
 
   $schema['fieldform_result'] = array(
-    'description' => st('Results from completed field forms'),
     'fields' => array(
       'rid' => array(
         'type' => 'serial',
@@ -82,7 +81,6 @@ function fieldform_schema() {
         'not null' => TRUE
       ),
       'hostname' => array(
-        'description' => 'The IP Address or hostname of the user',
         'type' => 'varchar',
         'length' => 15,
         'not null' => FALSE,
@@ -98,7 +96,6 @@ function fieldform_schema() {
         'not null' => TRUE
       ),
       'module' => array(
-        'description' => 'The name of the providing module if the entity has been defined in code.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => FALSE,
@@ -113,11 +110,11 @@ function fieldform_schema() {
     'foreign keys' => array(
       'form_name' => array(
         'table' => 'fieldform',
-        'form_name' => 'name'
+        'columns' => array('form_name' => 'name')
       ),
       'uid' => array(
-        'table' => 'user',
-        'uid' => 'uid'
+        'table' => 'users',
+        'columns' => array('uid' => 'uid')
       )
     ),
     'primary key' => array('rid')
@@ -126,37 +123,27 @@ function fieldform_schema() {
   return $schema;
 }
 
-function fieldform_update_7001() {
-  db_add_field('fieldform', 'settings',
-    array(
-      'type' => 'text',
-      'not null' => FALSE,
-      'serialize' => TRUE,
-      'default' => array()
-    )
-  );
-
-  db_add_field('fieldform_result', 'hostname',
-    array(
-      'type' => 'varchar',
-      'length' => 15,
-      'not null' => FALSE,
-    )
-  );
-
-  db_add_field('fieldform_result', 'form_name',
-    array(
-      'type' => 'varchar',
-      'length' => 64,
-      'not null' => TRUE
-    ),
-    array(
+function fieldform_field_schema($field) {
+  $ret = array();
+  if ($field['type'] === 'fieldform') {
+    $ret = array(
+      'columns' => array(
+        'fieldform_form' => array(
+          'type' => 'varchar',
+          'length' => 64,
+          'not null' => FALSE
+        )
+      ),
+      'indexes' => array(
+        'fieldform_form' => array('fieldform_form'),
+      ),
       'foreign keys' => array(
-        'form_name' => array(
+        'fieldform_form' => array(
           'table' => 'fieldform',
-          'form_name' => 'name'
+          'columns' => array('fieldform_form' => 'name')
         )
       )
-    )
-  );
+    );
+  }
+  return $ret;
 }

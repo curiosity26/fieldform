@@ -30,7 +30,7 @@ class OptionsElementController extends FieldFormElementController {
     $form['default_value']['#prefix'] = '<div id="default-value-element-ajax">';
     $form['default_value']['#suffix'] = '</div>';
     $form['default_value']['#options'] = $form['required']['#default_value'] != 1 ?
-      array('--' => t('None')) + $values['options'] : $values['options'];
+      array('--' => t('None')) + (array)$values['options'] : $values['options'];
 
     if (!empty($form['multiple'])) {
       $form['multiple']['#default_value'] = $multiple;
@@ -104,7 +104,7 @@ class OptionsElementController extends FieldFormElementController {
     return $commands;
   }
 
-  public function optionsChange($form, $form_state, $values) {
+  public function optionsChange($form, $form_state, array $values = array()) {
     $data = $form['required']['#checked'] == TRUE ? array() : array('--' => t('None'));
     $data += $values;
     $data = array_filter($data);

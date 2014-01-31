@@ -19,6 +19,7 @@ module_load_include('inc', 'fieldform', 'entity/fieldform.class');
 module_load_include('inc', 'fieldform', 'entity/fieldform.controller');
 module_load_include('inc', 'fieldform', 'entity/fieldformresult.class');
 module_load_include('inc', 'fieldform', 'entity/fieldformresult.controller');
+module_load_include('inc', 'fieldform', 'fieldform.field');
 
 function fieldform_hook_info() {
   return array(
@@ -609,7 +610,11 @@ function fieldform_element_settings_form_submit($form, &$form_state) {
   $class::settingsSubmitForm($form, $form_state, $entity_type, $entity, $element_type, $element);
 
   $values = $form_state['values'];
-  $values['attributes'] = $values['attributes']['values'];
+
+  if (isset($values['attributes'])) {
+    $values['attributes'] = $values['attributes']['values'];
+  }
+
   unset($values['type'], $values['name'], $values['form_id'], $values['form_build_id'],
     $values['form_token'], $values['op'], $values['class'], $values['submit']);
 
@@ -811,8 +816,7 @@ function _namevalue_table_ajax($op, $element_name) {
     $count = max($op == 'remove' ? $count - 1 : $count + 1, 1);
   }
   $form_values = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
-  $values = array_filter($form_values['values']);
-
+  $values = isset($form_values['values']) ? array_filter($form_values['values']) : array_filter($form_values);
   // Cleanse the Element
   foreach (element_children($element) as $branch) {
     if (is_numeric($branch)) {
