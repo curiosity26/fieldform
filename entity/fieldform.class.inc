@@ -8,6 +8,7 @@
 
 class FieldFormEntity extends Entity {
   public $elements = array();
+  public $settings = array();
 
   public function __construct($values = array()) {
     parent::__construct($values, 'fieldform');

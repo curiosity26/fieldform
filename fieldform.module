@@ -19,6 +19,7 @@ module_load_include('inc', 'fieldform', 'entity/fieldform.class');
 module_load_include('inc', 'fieldform', 'entity/fieldform.controller');
 module_load_include('inc', 'fieldform', 'entity/fieldformresult.class');
 module_load_include('inc', 'fieldform', 'entity/fieldformresult.controller');
+module_load_include('inc', 'fieldform', 'fieldform.field');
 
 function fieldform_hook_info() {
   return array(
@@ -208,6 +209,21 @@ function fieldform_result_access($op, $entity, $account = NULL) {
   return FALSE;
 }
 
+function fieldform_field_result_access($op, $entity, $account = NULL) {
+  if (!isset($account)) {
+    $account = $GLOBALS['user'];
+  }
+  if ($account->uid === 1) {
+    return TRUE;
+  }
+
+  $ret = (user_access($op.' any field form results', $account) || user_access($op.' own field form results', $account));
+
+  return $ret;
+}
+
+/* Menu */
+
 function fieldform_menu() {
   $menu = array();
 
@@ -231,8 +247,66 @@ function fieldform_menu() {
     'type' => MENU_CALLBACK
   );
 
+  foreach (fieldform_get_instances() as $instance) {
+    $type = $instance['entity_type'];
+    $menu[$type.'/%entity_object/results'] = array(
+      'title' => 'Form Results',
+      'load arguments' => array($type),
+      'page callback' => 'fieldform_field_results_page',
+      'page arguments' => array(1),
+      'access callback' => 'fieldform_field_result_access',
+      'access arguments' => array('view', 1),
+      'type' => MENU_LOCAL_TASK
+    );
+
+    $menu[$type.'/%entity_object/results/%fieldform_result/delete'] = array(
+      'title' => 'Delete Result',
+      'load arguments' => array($type),
+      'page callback' => 'fieldform_field_results_delete_page',
+      'page arguments' => array(1, 3),
+      'access callback' => 'fieldform_result_access',
+      'access arguments' => array('delete', 3),
+      'type' => MENU_CALLBACK
+    );
+
+    $menu[$type.'/%entity_object/results/%fieldform_result/print'] = array(
+      'title' => 'Edit Result',
+      'load arguments' => array($type),
+      'page callback' => 'fieldform_field_results_print_page',
+      'page arguments' => array(1, 3),
+      'access callback' => 'fieldform_result_access',
+      'access arguments' => array('print', 3),
+      'type' => MENU_CALLBACK
+    );
+
+    $menu[$type.'/%entity_object/results/%fieldform_result/export'] = array(
+      'title' => 'Edit Result',
+      'load arguments' => array($type),
+      'page callback' => 'fieldform_field_results_export_page',
+      'page arguments' => array(1, 3),
+      'access callback' => 'fieldform_result_access',
+      'access arguments' => array('print', 3),
+      'type' => MENU_CALLBACK
+    );
+  }
+
   return $menu;
 }
+
+function fieldform_get_instances($params = array()) {
+  $fields = field_read_fields(array('type' => 'fieldform'));
+  $instances = array();
+  if (!empty($fields)) {
+    $field_name = array(
+      'field_name' => array_keys($fields)
+    );
+    $params = array_merge($field_name, $params);
+    $instances = field_read_instances($params);
+  }
+  return $instances;
+}
+
+/* Fieldform Info Calls */
 
 function fieldform_get_info($elementType = NULL) {
   $static = &drupal_static(__FUNCTION__, array());
@@ -361,6 +435,8 @@ function fieldform_result_controller($resultType) {
     new $info['result controller']($resultType) : new FieldFormResultDataController($resultType);
 }
 
+/* Entity / Element CRUD */
+
 function elements_add(Entity $entity, FieldFormElement $element) {
   $entityInfo = $entity->entityInfo();
   if (isset($entityInfo['element add callback']) && function_exists($entityInfo['element add callback'])) {
@@ -431,9 +507,43 @@ function fieldform_result_load($id) {
 function fieldform_result_load_multiple($ids = FALSE) {
   return entity_load('fieldform_result', $ids);
 }
+
+function fieldform_result_load_by_form($form_name) {
+  $info = entity_get_info('fieldform_result');
+  $id_key = $info['entity keys']['id'];
+  $query = db_select('fieldform_result', 'fr')
+    ->fields('fr', array($id_key))
+    ->condition('form_name', $form_name);
+  $results = $query->execute();
+  $ids = $results->fetchAllAssoc($id_key);
+  return fieldform_result_load_multiple($ids);
+}
+
 function fieldform_result_create($resultType, $values = array()) {
   $controller = fieldform_result_controller($resultType);
   return $controller->create($resultType, $values);
+}
+
+function fieldform_field_results_load($entity) {
+  if (method_exists($entity, 'entityType')) {
+    $type = $entity->entityType();
+    $id = $entity->identifier();
+    list(, , $bundle) = entity_extract_ids($entity->entityType(), $entity);
+  }
+  else {
+    $type = 'node';
+    $id = $entity->nid;
+    $bundle = $entity->type;
+  }
+
+  $ids = db_select('fieldform_entities', 'fe')
+    ->fields('fe', array('id'))
+    ->condition('entity_type', $type)
+    ->condition('entity', $id)
+    ->condition('bundle', $bundle)
+    ->execute()
+    ->fetchAllAssoc('id');;
+  return fieldform_result_load_multiple(array_keys($ids));
 }
 
 /* View Functions */
@@ -442,6 +552,110 @@ function fieldform_view($entity, $view_mode = 'full', $langcode = NULL, $page = 
   $entities = is_array($entity) ? $entity : array($entity);
   drupal_set_title($entity->label());
   return entity_view('fieldform', $entities);
+}
+
+/* Save Functions */
+
+function fieldform_field_result_save($entity_type, $entity, $bundle = NULL, $result) {
+  if (method_exists($entity, 'entityType')) {
+    $id = $entity->identifier();
+    list(, , $bundle) = entity_extract_ids($entity->entityType(), $entity);
+  }
+  else {
+    $id = $entity->nid;
+    $bundle = $entity->type;
+  }
+
+  $save = array();
+  $save['entity_type'] = $entity_type;
+  $save['entity'] = $id;
+  $save['bundle'] = $bundle;
+  $save['result'] = $result->identifier();
+
+  $result = db_select('fieldform_entities', 'fe')
+    ->fields('fe', array('id'))
+    ->condition('result', $result->identifier())
+    ->execute();
+  if ($result->rowCount() < 1) {
+    // Don't bother saving what's already saved
+    db_insert('fieldform_entities')
+      ->fields(array_keys($save), array_values($save))
+      ->execute();
+  }
+
+  return $save;
+}
+
+/* Page Callbacks */
+
+function fieldform_field_results_page($entity) {
+  if (method_exists($entity, 'entityType')) {
+    $type = $entity->entityType();
+    $id = $entity->identifier();
+    list(, , $bundle) = entity_extract_ids($entity->entityType(), $entity);
+  }
+  else {
+    $type = 'node';
+    $id = $entity->nid;
+    list(, , $bundle) = entity_extract_ids($entity->type, $entity);
+  }
+
+  $fields = field_read_fields(
+    array(
+      'type' => 'fieldform',
+      'entity_type' => $type,
+      'bundle' => $bundle
+    )
+  );
+
+  $header = array(
+    'ID',
+    'User',
+    'Form Name',
+    'Created',
+    array(
+      'data' => 'Operations',
+      'colspan' => 3
+    )
+  );
+
+  $rows = array();
+
+  $field_names = array_keys($fields);
+  foreach ($field_names as $field_name) {
+    $items = field_get_items($type, $entity, $field_name);
+    if (isset($items[0]['fieldform_form'])) {
+      $results = fieldform_field_results_load($entity);
+      foreach ($results as $result) {
+        $user = user_load($result->uid);
+        $path = $type.'/'.$id;
+        $rows[] = array(
+          $result->identifier(),
+          $user->name.' ('.$result->hostname.')',
+          $result->form_name,
+          format_date($result->created),
+          l('print', $path.'/results/'.$result->identifier().'/print', array('absolute' => TRUE)),
+          l('export', $path.'/results/'.$result->identifier().'/export', array('absolute' => TRUE)),
+          l('delete', $path.'/results/'.$result->identifier().'/delete', array('absolute' => TRUE)),
+        );
+      }
+    }
+  }
+
+  return theme('table', array('header' => $header, 'rows' => $rows));
+}
+
+function fieldform_field_results_print_page($entity, $result) {
+  $output = array();
+  foreach ($result->data as $render) {
+    $output[] = $render->render();
+  }
+
+  return $output;
+}
+
+function fieldform_field_results_export_page($entity, $result) {
+
 }
 
 /* Forms */
@@ -533,8 +747,25 @@ function fieldform_view_form_submit(&$form, &$form_state) {
   $result_controller::buildResult($result, $entity, $form, $form_state);
   entity_save($result->entityType(), $result);
   $form_state['result'] = $result;
-
   $entity->submit($form, $form_state);
+  _fieldform_field_form_submit($form, $form_state);
+}
+
+function _fieldform_field_form_submit($form, &$form_state) {
+  $fieldform = $form_state['fieldform'];
+  $result = $form_state['result'];
+  $entity = $fieldform->field_entity;
+  if (isset($entity)) {
+    if (method_exists($entity, 'entityType')) {
+      $entity_type = $entity->entityType();
+      list(, , $bundle) = entity_extract_ids($entity_type, $entity);
+    }
+    else {
+      $entity_type = 'node';
+      $bundle = $entity->type;
+    }
+    fieldform_field_result_save($entity_type, $entity, $bundle, $result);
+  }
 }
 
 function fieldform_element_operations_form($op = 'edit', Entity $entity, FieldFormElementInterface $element) {
@@ -609,7 +840,11 @@ function fieldform_element_settings_form_submit($form, &$form_state) {
   $class::settingsSubmitForm($form, $form_state, $entity_type, $entity, $element_type, $element);
 
   $values = $form_state['values'];
-  $values['attributes'] = $values['attributes']['values'];
+
+  if (isset($values['attributes'])) {
+    $values['attributes'] = $values['attributes']['values'];
+  }
+
   unset($values['type'], $values['name'], $values['form_id'], $values['form_build_id'],
     $values['form_token'], $values['op'], $values['class'], $values['submit']);
 
@@ -811,8 +1046,7 @@ function _namevalue_table_ajax($op, $element_name) {
     $count = max($op == 'remove' ? $count - 1 : $count + 1, 1);
   }
   $form_values = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
-  $values = array_filter($form_values['values']);
-
+  $values = isset($form_values['values']) ? array_filter($form_values['values']) : array_filter($form_values);
   // Cleanse the Element
   foreach (element_children($element) as $branch) {
     if (is_numeric($branch)) {
@@ -939,7 +1173,8 @@ function fieldform_theme() {
 
   $themes['fieldform_result'] = array(
     'render element' => 'element',
-    'template' => 'fieldform_result'
+    'template' => 'fieldform_result',
+    'path' => drupal_get_path('module', 'fieldform').'/theme'
   );
 
   return $themes;
@@ -1126,7 +1361,7 @@ function template_preprocess_fieldform_result(&$vars) {
   $vars['result'] = $result;
 
   $vars['title_display'] = isset($vars['element']['#title_display']) ? $vars['element']['#title_display'] : 'before';
-  $default_title_prefix = '<div>';
+  $default_title_prefix = '<div class="label">';
   $default_title_suffix = '</div>';
 
   $vars['title_prefix'] = isset($vars['element']['#title_prefix']) ? $vars['element']['#title_prefix']
@@ -1135,14 +1370,17 @@ function template_preprocess_fieldform_result(&$vars) {
   $vars['title_suffix'] = isset($vars['element']['#title_suffix']) ? $vars['element']['#title_suffix']
     : $default_title_suffix;
 
+  $data = $result->data();
+
   $vars['classes_array'][] = 'fieldform_result';
-  $vars['classes_array'][] = 'fieldform_result-'.$result->data['type'];
-  $vars['classes_array'][] = 'fieldform_result-'.$result->data['name'];
+  $vars['classes_array'][] = 'fieldform_result-'.$data['type'];
+  $vars['classes_array'][] = 'fieldform_result-'.$data['name'];
   $vars['classes'] = implode(' ', $vars['classes_array']);
   $vars['content_wrapper_tag'] = 'div';
 
-  if (is_array($result->data['value'])) {
-    $items = array('items' => $result->data['value']);
+  $value = $result->value();
+  if (is_array($value)) {
+    $items = array('items' => $value);
     if ($vars['title_display'] == 'inline') {
       $items =+ array(
         'class' => 'inline'
@@ -1152,11 +1390,11 @@ function template_preprocess_fieldform_result(&$vars) {
       ."</{$vars['content_wrapper_tag']}>";
   }
   else {
-    $vars['content'] = "<{$vars['content_wrapper_tag']} class=\"content\">".$result->data['value']
+    $vars['content'] = "<{$vars['content_wrapper_tag']} class=\"content\">".$value
       ."</{$vars['content_wrapper_tag']}>";
   }
 
-  if ($suggestions = theme_get_suggestions(array($result->data['type'], $result->data['name']), 'fieldform_result')) {
+  if ($suggestions = theme_get_suggestions(array($data['type'], $data['name']), 'fieldform_result')) {
     $vars['theme_hook_suggestions'] = $suggestions;
   }
 

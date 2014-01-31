@@ -215,74 +215,76 @@ function fieldform_elements_list($form, &$form_state, $entity) {
 function _fieldform_element_form_row(&$form, $elements, $entity) {
   $base_url = $entity->entityInfo()['admin ui']['path'];
   $temp = array();
-  foreach ($elements as $element) {
-    if (!is_object($element)) {
-      continue;
-    }
+  if (!empty($elements)) {
+    foreach ($elements as $element) {
+      if (!is_object($element)) {
+        continue;
+      }
 
-    $parents = $element->parents;
-    array_pop($parents);
-    $parent = $entity->findElementByName(array_pop($parents));
+      $parents = $element->parents;
+      array_pop($parents);
+      $parent = $entity->findElementByName(array_pop($parents));
 
-    $temp['title_label'] = array(
-      '#markup' => $element->title
-    );
+      $temp['title_label'] = array(
+        '#markup' => $element->title
+      );
 
-    $temp['title'] = array(
-      '#type' => 'hidden',
-      '#value' => $element->title
-    );
+      $temp['title'] = array(
+        '#type' => 'hidden',
+        '#value' => $element->title
+      );
 
-    $temp['name_label'] = array(
-      '#markup' => $element->name
-    );
+      $temp['name_label'] = array(
+        '#markup' => $element->name
+      );
 
-    $temp['name'] = array(
-      '#type' => 'hidden',
-      '#value' => $element->name
-    );
+      $temp['name'] = array(
+        '#type' => 'hidden',
+        '#value' => $element->name
+      );
 
-    $temp['type_label'] = array(
-      '#markup' => $element->type
-    );
+      $temp['type_label'] = array(
+        '#markup' => $element->type
+      );
 
-    $temp['type'] = array(
-      '#type' => 'hidden',
-      '#value' => $element->elementType()
-    );
+      $temp['type'] = array(
+        '#type' => 'hidden',
+        '#value' => $element->elementType()
+      );
 
-    $temp['id'] = array(
-      '#type' => 'hidden',
-      '#value' => $element->_id
-    );
+      $temp['id'] = array(
+        '#type' => 'hidden',
+        '#value' => $element->_id
+      );
 
-    $temp['weight'] = array(
-      '#type' => 'weight',
-      '#value' => is_numeric($element->weight) ? $element->weight : 0
-    );
+      $temp['weight'] = array(
+        '#type' => 'weight',
+        '#value' => is_numeric($element->weight) ? $element->weight : 0
+      );
 
-    $temp['parent'] = array(
-      '#type' => 'hidden',
-      '#value' => $parent !== FALSE ? $parent->_id : ''
-    );
+      $temp['parent'] = array(
+        '#type' => 'hidden',
+        '#value' => $parent !== FALSE ? $parent->_id : ''
+      );
 
-    $temp['depth'] = array(
-      '#type' => 'hidden',
-      '#value'=> count($element->parents) - 1
-    );
+      $temp['depth'] = array(
+        '#type' => 'hidden',
+        '#value'=> count($element->parents) - 1
+      );
 
-    $temp['operations']['edit'] = array(
-      '#markup' => l('edit', $base_url.'/manage/'.$entity->identifier().'/elements/'.$element->name.'/edit')
-    );
+      $temp['operations']['edit'] = array(
+        '#markup' => l('edit', $base_url.'/manage/'.$entity->identifier().'/elements/'.$element->name.'/edit')
+      );
 
-    $temp['operations']['delete'] = array(
-      '#markup' => l('delete', $base_url.'/manage/'.$entity->identifier().'/elements/'.$element->name.'/delete')
-    );
+      $temp['operations']['delete'] = array(
+        '#markup' => l('delete', $base_url.'/manage/'.$entity->identifier().'/elements/'.$element->name.'/delete')
+      );
 
-    $form['elements'][$element->name] = $temp;
+      $form['elements'][$element->name] = $temp;
 
-    if ($element->hasChildren()) {
-      _fieldform_element_form_row($form, $element->children, $entity);
+      if ($element->hasChildren()) {
+        _fieldform_element_form_row($form, $element->children, $entity);
+      }
     }
   }
 }

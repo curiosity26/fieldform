@@ -23,7 +23,7 @@ class FieldFormController extends EntityAPIControllerExportable {
         $entity->elements = $elements;
       }
 
-      if (!is_array($entity->settings)) {
+      if (!isset($entity->settings) || !is_array($entity->settings)) {
         $entity->settings = array();
       }
 
@@ -38,6 +38,32 @@ class FieldFormController extends EntityAPIControllerExportable {
     }
 
     return $entities;
+  }
+
+  public function create(array $values = array()) {
+    $values += array('is_new' => TRUE);
+    if (isset($this->entityInfo['entity class']) && $class = $this->entityInfo['entity class']) {
+      $entity = new $class($values, $this->entityType);
+    }
+
+    if(!is_array($entity->elements)) {
+      $this->elements = unserialize($this->elements);
+    }
+
+    if(!is_array($entity->settings)) {
+      $this->settings = unserialize($entity->settings);
+    }
+
+    $entity->settings += array(
+      'completed_behavior' => 'message',
+      'completed_behavior_message' => array('value' => '', 'format' => NULL),
+      'completed_behavior_url' => '',
+      'submit_button_text' => t('Submit'),
+      'continue_button_text' => t('Continue'),
+      'back_button_text' => t('Back')
+    );
+
+    return $entity;
   }
 
   static public function hookForms() {
@@ -731,8 +757,11 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
    if (isset($form_state['input']['attributes']['values'])) {
      $form_state['input']['attributes'] = $form_state['input']['attributes']['values'];
    }
-    $form_state['input']['attributes'] = $form_state['input']['attributes'] +
-      array('class' => $form_state['input']['class']);
+
+    if (isset($form_state['input']['attributes'])) {
+      $form_state['input']['attributes'] = $form_state['input']['attributes'] +
+        array('class' => $form_state['input']['class']);
+    }
   }
 
   static public function save(FieldFormElementInterface $element) {

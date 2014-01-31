@@ -25,7 +25,8 @@ class FieldFormResultController extends EntityAPIController {
         $data = (array) $entity->data;
         $tmp = array();
         foreach ($data as $name => $value) {
-          $tmp[$name] = fieldform_result_create($value['type'], $value);
+          $type = is_array($value) ? $value['type'] : $value->type;
+          $tmp[$name] = fieldform_result_create($type, $value);
         }
         $entity->data = $tmp;
       }

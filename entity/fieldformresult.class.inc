@@ -71,7 +71,7 @@ class FieldFormResultData implements FieldFormResultDataInterface {
   }
 
   public function data() {
-    $class = $this->resultInfo['result controller'];
+    $class = fieldform_result_controller($this->resultType);
     return $class::data($this);
   }
 
@@ -83,22 +83,22 @@ class FieldFormResultData implements FieldFormResultDataInterface {
   }
 
   public function render($view_mode = 'full') {
-    $class = $this->resultInfo['result controller'];
+    $class = fieldform_result_controller($this->resultType);
     return $class::render($this, $view_mode);
   }
 
   public function save() {
-    $class = $this->resultInfo['result controller'];
+    $class = fieldform_result_controller($this->resultType);
     return $class::save($this);
   }
 
   public function buildElement($element) {
-    $class = $this->resultInfo['result controller'];
-    return $class::buildElement($this, $element);
+    $class = fieldform_result_controller($this->resultType);
+    $class::buildElement($this, $element);
   }
 
   public function processResult(FieldFormElementInterface $element, $value) {
-    $class = $this->resultInfo['result controller'];
+    $class = fieldform_result_controller($this->resultType);
     return $class::processResult($this, $element, $value);
   }
 }

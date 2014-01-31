@@ -8,8 +8,9 @@
 
 class SeparatorElementController extends FieldFormElementController {
   static public function settingsForm($form, &$form_state, FieldFormElementInterface $element = NULL, $op = NULL) {
+    $form = parent::settingsForm($form, $form_state, $element, $op);
     unset($form['required'], $form['description'], $form['details']);
-    drupal_form_submit($form['#form_id'], $form_state);
+    return $form;
   }
 
   static public function buildElement(FieldFormElementInterface $element, $view_mode = 'full') {
