@@ -191,13 +191,21 @@ class FieldFormController extends EntityAPIControllerExportable {
     return $children[$type];
   }
 
-  static protected function processElements($entity, $elements, &$form, &$form_state) {
+  static public function processElements($entity, $elements, &$form, &$form_state) {
     $page = isset($form_state['form_separator']) ? $form_state['form_separator'] : NULL;
     $separators = array_keys($entity->findElementsByType('separator'));
     $iterator = new ArrayIterator($elements);
 
+    // If the redirect option were chosen, it would already be redirected by now
+    if (isset($form_state['storage']['complete'])) {
+      $form['completed'] = array(
+        '#markup' => $entity->settings['completed_behavior_message']['value']
+      );
+      return $form;
+    }
+
     if (isset($page) && !empty($separators)) {
-      if ($form_state['op'] === $entity->settings['back_button_text']) {
+      if ($form_state['values']['op'] === $entity->settings['back_button_text']) {
         $index = array_search($page, $separators);
         unset($page);
         if ($index > 0) {
@@ -206,10 +214,13 @@ class FieldFormController extends EntityAPIControllerExportable {
         }
       }
       if (isset($page)) {
-        $iterator->seek(array_search($page, $elements));
+        $seek = array_search($page, array_keys($elements));
+        $iterator->seek($seek);
+        if ($iterator->valid()) {
+          $iterator->next();
+        }
       }
     }
-
     while($iterator->valid()) {
       $element = $iterator->current();
       $form[$element->name] = $element->buildElement();
@@ -250,7 +261,7 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function buildForm($entity, $form, &$form_state) {
-    self::processElements($entity, $entity->elements, $form, $form_state);
+    $entity->processElements($form, $form_state);
 
     $form_state += array(
       'build_info' => array(
@@ -260,7 +271,6 @@ class FieldFormController extends EntityAPIControllerExportable {
     );
 
     $form_state[$entity->entityType()] = $entity;
-
     return $form;
   }
 
@@ -273,37 +283,41 @@ class FieldFormController extends EntityAPIControllerExportable {
     return drupal_build_form('fieldform_'.$entity->identifier().'_form', $form_state);
   }
 
-  public function validate($entity, &$form, &$form_state) {
+  static public function validate($entity, &$form, &$form_state) {
     foreach ($entity->elements as $element) {
-      $element->validate($form, $form_state);
+      if (method_exists($element, 'validate')) {
+        $element->validate($form, $form_state);
+      }
     }
   }
 
-  public function submit($entity, &$form, &$form_state) {
-    $entity->separator = NULL;
-
+  static public function submit($entity, &$form, &$form_state) {
     foreach ($entity->elements as $element) {
-      $element->submit($form, $form_state);
+      if (method_exists($element, 'submit')) {
+        $element->submit($form, $form_state);
+      }
     }
 
-    if (isset($entity->separator)) {
+
+    if (isset($form_state['form_separator'])
+      && $form_state['values']['op'] !== $entity->settings['submit_button_text']) {
       $form_state['rebuild'] = TRUE;
-      $form['#rebuild'] = TRUE;
-      $form = $entity->buildForm($form, $form_state, $entity, $entity->elements);
+      $form_state['input'] = array();
+      $form = $entity->buildForm($form, $form_state);
     }
-    elseif ($entity->settings['completed_behavior'] === 'message') {
+    else{
+      $entity->completedFormBehavior($form, $form_state);
+    }
+  }
+
+  static public function completedFormBehavior(FieldFormEntity $entity, &$form, &$form_state) {
+    if ($entity->settings['completed_behavior'] === 'message') {
       $form_state['rebuild'] = TRUE;
-      $form['#rebuild'] = TRUE;
-      $form = array(
-        'complete_message' => array(
-          '#markup' => $entity->settings['completed_behavior_message']['value']
-        )
-      );
+      $form_state['storage']['complete'] = TRUE;
     }
     else {
       $form_state['rebuild'] = FALSE;
-      $form['#rebuild'] = FALSE;
-      $form_state['redirect'] = $entity->settings['completed_behavior_url'];
+      $form_state['redirect'] = url($entity->settings['completed_behavior_url']);
       drupal_redirect_form($form_state);
     }
   }
@@ -719,16 +733,6 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
    }
     $form_state['input']['attributes'] = $form_state['input']['attributes'] +
       array('class' => $form_state['input']['class']);
-  }
-
-  static public function validate(FieldFormElementInterface $element, &$form, &$form_state) {
-    // TODO: Process validation per the element
-    return NULL;
-  }
-
-  static public function submit(FieldFormElementInterface $element, &$form, &$form_state) {
-    // TODO: Handle any pre-save processes on the element value
-    return NULL;
   }
 
   static public function save(FieldFormElementInterface $element) {

@@ -36,6 +36,7 @@ interface FieldFormResultDataInterface {
   public function render($view_mode = 'full');
   public function save();
   public function buildElement($element);
+  public function processResult(FieldFormElementInterface $element, $value);
 }
 
 class FieldFormResultData implements FieldFormResultDataInterface {
@@ -94,5 +95,10 @@ class FieldFormResultData implements FieldFormResultDataInterface {
   public function buildElement($element) {
     $class = $this->resultInfo['result controller'];
     return $class::buildElement($this, $element);
+  }
+
+  public function processResult(FieldFormElementInterface $element, $value) {
+    $class = $this->resultInfo['result controller'];
+    return $class::processResult($this, $element, $value);
   }
 }

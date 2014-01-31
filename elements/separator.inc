@@ -9,12 +9,14 @@
 class SeparatorElementController extends FieldFormElementController {
   static public function settingsForm($form, &$form_state, FieldFormElementInterface $element = NULL, $op = NULL) {
     unset($form['required'], $form['description'], $form['details']);
-    return $form;
+    drupal_form_submit($form['#form_id'], $form_state);
   }
 
   static public function buildElement(FieldFormElementInterface $element, $view_mode = 'full') {
     return array(
+      '#name' => $element->elementType(),
       '#type' => 'hidden',
+      '#value' => $element->name
     );
   }
 }

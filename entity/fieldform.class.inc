@@ -48,6 +48,16 @@ class FieldFormEntity extends Entity {
     return $class::findElementsByType($this, $type);
   }
 
+  public function processElements(&$form, &$form_state) {
+    $class = entity_get_controller($this->entityType);
+    $class::processElements($this, $this->elements, $form, $form_state);
+  }
+
+  public function buildForm($form, &$form_state) {
+    $class = entity_get_controller($this->entityType);
+    $class::buildForm($this, $form, $form_state);
+  }
+
   public function validate(&$form, &$form_state) {
     $class = entity_get_controller($this->entityType);
     $class::validate($this, $form, $form_state);
@@ -56,6 +66,11 @@ class FieldFormEntity extends Entity {
   public function submit(&$form, &$form_state) {
     $class = entity_get_controller($this->entityType);
     $class::submit($this, $form, $form_state);
+  }
+
+  public function completedFormBehavior(&$form, &$form_state) {
+    $class = entity_get_controller($this->entityType);
+    $class::completedFormBehavior($this, $form, $form_state);
   }
 }
 
@@ -210,12 +225,16 @@ class FieldFormElement implements FieldFormElementInterface {
 
   public function validate(&$form, &$form_state) {
     $class = fieldform_element_controller($this->elementType);
-    $class::validate($this, $form, $form_state);
+    if (method_exists($class, 'validate')) {
+      $class->validate($this, $form, $form_state);
+    }
   }
 
   public function submit(&$form, &$form_state) {
     $class = fieldform_element_controller($this->elementType);
-    $class::submit($this, $form, $form_state);
+    if (method_exists($class, 'submit')) {
+      $class->submit($this, $form, $form_state);
+    }
   }
 
   public function save() {

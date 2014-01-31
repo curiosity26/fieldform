@@ -12,25 +12,29 @@ class FieldFormResultController extends EntityAPIController {
   }
 
   public function load($ids = array(), $conditions = array()) {
-    foreach ($ids as $entity) {
-      $entity->form = fieldform_load($entity->form_name);
+    $entities = parent::load($ids, $conditions);
+    foreach ($entities as $entity) {
+      if (isset($entity->form_name)) {
+        $entity->form = fieldform_load($entity->form_name);
+      }
+
       if (!isset($entity->module)) {
         $entity->module = 'fieldform';
       }
       if (!empty($entity->data)) {
-        $data = $entity->data;
+        $data = (array) $entity->data;
         $tmp = array();
         foreach ($data as $name => $value) {
           $tmp[$name] = fieldform_result_create($value['type'], $value);
-          $tmp[$name]['element'] = $entity->form->findElementByName($name);
         }
         $entity->data = $tmp;
       }
     }
+    return $entities;
   }
 
   public function save($entity) {
-    if ($entity->is_new) {
+    if (isset($entity->is_new)) {
       $entity->created = REQUEST_TIME;
     }
     $entity->changed = REQUEST_TIME;
@@ -70,14 +74,13 @@ class FieldFormResultController extends EntityAPIController {
     if (is_array($data) && isset($data['name']) && isset($data['type'])) {
       $data = fieldform_result_create($data['type'], $data);
     }
-    dpm($data, 'Add Data');
-    if (isset($data->name) && isset($data->value)) {
+
+    if (isset($data->name)) {
       $entity->data[$data->name] = $data;
     }
   }
 
   static public function update(FieldFormResultEntity $entity, $data) {
-    dpm($data, 'Update Data');
     if (is_array($data) && isset($data['name']) && isset($data['type'])) {
       $data = fieldform_result_create($data['type'], $data);
     }
@@ -112,24 +115,24 @@ class FieldFormResultController extends EntityAPIController {
 
   static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form, $form_state) {
     foreach ($fieldform->elements as $element) {
-      $child = $form[$element->name];
-      $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
-      dpm($element, 'Element');
-      dpm($value, 'Value');
-      $data = array(
-        'name' => $element->name,
-        'type' => $element->type,
-        'value' => $value,
-        'title' => $element->label()
-      );
-      // TODO : Need to process the value per the ResultData controller.
-      if (self::update($entity, $data) === FALSE) {
-        self::add($entity, $data);
-      }
-      dpm($entity, 'Result');
+      if (isset($form[$element->name])) {
+        $child = $form[$element->name];
+        $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
+        $data = array(
+          'name' => $element->name,
+          'type' => $element->elementType(),
+          'value' => $value,
+          'title' => $element->title
+        );
+        $result = fieldform_result_create($element->type, $data);
+        $result->value($result->processResult($element, $value));
+        if ($entity->update($result) === FALSE) {
+          $entity->add($result);
+        }
 
-      if ($element['#tree'] !== TRUE && count(element_children($element)) > 0) {
-        self::processResults($entity, $fieldform, $element, $form_state);
+        if ($element->hasChildren()) {
+          self::processResults($entity, $fieldform, $element, $form_state);
+        }
       }
     }
   }
@@ -210,5 +213,21 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
     if (isset($value)) {
       $element['#default_value'] = $value;
     }
+  }
+
+  static public function processResult(FieldFormResultDataInterface $result, FieldFormElementInterface $element, $value) {
+    if (isset($element->options)) {
+      if (is_array($value)) {
+        $ret = array();
+        foreach($element->options as $option => $set) {
+          if ($option === $value) {
+            $ret[] = $set;
+          }
+        }
+        return $ret;
+      }
+      return $element->options[$value];
+    }
+    return $value;
   }
 }

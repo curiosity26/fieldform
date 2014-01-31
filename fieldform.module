@@ -241,7 +241,7 @@ function fieldform_get_info($elementType = NULL) {
 
     $cache = cache_get('fieldform_info');
     $static = is_object($cache) ? $cache->data  : array();
-    if (empty($static) || (!isset($elementType) && empty($static[$elementType]))) {
+    if (empty($static) || (isset($elementType) && empty($static[$elementType]))) {
       $static = array();
       $default = array(
         'element class' => 'FieldFormElement',
@@ -433,13 +433,14 @@ function fieldform_result_load_multiple($ids = FALSE) {
 }
 function fieldform_result_create($resultType, $values = array()) {
   $controller = fieldform_result_controller($resultType);
-  return $controller->create($values);
+  return $controller->create($resultType, $values);
 }
 
 /* View Functions */
 
 function fieldform_view($entity, $view_mode = 'full', $langcode = NULL, $page = NULL) {
   $entities = is_array($entity) ? $entity : array($entity);
+  drupal_set_title($entity->label());
   return entity_view('fieldform', $entities);
 }
 
@@ -508,7 +509,6 @@ function fieldform_element_info() {
 }
 
 function fieldform_view_form($form, &$form_state, $entity_type, Entity $entity) {
-  drupal_set_title($entity->label());
   $controller = entity_get_controller($entity_type);
   $result = isset($form_state['result']) ? $form_state['result'] : entity_create('fieldform_result', array(
     'uid' => $GLOBALS['user']->uid,
