@@ -87,8 +87,9 @@ function fieldform_field_formatter_view($entity_type, $entity, $field, $instance
     if (isset($items[0]['fieldform_form']) && $items[0]['fieldform_form'] !== '--') {
       $fieldform = fieldform_load($items[0]['fieldform_form']);
       if ($fieldform !== FALSE && fieldform_result_access('view', $fieldform)) {
-        $fieldform->field_entity = $entity;
-        $element[0] = entity_view($fieldform->entityType(), array($fieldform));
+        $form_state = array('build_info' => array('args' => array($fieldform->entityType(), $fieldform)));
+        $form_state['field_entity'] = $entity;
+        $element[0] = drupal_build_form('fieldform_'.$fieldform->identifier().'_form', $form_state);
       }
     }
   }
