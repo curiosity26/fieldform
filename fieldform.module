@@ -293,8 +293,8 @@ function fieldform_menu() {
     $menu[$type.'/%entity_object/results/%fieldform_result/delete'] = array(
       'title' => 'Delete Result',
       'load arguments' => array($type),
-      'page callback' => 'fieldform_field_results_delete_page',
-      'page arguments' => array(1, 3),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('fieldform_field_delete_form', 1, 3),
       'access callback' => 'fieldform_result_access',
       'access arguments' => array('delete', 3),
       'type' => MENU_CALLBACK
@@ -600,7 +600,7 @@ function fieldform_field_result_save($entity_type, $entity, $bundle = NULL, $res
 /* Delete Functions */
 
 function fieldform_field_result_delete($entity_type, $entity, $bundle = NULL, $result) {
-  if (entity_delete($result->entityType(), $result)) {
+  if (entity_delete($result->entityType(), $result->identifier()) !== FALSE) {
     if (method_exists($entity, 'entityType')) {
       $id = $entity->identifier();
       $type = $entity->entityType();
@@ -613,14 +613,16 @@ function fieldform_field_result_delete($entity_type, $entity, $bundle = NULL, $r
     }
 
     $ids = db_select('fieldform_entities', 'fe')
-      ->fields('fe', array('result'))
+      ->fields('fe', array('id'))
       ->condition('entity_type', $type)
       ->condition('entity', $id)
       ->condition('bundle', $bundle)
+      ->condition('result', $result->identifier())
       ->execute()
-      ->fetchAllAssoc('result');
-    return db_delete('fieldform_entities', 'fe')
-      ->condition('id', $ids, 'IN')
+      ->fetchAllAssoc('id');
+
+    return db_delete('fieldform_entities')
+      ->condition('id', array_keys($ids))
       ->execute();
   }
 
@@ -771,15 +773,20 @@ function fieldform_field_delete_form_submit($form, &$form_state) {
   $result = $form_state['result'];
   if (method_exists($entity, 'entityType')) {
     $type = $entity->entityType();
+    $id = $entity->identifier();
     list(, , $bundle) = entity_extract_ids($type, $entity);
   }
   else {
     $type = 'node';
+    $id = $entity->nid;
     $bundle = $entity->type;
   }
   if (fieldform_field_result_delete($type, $entity, $bundle, $result) === FALSE) {
     drupal_set_message(t('Failed to delete result'), 'error');
   }
+
+  $form_state['redirect'] = $type.'/'.$id.'/results';
+  drupal_redirect_form($form_state);
 }
 
 /* Forms */
