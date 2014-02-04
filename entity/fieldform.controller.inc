@@ -439,6 +439,17 @@ class FieldFormAdminUIController extends EntityDefaultUIController {
 
     return $menu;
   }
+
+  protected function operationCount() {
+    return parent::operationCount() + 1;
+  }
+
+  protected function overviewTableRow($conditions, $id, $entity, $additional_cols = array()) {
+    $row = parent::overviewTableRow($conditions, $id, $entity, $additional_cols);
+    $second_half = array_splice($row, 2, count($row) - 3);
+    $row[] = l(t('elements'), $this->path . '/manage/' . $id . '/elements');
+    return array_merge($row, $second_half);
+  }
 }
 
 interface FieldFormElementControllerInterface {

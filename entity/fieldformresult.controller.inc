@@ -14,10 +14,6 @@ class FieldFormResultController extends EntityAPIController {
   public function load($ids = array(), $conditions = array()) {
     $entities = parent::load($ids, $conditions);
     foreach ($entities as $entity) {
-      if (isset($entity->form_name)) {
-        $entity->form = fieldform_load($entity->form_name);
-      }
-
       if (!isset($entity->module)) {
         $entity->module = 'fieldform';
       }
@@ -31,6 +27,7 @@ class FieldFormResultController extends EntityAPIController {
         $entity->data = $tmp;
       }
     }
+    reset($entities);
     return $entities;
   }
 
@@ -104,12 +101,16 @@ class FieldFormResultController extends EntityAPIController {
       foreach ($entity->data as $result) {
         $element = $fieldform->findElementByName($result->name);
         if (is_array($element->parents)) {
-          $ret = drupal_array_get_nested_value($form, $element->parents);
+          $ret = &drupal_array_get_nested_value($form, $element->parents);
+          $default_value = isset($ret['#parents']) && is_array($ret['#parents']) ?
+            drupal_array_get_nested_value($form_state, $ret['#parent']) : NULL;
         }
         else {
           $ret = &$form[$element->name];
+          $default_value = isset($ret['#parents']) && is_array($ret['#parents']) ?
+            drupal_array_get_nested_value($form_state, $ret['#parent']) : NULL;
         }
-        $result->buildElement($ret);
+        $result->buildElement($ret, $default_value);
       }
     }
   }
@@ -209,9 +210,9 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
     return $data;
   }
 
-  static public function buildElement(FieldFormResultDataInterface $result, &$element) {
-    $value = $result->value();
-    if (isset($value)) {
+  static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
+    $value = isset($default_value) ? $default_value : $result->value();
+    if (isset($value) && $element['#default_value'] !== $value) {
       $element['#default_value'] = $value;
     }
   }

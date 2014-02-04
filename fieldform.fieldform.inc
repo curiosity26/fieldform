@@ -31,6 +31,13 @@ function fieldform_fieldform_info() {
     'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
+  $info['email'] = array(
+    'label' => t('Email'),
+    'element controller' => 'EmailElementController',
+    'file' => 'email.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
+  );
+
   $info['select'] = array(
     'label' => t('Select'),
     'element controller' => 'OptionsElementController',

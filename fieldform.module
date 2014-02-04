@@ -123,7 +123,7 @@ function fieldform_permission() {
   );
 
   $perms['view field forms'] = array(
-    'title' => t('View Application Forms'),
+    'title' => t('View Field Forms'),
     'description' => t('View the different field forms in the system')
   );
 
@@ -144,6 +144,11 @@ function fieldform_permission() {
     'description' => t('View any field form results')
   );
 
+  $perms['edit any field form results'] = array(
+    'title' => t('Edit Any Field Form Results'),
+    'description' => t('Edit any field form results')
+  );
+
   $perms['print any field form results'] = array(
     'title' => t('Print Any Field Form Results'),
     'description' => t('Print any field form results')
@@ -157,6 +162,11 @@ function fieldform_permission() {
   $perms['view own field form results'] = array(
     'title' => t('View Own Field Form Results'),
     'description' => t('View my field form results')
+  );
+
+  $perms['edit own field form results'] = array(
+    'title' => t('Edit Own Field Form Results'),
+    'description' => t('Edit my field form results')
   );
 
   $perms['print own field form results'] = array(
@@ -177,7 +187,7 @@ function fieldform_access($op, $entity, $account = NULL) {
     $account = $GLOBALS['user'];
   }
 
-  if ($account->uid === 1 || user_access('administer career applications', $account)) {
+  if ($account->uid === 1 || user_access('administer field forms', $account)) {
     return TRUE;
   }
 
@@ -193,20 +203,9 @@ function fieldform_result_access($op, $entity, $account = NULL) {
     return TRUE;
   }
 
-  switch ($op) {
-    case 'view':
-    case 'print':
-    case 'delete':
-      return user_access($op.' any field form results', $account) ||
-      (user_access($op.' own field form results', $account)
-        && $account->uid === $entity->uid) ||
-      user_access($op.' any '.$entity->type.' field form results', $account) ||
-      (user_access($op.' own '.$entity->type.' field form results', $account)
-        && $account->uid === $entity->uid);
-      break;
-  }
-
-  return FALSE;
+  return (user_access($op.' any field form results', $account)) ||
+    (user_access($op.' own field form results', $account)
+      && $account->uid === $entity->uid);
 }
 
 function fieldform_field_result_access($op, $entity, $account = NULL) {
@@ -217,7 +216,7 @@ function fieldform_field_result_access($op, $entity, $account = NULL) {
     return TRUE;
   }
 
-  $ret = (user_access($op.' any field form results', $account) || user_access($op.' own field form results', $account));
+  $ret = (user_access($op.' any field form results', $account) || (user_access($op.' own field form results', $account)));
 
   return $ret;
 }
@@ -259,8 +258,30 @@ function fieldform_menu() {
       'type' => MENU_LOCAL_TASK
     );
 
+    $menu[$type.'/%entity_object/results/export'] = array(
+      'title' => 'Export Results',
+      'load arguments' => array($type),
+      'page callback' => 'fieldform_field_results_export_page',
+      'page arguments' => array(1),
+      'access callback' => 'fieldform_field_result_access',
+      'access arguments' => array('view', 1),
+      'type' => MENU_LOCAL_ACTION,
+      'weight' => 1
+    );
+
+    $menu[$type.'/%entity_object/results/clear'] = array(
+      'title' => 'Clear All Results',
+      'load arguments' => array($type),
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('fieldform_field_clear_form', 1),
+      'access callback' => 'fieldform_field_result_access',
+      'access arguments' => array('delete', 1),
+      'type' => MENU_LOCAL_ACTION,
+      'weight' => 2
+    );
+
     $menu[$type.'/%entity_object/results/%fieldform_result/view'] = array(
-      'title' => 'Edit Result',
+      'title' => 'View Result',
       'load arguments' => array($type),
       'page callback' => 'fieldform_field_results_view_page',
       'page arguments' => array(1, 3),
@@ -269,8 +290,18 @@ function fieldform_menu() {
       'type' => MENU_CALLBACK
     );
 
-    $menu[$type.'/%entity_object/results/%fieldform_result/print'] = array(
+    $menu[$type.'/%entity_object/results/%fieldform_result/edit'] = array(
       'title' => 'Edit Result',
+      'load arguments' => array($type),
+      'page callback' => 'fieldform_field_results_edit_page',
+      'page arguments' => array(1, 3),
+      'access callback' => 'fieldform_result_access',
+      'access arguments' => array('edit', 3),
+      'type' => MENU_CALLBACK
+    );
+
+    $menu[$type.'/%entity_object/results/%fieldform_result/print'] = array(
+      'title' => 'Print Result',
       'load arguments' => array($type),
       'page callback' => 'fieldform_field_results_print_page',
       'page arguments' => array(1, 3),
@@ -278,16 +309,6 @@ function fieldform_menu() {
       'access arguments' => array('print', 3),
       'type' => MENU_CALLBACK,
       'delivery callback' => 'fieldform_print_page_delivery'
-    );
-
-    $menu[$type.'/%entity_object/results/%fieldform_result/export'] = array(
-      'title' => 'Edit Result',
-      'load arguments' => array($type),
-      'page callback' => 'fieldform_field_results_export_page',
-      'page arguments' => array(1, 3),
-      'access callback' => 'fieldform_result_access',
-      'access arguments' => array('print', 3),
-      'type' => MENU_CALLBACK
     );
 
     $menu[$type.'/%entity_object/results/%fieldform_result/delete'] = array(
@@ -671,6 +692,9 @@ function fieldform_field_results_page($entity) {
       $results = fieldform_field_results_load($entity);
       foreach ($results as $result) {
         $user = user_load($result->uid);
+        if (!$user->name) {
+          $user->name = t('Anonymous');
+        }
         $path = $type.'/'.$id;
         $rows[] = array(
           $result->identifier(),
@@ -678,9 +702,9 @@ function fieldform_field_results_page($entity) {
           $result->form_name,
           format_date($result->created),
           l('view', $path.'/results/'.$result->identifier().'/view', array('absolute' => TRUE)),
+          l('edit', $path.'/results/'.$result->identifier().'/edit', array('absolute' => TRUE)),
           l('print', $path.'/results/'.$result->identifier().'/print',
             array('absolute' => TRUE, 'attributes' => array('target' => '_blank'))),
-          l('export', $path.'/results/'.$result->identifier().'/export', array('absolute' => TRUE)),
           l('delete', $path.'/results/'.$result->identifier().'/delete', array('absolute' => TRUE)),
         );
       }
@@ -700,17 +724,20 @@ function fieldform_field_results_view_page($entity, $result) {
   return $output;
 }
 
-function fieldform_field_results_print_page($entity, $result) {
-  $type = method_exists($entity, 'entityType') ? $entity->entityType() : 'node';
-  $fields = field_read_fields(array('type' => 'fieldform'));
-  $fieldform = NULL;
+function fieldform_field_results_edit_page($entity, $result) {
+  $form_id = 'fieldform_'.$result->form_name.'_form';
+  $fieldform = fieldform_load($result->form_name);
+  $form_state = array(
+    'build_info' => array(
+      'args' => array($fieldform->entityType(), $fieldform)
+    )
+  );
+  $form_state['result'] = $result;
+  return drupal_build_form($form_id, $form_state);
+}
 
-  foreach ($fields as $name => $field) {
-    $items = field_get_items($type, $entity, $name);
-    if (isset($items[0]['fieldform_form'])) {
-      $fieldform = fieldform_load($items[0]['fieldform_form']);
-    }
-  }
+function fieldform_field_results_print_page($entity, $result) {
+  $fieldform = fieldform_load($result->form_name);
 
   $output = array(
     '#type' => 'page',
@@ -747,8 +774,84 @@ function fieldform_print_page_delivery($page_callback_result) {
   }
 }
 
-function fieldform_field_results_export_page($entity, $result) {
+function fieldform_field_results_export_page($entity) {
+  drupal_add_http_header('Content-Type', 'text/csv; charset=utf-8');
+  drupal_add_http_header('Content-Disposition', 'attachment; filename=export.csv');
 
+  $results = fieldform_field_results_load($entity);
+  $result = current($results);
+  if ($result) {
+    $i = 0;
+    print 'ID,Form Name,User,Hostname,Created,Updated,';
+
+    foreach ($result->data as $data) {
+      $e = ($i < count($result->data) - 1) ? ',' : PHP_EOL;
+      print str_replace(array("\r", "\n", '"', ','), array("\rR", "\rN", "\rQ", "\rC"), $data->title).$e;
+      $i++;
+    }
+    reset($result->data);
+    while ($result) {
+      $i = 0;
+      $user = user_load($result->uid);
+      if (!$user->name) {
+        $user->name = t('Anonymous');
+      }
+      print $result->identifier().','.$result->form_name.','.$user->name.','.$result->hostname.',';
+      print str_replace(array("\r", "\n", '"', ','),
+          array("\rR", "\rN", "\rQ", "\rC"), format_date($result->created, 'custom', 'm-d-Y h:i:s')).',';
+      print str_replace(array("\r", "\n", '"', ','),
+          array("\rR", "\rN", "\rQ", "\rC"), format_date($result->changed, 'custom', 'm-d-Y h:i:s')).',';
+      foreach ($result->data as $data) {
+        $e = ($i < count($result->data) - 1) ? ',' : PHP_EOL;
+        $value = is_array($data->value()) ? implode(',', $data->value()) : $data->value();
+        print str_replace(array("\r", "\n", '"', ','), array("\rR", "\rN", "\rQ", "\rC"), $value).$e;
+        $i++;
+      }
+      $result = next($results);
+    }
+  }
+  drupal_exit();
+}
+
+function fieldform_field_clear_form($form, &$form_state, $entity) {
+  if (method_exists($entity, 'entityType')) {
+    $type = $entity->entityType();
+    $id = $entity->identifier();
+  }
+  else {
+    $type = 'node';
+    $id = $entity->nid;
+  }
+  $form_state['entity'] = $entity;
+  $form_state['results'] = fieldform_field_results_load($entity);
+  $question = t('Are you sure you want to delete the form results from %type: %id',
+    array('%type' => $type, '%id' => $id));
+  return confirm_form($form, $question, $type.'/'.$id.'/results');
+}
+
+function fieldform_field_clear_form_submit($form, &$form_state) {
+  $results = $form_state['results'];
+  $entity = $form_state['entity'];
+
+  if (method_exists($entity, 'entityType')) {
+    $type = $entity->entityType();
+    $id = $entity->identifier();
+    list(, , $bundle) = entity_extract_ids($type, $entity);
+  }
+  else {
+    $type = 'node';
+    $id = $entity->nid;
+    $bundle = $entity->type;
+  }
+
+  foreach ($results as $result) {
+    if (fieldform_field_result_delete($type, $entity, $bundle, $result) === FALSE) {
+      drupal_set_message(t('Failed to delete result'), 'error');
+    }
+  }
+
+  $form_state['redirect'] = $type.'/'.$id.'/results';
+  drupal_redirect_form($form_state);
 }
 
 function fieldform_field_delete_form($form, &$form_state, $entity, $result) {
@@ -871,10 +974,12 @@ function fieldform_view_form($form, &$form_state, $entity_type, Entity $entity) 
     'hostname' => $GLOBALS['user']->hostname
   ));
 
+  $form = $controller::buildForm($entity, $form, $form_state);
+
   $result_controller = entity_get_controller($result->entityType());
   $result_controller::buildForm($result, $entity, $form, $form_state);
   $form_state['result'] = $result;
-  return $controller::buildForm($entity, $form, $form_state);
+  return $form;
 }
 
 function fieldform_view_form_validate(&$form, &$form_state) {
