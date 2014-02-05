@@ -21,3 +21,9 @@ class SeparatorElementController extends FieldFormElementController {
     );
   }
 }
+
+class SeparatorResultDataController extends FieldFormResultDataController {
+  static public function render(FieldFormResultDataInterface $result, $view_mode = 'full') {
+    return NULL;
+  }
+}

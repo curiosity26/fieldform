@@ -85,7 +85,7 @@ class FieldFormResultController extends EntityAPIController {
     if (!empty($entity->data[$data->name])) {
 
       foreach ($data as $key => $value) {
-        $entity->data[$data->name][$key] = $value;
+        $entity->data[$data->name]->$key = $value;
       }
       return $entity;
     }
@@ -212,12 +212,20 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
 
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
     $value = isset($default_value) ? $default_value : $result->value();
-    if (isset($value) && $element['#default_value'] !== $value) {
+    if (isset($value)
+      && ((isset($element['#default_value']) && $element['#default_value'] !== $value)
+      || (!isset($element['#default_value'])
+        && !in_array($element['#type'], array('hidden', 'fieldset', 'token', 'button'))))) {
       $element['#default_value'] = $value;
+    }
+    elseif (isset($value) && in_array($element['#type'], array('hidden', 'token'))
+      && ((isset($element['#value']) && $element['#default_value'] !== $value) || !isset($element['#value']))) {
+
     }
   }
 
-  static public function processResult(FieldFormResultDataInterface $result, FieldFormElementInterface $element, $value) {
+  static public function processResult(FieldFormResultDataInterface $result,
+                                       FieldFormElementInterface $element, $value) {
     if (isset($element->options)) {
       if (is_array($value)) {
         $ret = array();

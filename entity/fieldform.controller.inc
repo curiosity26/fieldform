@@ -261,15 +261,16 @@ class FieldFormController extends EntityAPIControllerExportable {
       '#type' => 'actions'
     );
 
+    if (isset($page)) {
+      $form['actions']['back'] = array(
+        '#type' => 'button',
+        '#value' => $entity->settings['back_button_text']
+      );
+    }
+
     if ($iterator->valid() && $iterator->current()->elementType() === 'separator') {
       // If the last element processed was a form separator
-      // Process the Continue / Back buttons
-      if (isset($page)) {
-        $form['actions']['back'] = array(
-          '#type' => 'button',
-          '#value' => $entity->settings['back_button_text']
-        );
-      }
+      // Process the Continue button
 
       $form['actions']['continue'] = array(
         '#type' => 'submit',

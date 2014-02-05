@@ -27,10 +27,12 @@ class OptionsElementController extends FieldFormElementController {
       )
     );
 
+    $options = isset($values['options']) ? (array)$values['options'] : array();
+
     $form['default_value']['#prefix'] = '<div id="default-value-element-ajax">';
     $form['default_value']['#suffix'] = '</div>';
     $form['default_value']['#options'] = $form['required']['#default_value'] != 1 ?
-      array('--' => t('None')) + (array)$values['options'] : $values['options'];
+      array('--' => t('None')) + $options : $options;
 
     if (!empty($form['multiple'])) {
       $form['multiple']['#default_value'] = $multiple;

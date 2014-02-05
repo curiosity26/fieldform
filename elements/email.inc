@@ -13,7 +13,6 @@ class EmailElementController extends FieldFormElementController {
       $element->settings = array(
         'anonymous_account' => array(
           'user_lookup' => FALSE,
-          'user_login' => FALSE,
           'user_create' => FALSE
         ),
         'authenticated_account' => array(
@@ -39,36 +38,53 @@ class EmailElementController extends FieldFormElementController {
 
   static public function validate(FieldFormElementInterface $element, &$form, &$form_state) {
     $form_element = &drupal_array_get_nested_value($form, $element->parents);
-    $value = drupal_array_get_nested_value($form_state['values'], $form_element['#parents']);
-    if ($form_element['#required'] == TRUE && filter_var($value, FILTER_VALIDATE_EMAIL) === FALSE) {
-      form_error($form_element, t('Invalid email address'));
+    if (isset($form_element['#parents']) && is_array($form_element['#parents'])) {
+      $value = drupal_array_get_nested_value($form_state['values'], $form_element['#parents']);
+      if ($form_element['#required'] == TRUE && filter_var($value, FILTER_VALIDATE_EMAIL) === FALSE) {
+        form_error($form_element, t('Invalid email address'));
+      }
     }
   }
 
   static public function submit(FieldFormElementInterface $element, &$form, &$form_state) {
     $user = $GLOBALS['user'];
     $form_element = &drupal_array_get_nested_value($form, $element->parents);
-    $value = drupal_array_get_nested_value($form_state['values'], $form_element['#parents']);
-    $result = &$form_state['result'];
-    if ($user->uid == 0 && $element->settings['anonymous_account']['user_lookup'] == TRUE) {
-      if (($accounts = user_load_by_mail($value)) && !empty($accounts)) {
-        $account = array_shift($accounts);
-        $result->uid = user_authenticate($account->name, $account->pass);
-        if ($result->uid > 0 && $element->settings['anonymous_account']['user_login'] == TRUE) {
-          user_login_finalize();
+    if (isset($form_element['#parents']) && is_array($form_element['#parents'])) {
+      $value = drupal_array_get_nested_value($form_state['values'], $form_element['#parents']);
+      if ($user->uid == 0 && $element->settings['anonymous_account']['user_lookup'] == TRUE) {
+        if (($account = user_load_by_mail($value)) !== FALSE) {
+          $state['values']['name'] = $account->name;
+          user_login_name_validate(array(), $state); // Check to ensure the user isn't blocked
+          if (!form_get_errors() && is_object($form_state['result'])) {
+            $form_state['result']->uid = $account->uid;
+          }
         }
-      }
-      elseif($element->settings['anonymous_account']['user_create'] == TRUE) {
-        $account = new stdClass();
-        $account->is_new = TRUE;
-        $account->name = $value;
-        $account->mail = $value;
-        $account->pass = user_password();
-        $account->timezone = drupal_get_user_timezone();
-        if (($account = user_save($account)) !== FALSE) {
-          $result->uid = user_authenticate($account->name, $account->pass);
-          if ($result->uid != 0) {
-            user_login_finalize();
+        elseif($element->settings['anonymous_account']['user_create'] == TRUE) {
+          $password = user_password();
+          $fields = array(
+            'name' => $value,
+            'mail' => $value,
+            'pass' => $password,
+            'status' => 1,
+            'init' => 'email address',
+            'timezone' => drupal_get_user_timezone(),
+            'roles' => array(
+              DRUPAL_AUTHENTICATED_RID => 'authenticated user',
+            )
+          );
+          $account = user_save('', $fields);
+          if ($account !== FALSE) {
+            $state['values']['name'] = $account->name;
+            user_login_name_validate(array(), $state); // Check to ensure the user isn't blocked
+            if (!form_get_errors()) {
+              $auth = user_authenticate($account->name, $password);
+              drupal_mail('user', 'register_no_approval_required', $value, NULL, array('account' => $account));
+              $form_state['result']->uid = $auth;
+              if ($auth !== FALSE && !variable_get('user_email_verification', TRUE)) {
+                $GLOBALS['user'] = $account;
+                user_login_finalize();
+              }
+            }
           }
         }
       }
@@ -102,22 +118,6 @@ class EmailElementController extends FieldFormElementController {
       '#title' => t('Lookup site user using this email address'),
       '#decription' => t('If a user is found, the results will be associated with the user'),
       '#default_value' => $element->settings['anonymous_account']['user_lookup']
-    );
-
-    $form['settings']['anonymous_account']['user_login'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Login as the user, if one is found'),
-      '#description' => t('The account must have access per the !account_settings',
-        array('!account_settings' => l('account settings', 'admin/config/people/accounts'))),
-      '#default_value' => $element->settings['anonymous_account']['user_login'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="settings[anonymous_account][user_lookup]"]' => array('checked' => TRUE)
-        ),
-        'unchecked' => array(
-          ':input[name="settings[anonymous_account][user_lookup]"]' => array('unchecked' => TRUE)
-        )
-      )
     );
 
     $form['settings']['anonymous_account']['user_create'] = array(
