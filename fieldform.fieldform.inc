@@ -198,6 +198,12 @@ function fieldform_result_info() {
     'module' => 'fieldform'
   );
 
+  $info['email'] = array(
+    'result controller' => 'EmailResultDataController',
+    'file' => 'email.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
+  );
+
   $info['separator'] = array(
     'result controller' => 'SeparatorResultDataController',
     'file' => 'separator.inc',

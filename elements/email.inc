@@ -46,51 +46,6 @@ class EmailElementController extends FieldFormElementController {
     }
   }
 
-  static public function submit(FieldFormElementInterface $element, &$form, &$form_state) {
-    $user = $GLOBALS['user'];
-    $form_element = &drupal_array_get_nested_value($form, $element->parents);
-    if (isset($form_element['#parents']) && is_array($form_element['#parents'])) {
-      $value = drupal_array_get_nested_value($form_state['values'], $form_element['#parents']);
-      if ($user->uid == 0 && $element->settings['anonymous_account']['user_lookup'] == TRUE) {
-        if (($account = user_load_by_mail($value)) !== FALSE) {
-          $state['values']['name'] = $account->name;
-          user_login_name_validate(array(), $state); // Check to ensure the user isn't blocked
-          if (!form_get_errors() && is_object($form_state['result'])) {
-            $form_state['result']->uid = $account->uid;
-          }
-        }
-        elseif($element->settings['anonymous_account']['user_create'] == TRUE) {
-          $password = user_password();
-          $fields = array(
-            'name' => $value,
-            'mail' => $value,
-            'pass' => $password,
-            'status' => 1,
-            'init' => 'email address',
-            'timezone' => drupal_get_user_timezone(),
-            'roles' => array(
-              DRUPAL_AUTHENTICATED_RID => 'authenticated user',
-            )
-          );
-          $account = user_save('', $fields);
-          if ($account !== FALSE) {
-            $state['values']['name'] = $account->name;
-            user_login_name_validate(array(), $state); // Check to ensure the user isn't blocked
-            if (!form_get_errors()) {
-              $auth = user_authenticate($account->name, $password);
-              drupal_mail('user', 'register_no_approval_required', $value, NULL, array('account' => $account));
-              $form_state['result']->uid = $auth;
-              if ($auth !== FALSE && !variable_get('user_email_verification', TRUE)) {
-                $GLOBALS['user'] = $account;
-                user_login_finalize();
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
   static public function settingsForm($form, &$form_state, FieldFormElementInterface $element = NULL, $op = NULL) {
     $form = parent::settingsForm($form, $form_state, $element, $op);
 
@@ -151,5 +106,51 @@ class EmailElementController extends FieldFormElementController {
     );
 
     return $form;
+  }
+}
+
+class EmailResultDataController extends FieldFormResultDataController {
+  static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
+                                       FieldFormElementInterface $element, $value) {
+    $user = $GLOBALS['user'];
+    if ($user->uid == 0 && $element->settings['anonymous_account']['user_lookup'] == TRUE) {
+      if (($account = user_load_by_mail($value)) !== FALSE) {
+        $state['values']['name'] = $account->name;
+        user_login_name_validate(array(), $state); // Check to ensure the user isn't blocked
+        if (!form_get_errors()) {
+          $entity->uid = $account->uid;
+        }
+      }
+      elseif($element->settings['anonymous_account']['user_create'] == TRUE) {
+        $password = user_password();
+        $fields = array(
+          'name' => $value,
+          'mail' => $value,
+          'pass' => $password,
+          'status' => 1,
+          'init' => 'email address',
+          'timezone' => drupal_get_user_timezone(),
+          'roles' => array(
+            DRUPAL_AUTHENTICATED_RID => 'authenticated user',
+          )
+        );
+        $account = user_save('', $fields);
+        if ($account !== FALSE) {
+          $state['values']['name'] = $account->name;
+          user_login_name_validate(array(), $state); // Check to ensure the user isn't blocked
+          if (!form_get_errors()) {
+            $auth = user_authenticate($account->name, $password);
+            drupal_mail('user', 'register_no_approval_required', $value, NULL, array('account' => $account));
+            $entity->uid = $auth;
+            if ($auth !== FALSE && !variable_get('user_email_verification', TRUE)) {
+              $GLOBALS['user'] = $account;
+              user_login_finalize();
+            }
+          }
+        }
+      }
+    }
+
+    return parent::processResult($result, $entity, $element, $value);
   }
 }

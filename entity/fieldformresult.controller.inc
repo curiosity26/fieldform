@@ -115,7 +115,8 @@ class FieldFormResultController extends EntityAPIController {
     }
   }
 
-  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form, $form_state) {
+  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform,
+                                        &$form, &$form_state) {
     foreach ($fieldform->elements as $element) {
       if (isset($form[$element->name])) {
         $child = $form[$element->name];
@@ -126,8 +127,8 @@ class FieldFormResultController extends EntityAPIController {
           'value' => $value,
           'title' => $element->title
         );
-        $result = fieldform_result_create($element->type, $data);
-        $result->value($result->processResult($element, $value));
+        $result = fieldform_result_create($element->elementType(), $data);
+        $result->value($result->processResult($entity, $element, $value));
         if ($entity->update($result) === FALSE) {
           $entity->add($result);
         }
@@ -161,6 +162,8 @@ interface FieldFormResultDataControllerInterface {
   static public function render(FieldFormResultDataInterface $result, $view_mode = 'full');
   static public function save(FieldFormResultDataInterface $result);
   static public function buildElement(FieldFormResultDataInterface $result, &$element);
+  static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
+                                       FieldFormElementInterface $element, $value);
 }
 
 class FieldFormResultDataController implements FieldFormResultDataControllerInterface {
@@ -224,7 +227,7 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
     }
   }
 
-  static public function processResult(FieldFormResultDataInterface $result,
+  static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $value) {
     if (isset($element->options)) {
       if (is_array($value)) {
