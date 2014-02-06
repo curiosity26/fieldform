@@ -72,19 +72,26 @@ class OptionsElementController extends FieldFormElementController {
     $method = $form_state['triggering_element']['#ajax']['method'];
     $func = 'ajax_command_'.$method;
     $commands = array();
+    $values = drupal_array_get_nested_value($form_state['values'], $form['options']['#parents']);
+    $values = isset($values['values']) ? array_filter($values['values']) : array();
     if ($form_state['input']['required'] != 1) {
-      $options = array('--' => t('None')) + $form['default_value']['#options'];
-      array_filter($options);
+      $options = array('--' => t('None'));
+      $options += $values;
       $form['default_value']['#options'] = $options;
     }
     else {
-      unset($form['default_value']['#options']['--']);
+      $form['default_value']['#options'] = $values;
     }
 
     if ($form_state['input']['multiple'] == 1) {
       $form['default_value']['#attributes']['multiple'] = 'multiple';
     }
 
+    foreach(element_children($form['default_value']) as $child) {
+      unset($form['default_value'][$child]);
+    }
+    unset($form_state['complete_form']['default_value']);
+    form_builder($form['#form_id'], $form['default_value'], $form_state);
     unset($form['default_value']['#printed']);
     $commands[] = $func($wrapper, render($form['default_value']));
     return $commands;

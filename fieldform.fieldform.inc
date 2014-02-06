@@ -87,7 +87,7 @@ function fieldform_fieldform_info() {
 
   $info['checkboxes'] = array(
     'label' => t('Checkboxes (Multiple)'),
-    'element controller' => 'OptionsElementController',
+    'element controller' => 'CheckboxesElementController',
     'properties' => array(
       'options' => array(
         'type' => FIELDFORM_PROPERTY_TABLE
@@ -96,7 +96,7 @@ function fieldform_fieldform_info() {
         'type' => FIELDFORM_PROPERTY_CHECKBOXES
       )
     ),
-    'file' => 'options.inc',
+    'file' => 'checkboxes.inc',
     'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 

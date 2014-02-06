@@ -1074,7 +1074,6 @@ function fieldform_element_settings_defaults($form, &$form_state, $entity_type, 
 
 function fieldform_element_settings_form($form, &$form_state, $entity_type, Entity $entity,
                                          $element_type, FieldFormElement $element, $op = NULL) {
-
   $class = $element->elementInfo()['element controller'];
   $form = $class::settingsForm($form, $form_state, $element, $op);
   $cancel_url = $entity->entityInfo()['admin ui']['path'].'/manage/'.$entity->identifier().'/elements';
