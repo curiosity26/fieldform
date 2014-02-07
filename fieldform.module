@@ -1135,6 +1135,9 @@ function fieldform_element_delete_form_submit($form, &$form_state) {
   if (elements_delete($entity, $element)) {
     entity_save($entity_type, $entity);
   }
+  else {
+    drupal_set_message(t('Failed to delete element %name', array('%name' => $element->name)), 'error');
+  }
   drupal_redirect_form($form_state);
 }
 
@@ -1441,7 +1444,7 @@ function theme_fieldform_elements_list($variables) {
   }
   $form['elements']['add_new_element']['id']['#attributes']['class'] = array('elements-list-id');
   $form['elements']['add_new_element']['weight']['#attributes']['class'] = array('elements-list-weight');
-  $form['elements']['add_new_element']['parents']['#attributes']['class'] = array('elements-list-parents');
+  $form['elements']['add_new_element']['parent']['#attributes']['class'] = array('elements-list-parents');
 
   if (empty($rows)) {
     $add_row = array(
@@ -1560,6 +1563,7 @@ function theme_namevalue_table($variables) {
 
 function template_preprocess_fieldform_result(&$vars) {
   $result = $vars['element']['#result'];
+  $controller = fieldform_result_controller($result->resultType());
   $vars['result'] = $result;
 
   $vars['title_display'] = isset($vars['element']['#title_display']) ? $vars['element']['#title_display'] : 'before';
@@ -1583,19 +1587,8 @@ function template_preprocess_fieldform_result(&$vars) {
 
   $vars['content_attributes_array']['class'][] = 'content';
 
-  $value = $result->value();
-  if (is_array($value)) {
-    $items = array('items' => $value);
-    if ($vars['title_display'] == 'inline') {
-      $items =+ array(
-        'class' => 'inline'
-      );
-    }
-    $vars['content'] = theme('item_list', $items);
-  }
-  else {
-    $vars['content'] = $value;
-  }
+  $controller->preRender($result, $vars);
+
 
   if ($suggestions = theme_get_suggestions(array($data['type'], $data['name']), 'fieldform_result')) {
     $vars['theme_hook_suggestions'] = $suggestions;

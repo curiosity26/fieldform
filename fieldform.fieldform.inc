@@ -141,6 +141,7 @@ function fieldform_fieldform_info() {
 
   $info['markup'] = array(
     'label' => t('HTML Markup'),
+    'element controller' => 'MarkupElementController',
     'properties' => array(
       'markup' => array(
         'title' => t('HTML Code'),
@@ -149,29 +150,33 @@ function fieldform_fieldform_info() {
       'default_value' => array(
         'type' => FIELDFORM_PROPERTY_NONE
       )
-    )
+    ),
+    'file' => 'markup.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
   $info['date'] = array(
     'label' => t('Date'),
+    'element controller' => 'DateElementController',
     'properties' => array(
       'default_value' => array(
         'type' => FIELDFORM_PROPERTY_DATE
-      ),
-      'use_today' => array(
-        'title' => t('Use Current Date'),
-        'type' => FIELDFORM_PROPERTY_BOOL
       )
-    )
+    ),
+    'file' => 'date.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
   $info['file'] = array(
     'label' => t('File'),
+    'element controller' => 'FileElementController',
     'properties' => array(
       'default_value' => array(
         'type' => FIELDFORM_PROPERTY_NONE
       ),
-    )
+    ),
+    'file' => 'file.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
   $info['separator'] = array(
@@ -207,6 +212,24 @@ function fieldform_result_info() {
   $info['separator'] = array(
     'result controller' => 'SeparatorResultDataController',
     'file' => 'separator.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
+  );
+
+  $info['file'] = array(
+    'result controller' => 'FileResultDataController',
+    'file' => 'file.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
+  );
+
+  $info['markup'] = array(
+    'result controller' => 'MarkupResultDataController',
+    'file' => 'markup.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
+  );
+
+  $info['date'] = array(
+    'result controller' => 'DateResultDataController',
+    'file' => 'date.inc',
     'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 

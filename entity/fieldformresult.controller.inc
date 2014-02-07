@@ -243,4 +243,20 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
     }
     return $value;
   }
+
+  static public function preRender(FieldFormResultDataInterface $result, &$vars) {
+    $value = $result->value();
+    if (is_array($value)) {
+      $items = array('items' => $value);
+      if ($vars['title_display'] == 'inline') {
+        $items =+ array(
+          'class' => 'inline'
+        );
+      }
+      $vars['content'] = theme('item_list', $items);
+    }
+    else {
+      $vars['content'] = $value;
+    }
+  }
 }

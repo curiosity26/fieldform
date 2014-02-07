@@ -516,7 +516,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
 
     $child_parents = $child->parents;
     array_pop($child_parents);
-    if ($element->parents === $child_parents && !in_array($child->_id, $element->children)) {
+    if ($element->parents === $child_parents && !array_key_exists($child->_id, $element->children)) {
       $element->children[$child->_id] = $child;
       uasort($element->children, 'self::sortWeights');
       return $element;
@@ -542,7 +542,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
   }
 
   static public function deleteElement(FieldFormElementInterface $element, FieldFormElementInterface $child) {
-    if ($element->hasChildren() && in_array($child->_id, $element->children)) {
+    if ($element->hasChildren() && array_key_exists($child->_id, $element->children)) {
       unset($element->children[$child->_id]);
       return TRUE;
     }
@@ -574,7 +574,6 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
   }
 
   static public function toArray(FieldFormElementInterface $element) {
-    $children = $element->children;
     $array = get_object_vars($element);
     unset($array['_id'], $array['parents'], $array['children']);
     return $array;

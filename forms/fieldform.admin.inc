@@ -259,7 +259,8 @@ function _fieldform_element_form_row(&$form, $elements, $entity) {
 
       $temp['weight'] = array(
         '#type' => 'weight',
-        '#value' => is_numeric($element->weight) ? $element->weight : 0
+        '#value' => is_numeric($element->weight) ? $element->weight : 0,
+        '#delta' => 100
       );
 
       $temp['parent'] = array(
@@ -386,7 +387,7 @@ function _fieldform_update_entity(FieldFormEntity $entity, $element) {
   if ($element) {
     $success = elements_add($entity, $element);
     if ($success === FALSE) {
-      drupal_set_message('Failed to add', 'error');
+      drupal_set_message('Failed to add element', 'error');
     }
     return $success;
   }
