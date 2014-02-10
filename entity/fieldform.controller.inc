@@ -247,10 +247,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $separators = array_keys($entity->findElementsByType('separator'));
     $iterator = new ArrayIterator($entity->elements);
     $ret = array();
-    dpm($separator, 'Separator');
-    if (!isset($separator)) {
-      dpm(debug_backtrace(), 'Backtrace');
-    }
+
     if (!empty($separators)) {
       if (isset($form_state['values']) && $form_state['values']['op'] === $entity->settings['back_button_text']) {
         $index = array_search($separator, $separators);
@@ -370,9 +367,9 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function submit($entity, &$form, &$form_state) {
-    dpm($form_state, 'Form_state');
-    $separator = isset($form_state['values']['separator']) ?
-      $entity->findElementByName($form_state['values']['separator']) : NULL;
+    $separator = isset($form_state['input']['separator']) ?
+      $entity->findElementByName($form_state['input']['separator']) : NULL;
+    dpm($separator, 'Separator');
     if (isset($separator)) {
       $separator = $separator->_id;
     }
@@ -385,7 +382,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
     if ($form_state['values']['op'] !== $entity->settings['submit_button_text']) {
       $form_state['rebuild'] = TRUE;
-      $form_state['input'] = array();
+      //$form_state['input'] = array();
       $form = $entity->buildForm($form, $form_state);
     }
     else{
