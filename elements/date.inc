@@ -44,6 +44,7 @@ class DateResultDataController extends FieldFormResultDataController {
       $value = isset($default_value) ? $default_value : $result->value();
       if (!is_array($value)) {
         $format = system_get_date_formats('medium');
+        dpm($format, 'Date Build Format');
         $time = DateTime::createFromFormat($format, $value, drupal_get_user_timezone());
         dpm($value, 'Date Build Value as String');
         dpm($time, 'Date Build Value as Time');
