@@ -255,6 +255,7 @@ class FieldFormController extends EntityAPIControllerExportable {
         $separator = $separators[$index];
         dpm($index, 'Index');
         dpm($separator, 'Separator');
+        dpm($separators, 'Separators');
       }
       if (isset($separator)) {
         $seek = self::getSectionIndex($entity, $separator);
