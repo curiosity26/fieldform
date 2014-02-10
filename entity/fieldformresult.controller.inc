@@ -227,8 +227,10 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
       $element['#default_value'] = $value;
     }
     elseif (isset($value) && in_array($element['#type'], array('hidden', 'token'))
-      && ((isset($element['#value']) && $element['#default_value'] !== $value) || !isset($element['#value']))) {
-
+      && isset($element['#default_value'])
+      && ((isset($element['#value']) && $element['#default_value'] !== $value)
+        || !isset($element['#value']))) {
+      $element['#value'] = $value;
     }
   }
 
