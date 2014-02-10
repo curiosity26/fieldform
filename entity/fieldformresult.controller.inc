@@ -135,8 +135,8 @@ class FieldFormResultController extends EntityAPIController {
         if ($entity->update($result) === FALSE) {
           $entity->add($result);
         }
-        dpm($result->data['are_you_willing_to_work'], 'Entity Result');
-        dpm($result->data['are_you_willing_to_work']->value(), 'Entity Result Value');
+        dpm($entity->data['are_you_willing_to_work'], 'Entity Result');
+        dpm($entity->data['are_you_willing_to_work']->value(), 'Entity Result Value');
 
         if ($element->hasChildren()) {
           self::processResults($entity, $fieldform, $child, $form_state);
