@@ -251,7 +251,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     if (!empty($separators)) {
       if (isset($form_state['values']) && $form_state['values']['op'] === $entity->settings['back_button_text']) {
         $index = array_search($separator, $separators);
-        $index--;
+        $index -= 2;
         unset($separator);
         if ($index >= 0) {
           $separator = $separators[$index];
@@ -282,7 +282,6 @@ class FieldFormController extends EntityAPIControllerExportable {
   static public function processElements($entity, &$form, &$form_state) {
     $separator = isset($form_state['input']['separator']) ?
       $entity->findElementByName($form_state['input']['separator']) : NULL;
-    dpm($separator, 'Separator');
     if (isset($separator)) {
       $separator = $separator->_id;
     }
