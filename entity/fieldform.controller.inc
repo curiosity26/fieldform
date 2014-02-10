@@ -249,11 +249,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $ret = array();
 
     if (!empty($separators)) {
-      if (!$separator) {
-        $separator = $separators[0];
-      }
-
-      if ($form_state['values']['op'] === $entity->settings['back_button_text']) {
+      if (isset($form_state['values']) && $form_state['values']['op'] === $entity->settings['back_button_text']) {
         $index = array_search($separator, $separators);
         unset($separator);
         if ($index > 0) {
@@ -268,14 +264,14 @@ class FieldFormController extends EntityAPIControllerExportable {
       if ($iterator->valid()) {
         $iterator->next();
       }
+    }
 
-      while($iterator->valid()) {
-        $ret[] = $iterator->current();
-        if ($iterator->current()->elementType() === 'separator') {
-          break;
-        }
-        $iterator->next();
+    while($iterator->valid()) {
+      $ret[] = $iterator->current();
+      if ($iterator->current()->elementType() === 'separator') {
+        break;
       }
+      $iterator->next();
     }
 
     return $ret;
@@ -298,7 +294,6 @@ class FieldFormController extends EntityAPIControllerExportable {
     else {
       $elements = $entity->elements;
     }
-    dpm($elements, 'Elements');
 
     foreach ($elements as $element) {
       $form[$element->name] = $element->buildElement();
