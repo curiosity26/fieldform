@@ -132,6 +132,7 @@ class OptionsResultDataController extends FieldFormResultDataController {
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $value) {
     if (is_array($value)) {
+      dpm($value, 'Options Process Value');
       $ret = array();
       foreach($element->options as $option => $set) {
         if (in_array($option, $value)) {
