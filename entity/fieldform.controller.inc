@@ -298,7 +298,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     else {
       $elements = $entity->elements;
     }
-    dpm($elements);
+    dpm($elements, 'Elements');
 
     foreach ($elements as $element) {
       $form[$element->name] = $element->buildElement();
