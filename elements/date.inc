@@ -40,8 +40,8 @@ class DateResultDataController extends FieldFormResultDataController {
   }
 
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
-    if (!isset($default_value)) {
-      $value = $result->value();
+    if (!isset($default_value) || !is_array($default_value)) {
+      $value = isset($default_value) ? $default_value : $result->value();
       if (!is_array($value)) {
         $time = strtotime($value);
         $value = array(

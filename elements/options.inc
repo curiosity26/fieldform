@@ -138,8 +138,10 @@ class OptionsResultDataController extends FieldFormResultDataController {
           $ret[] = $set;
         }
       }
+      dpm($ret, 'Options Process Return');
       return $ret;
     }
+    dpm($element->options[$value], 'Options Process Return');
     return isset($element->options[$value]) ? $element->options[$value] : NULL;
   }
 
@@ -158,7 +160,8 @@ class OptionsResultDataController extends FieldFormResultDataController {
           break;
         }
       }
+      dpm($default_value, 'Options Result Build');
+      $element['#default_value'] = $default_value;
     }
-    $element['#default_value'] = $default_value;
   }
 }
