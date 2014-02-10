@@ -40,8 +40,8 @@ interface FieldFormResultDataInterface {
 }
 
 class FieldFormResultData implements FieldFormResultDataInterface {
-  private $_id;
-  private $value;
+  protected $_id;
+  protected $value;
   protected $resultType;
   protected $resultInfo;
   public $name;
