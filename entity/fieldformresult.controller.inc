@@ -131,7 +131,6 @@ class FieldFormResultController extends EntityAPIController {
         );
         $result = fieldform_result_create($element->elementType(), $data);
         $value = $result->processResult($entity, $element, $value);
-        dpm($value, 'Save Value for '.$result->name);
         $result->value($value);
         if ($entity->update($result) === FALSE) {
           $entity->add($result);
