@@ -326,6 +326,7 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function buildForm($entity, $form, &$form_state) {
+    unset($form_state['values']['form_build_id'], $form_state['values']['form_build_token']);
     $entity->processElements($form, $form_state);
 
     $form_state += array(
@@ -349,7 +350,9 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function validate($entity, &$form, &$form_state) {
-    foreach ($entity->elements as $element) {
+    $separator = isset($form_state['form_separator']) ? $form_state['form_separator'] : NULL;
+    $elements = $entity->getSection($separator, $form, $form_state);
+    foreach ($elements as $element) {
       if (method_exists($element, 'validate')) {
         $element->validate($form, $form_state);
       }
@@ -369,7 +372,6 @@ class FieldFormController extends EntityAPIControllerExportable {
       $form_state['rebuild'] = TRUE;
       $form_state['input'] = array();
       $form = $entity->buildForm($form, $form_state);
-      drupal_rebuild_form($form['#form_id'], $form_state, $form);
       dpm($form_state, 'Form State');
     }
     else{
