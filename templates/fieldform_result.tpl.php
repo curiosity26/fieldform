@@ -7,9 +7,11 @@
  */
 ?>
 <div <?php print $attributes ?> class="<?php print $classes ?>">
-  <h3 <?php print $title_attributes ?>>
-    <?php print render($title_prefix).$title.render($title_suffix) ?>
-  </h3>
+  <?php if ($title): ?>
+    <h3 <?php print $title_attributes ?>>
+      <?php print render($title_prefix).$title.render($title_suffix) ?>
+    </h3>
+  <?php endif; ?>
   <div <?php print $content_attributes?>>
     <?php print $content ?>
   </div>

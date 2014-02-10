@@ -27,4 +27,10 @@ class MarkupResultDataController extends FieldFormResultDataController {
                                        FieldFormElementInterface $element, $value) {
     return $value['value'];
   }
+
+  static public function preRender(FieldFormResultDataInterface $result, &$vars) {
+    unset($vars['title']);
+    $vars['content'] = $result->value();
+  }
+
 }
