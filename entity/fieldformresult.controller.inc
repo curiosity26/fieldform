@@ -85,6 +85,7 @@ class FieldFormResultController extends EntityAPIController {
     if (!empty($entity->data[$data->name])) {
 
       foreach ($data as $key => $value) {
+        dpm($value, $key);
         $entity->data[$data->name]->$key = $value;
       }
       return $entity;
