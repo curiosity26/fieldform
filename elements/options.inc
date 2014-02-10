@@ -126,6 +126,12 @@ class OptionsElementController extends FieldFormElementController {
     unset($form['default_value']['#printed']);
     return render($form['default_value']);
   }
+
+  static public function validate(FieldFormElementInterface $element, &$form, &$form_state) {
+    $field = drupal_array_get_nested_value($form, $element->parents);
+    dpm($field['#value'], "Value {$element->name}");
+    dpm($field['#options'], "Options {$element->name}");
+  }
 }
 
 class OptionsResultDataController extends FieldFormResultDataController {
