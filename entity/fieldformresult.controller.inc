@@ -124,7 +124,7 @@ class FieldFormResultController extends EntityAPIController {
         $child = $form[$name];
         $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
         $data = array(
-          'name' => $element->name,
+          'name' => $name,
           'type' => $element->elementType(),
           'value' => $value,
           'title' => $element->title
@@ -136,7 +136,7 @@ class FieldFormResultController extends EntityAPIController {
         }
 
         if ($element->hasChildren()) {
-          self::processResults($entity, $fieldform, $element, $form_state);
+          self::processResults($entity, $fieldform, $child, $form_state);
         }
       }
     }
