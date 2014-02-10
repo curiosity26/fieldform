@@ -138,7 +138,6 @@ class OptionsResultDataController extends FieldFormResultDataController {
           $ret[] = $element->options[$option];
         }
       }
-      dpm($ret, 'Save Options Results');
       return $ret;
     }
     return isset($element->options[$value]) ? $element->options[$value] : NULL;
