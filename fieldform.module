@@ -1566,17 +1566,7 @@ function template_preprocess_fieldform_result(&$vars) {
   $controller = fieldform_result_controller($result->resultType());
   $vars['result'] = $result;
 
-  $vars['title_display'] = isset($vars['element']['#title_display']) ? $vars['element']['#title_display'] : 'before';
   $vars['title_attributes_array']['class'][] = 'label';
-
-  switch($vars['title_display']) {
-    case 'inline':
-      $vars['title_attributes_array']['class'][] = 'inline';
-      break;
-    case 'hidden':
-      $vars['title_attributes_array']['class'][] = 'element-invisible';
-      break;
-  }
   $vars['title'] = $vars['element']['#title'];
 
   $data = $result->data();
@@ -1593,6 +1583,18 @@ function template_preprocess_fieldform_result(&$vars) {
     $vars['theme_hook_suggestions'] = $suggestions;
   }
 
+}
+
+function template_process_fieldform_result(&$vars) {
+  $vars['title_display'] = isset($vars['element']['#title_display']) ? $vars['element']['#title_display'] : 'before';
+  switch($vars['title_display']) {
+    case 'inline':
+      $vars['title_attributes_array']['class'][] = 'inline';
+      break;
+    case 'hidden':
+      $vars['title_attributes_array']['class'][] = 'element-invisible';
+      break;
+  }
 }
 
 function template_preprocess_fieldform_print_page(&$vars) {

@@ -217,6 +217,7 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
 
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
     $value = isset($default_value) ? $default_value : $result->value();
+
     if (isset($value)
       && ((isset($element['#default_value']) && $element['#default_value'] !== $value)
       || (!isset($element['#default_value'])
@@ -233,18 +234,6 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
 
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $value) {
-    if (isset($element->options)) {
-      if (is_array($value)) {
-        $ret = array();
-        foreach($element->options as $option => $set) {
-          if ($option === $value) {
-            $ret[] = $set;
-          }
-        }
-        return $ret;
-      }
-      return $element->options[$value];
-    }
     return $value;
   }
 

@@ -127,3 +127,38 @@ class OptionsElementController extends FieldFormElementController {
     return render($form['default_value']);
   }
 }
+
+class OptionsResultDataController extends FieldFormResultDataController {
+  static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
+                                       FieldFormElementInterface $element, $value) {
+    if (is_array($value)) {
+      $ret = array();
+      foreach($element->options as $option => $set) {
+        if ($option === $value) {
+          $ret[] = $set;
+        }
+      }
+      return $ret;
+    }
+    return $element->options[$value];
+  }
+
+  static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
+    if (!isset($default_value)) {
+      $value = $result->value();
+      foreach ($element['#options'] as $key => $option) {
+        if (is_array($value) && in_array($option, $value)) {
+          if (!is_array($default_value)) {
+            $default_value = array($default_value);
+          }
+          $default_value[] = $key;
+        }
+        elseif (!is_array($value) && $option === $value) {
+          $default_value = $key;
+          break;
+        }
+      }
+    }
+    $element['#default_value'] = $default_value;
+  }
+}
