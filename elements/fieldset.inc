@@ -15,3 +15,10 @@ class FieldsetElementController extends FieldFormElementController {
     return $form;
   }
 }
+
+class FieldsetResultDataController extends FieldFormResultDataController {
+  static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
+                                       FieldFormElementInterface $element, $value) {
+    return NULL;
+  }
+}

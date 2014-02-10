@@ -583,7 +583,9 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     $array = $element->toArray();
     $form = array();
     foreach ($array as $key => $value) {
-      $form['#'.$key] = $value;
+      if ($element->findChildByName($key) === FALSE) {
+        $form['#'.$key] = $value;
+      }
     }
 
     if ($element->hasChildren()) {

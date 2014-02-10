@@ -233,5 +233,11 @@ function fieldform_result_info() {
     'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
+  $info['fieldset'] = array(
+    'result controller' => 'FieldsetResultDataController',
+    'file' => 'fieldset.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
+  );
+
   return $info;
 }

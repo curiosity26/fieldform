@@ -118,24 +118,29 @@ class FieldFormResultController extends EntityAPIController {
   static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform,
                                         &$form, &$form_state) {
     foreach ($fieldform->elements as $element) {
-      if (isset($form[$element->name])) {
-        $child = $form[$element->name];
-        $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
-        $data = array(
-          'name' => $element->name,
-          'type' => $element->elementType(),
-          'value' => $value,
-          'title' => $element->title
-        );
-        $result = fieldform_result_create($element->elementType(), $data);
-        $result->value($result->processResult($entity, $element, $value));
-        if ($entity->update($result) === FALSE) {
-          $entity->add($result);
-        }
+      try {
+        if (isset($form[$element->name])) {
+          $child = $form[$element->name];
+          $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
+          $data = array(
+            'name' => $element->name,
+            'type' => $element->elementType(),
+            'value' => $value,
+            'title' => $element->title
+          );
+          $result = fieldform_result_create($element->elementType(), $data);
+          $result->value($result->processResult($entity, $element, $value));
+          if ($entity->update($result) === FALSE) {
+            $entity->add($result);
+          }
 
-        if ($element->hasChildren()) {
-          self::processResults($entity, $fieldform, $element, $form_state);
+          if ($element->hasChildren()) {
+            self::processResults($entity, $fieldform, $element, $form_state);
+          }
         }
+      }
+      catch(Exception $e) {
+        watchdog('fieldform', $e->getMessage());
       }
     }
   }
