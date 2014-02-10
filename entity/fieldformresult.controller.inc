@@ -118,30 +118,26 @@ class FieldFormResultController extends EntityAPIController {
   static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform,
                                         &$form, &$form_state) {
     foreach ($fieldform->elements as $element) {
-      try {
-        $name = $element->name;
-        if (!empty($form[$name])) {
-          $child = $form[$name];
-          $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
-          $data = array(
-            'name' => $element->name,
-            'type' => $element->elementType(),
-            'value' => $value,
-            'title' => $element->title
-          );
-          $result = fieldform_result_create($element->elementType(), $data);
-          $result->value($result->processResult($entity, $element, $value));
-          if ($entity->update($result) === FALSE) {
-            $entity->add($result);
-          }
-
-          if ($element->hasChildren()) {
-            self::processResults($entity, $fieldform, $element, $form_state);
-          }
+      $name = $element->name;
+      $child = drupal_array_get_nested_value($form, array($name));
+      if (is_array($child) && is_array($child['#parents'])) {
+        $child = $form[$name];
+        $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
+        $data = array(
+          'name' => $element->name,
+          'type' => $element->elementType(),
+          'value' => $value,
+          'title' => $element->title
+        );
+        $result = fieldform_result_create($element->elementType(), $data);
+        $result->value($result->processResult($entity, $element, $value));
+        if ($entity->update($result) === FALSE) {
+          $entity->add($result);
         }
-      }
-      catch(Exception $e) {
-        watchdog('fieldform', $e->getMessage());
+
+        if ($element->hasChildren()) {
+          self::processResults($entity, $fieldform, $element, $form_state);
+        }
       }
     }
   }
