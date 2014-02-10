@@ -147,7 +147,7 @@ class OptionsResultDataController extends FieldFormResultDataController {
   }
 
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
-    if (!isset($default_value)) {
+    if (!isset($default_value) && isset($element['#options'])) {
       $value = $result->value();
       foreach ($element['#options'] as $key => $option) {
         if (is_array($value) && in_array($option, $value)) {
@@ -163,6 +163,9 @@ class OptionsResultDataController extends FieldFormResultDataController {
       }
       dpm($default_value, 'Options Result Build');
       $element['#default_value'] = $default_value;
+    }
+    else {
+      dpm($element, 'Options Build Element No #options');
     }
   }
 }
