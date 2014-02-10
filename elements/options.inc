@@ -166,5 +166,6 @@ class OptionsResultDataController extends FieldFormResultDataController {
       }
       $element['#default_value'] = $default_value;
     }
+    unset($element['#value']);
   }
 }
