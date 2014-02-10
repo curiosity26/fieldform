@@ -138,6 +138,7 @@ class OptionsResultDataController extends FieldFormResultDataController {
           $ret[] = $element->options[$option];
         }
       }
+      dpm($ret, 'Save Options Results');
       return $ret;
     }
     return isset($element->options[$value]) ? $element->options[$value] : NULL;
@@ -164,11 +165,7 @@ class OptionsResultDataController extends FieldFormResultDataController {
           }
         }
       }
-      dpm($default_value, 'Options Result Build');
       $element['#default_value'] = $default_value;
-    }
-    else {
-      dpm($element, 'Options Build Element No #options');
     }
   }
 }
