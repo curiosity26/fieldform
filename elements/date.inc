@@ -43,7 +43,8 @@ class DateResultDataController extends FieldFormResultDataController {
     if (!isset($default_value) || !is_array($default_value)) {
       $value = isset($default_value) ? $default_value : $result->value();
       if (!is_array($value)) {
-        $time = strtotime($value, time());
+        $format = system_get_date_formats('medium');
+        $time = DateTime::createFromFormat($format, $value, drupal_get_user_timezone());
         dpm($value, 'Date Build Value as String');
         dpm($time, 'Date Build Value as Time');
         $value = array(
