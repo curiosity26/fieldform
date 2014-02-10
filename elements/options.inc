@@ -134,13 +134,13 @@ class OptionsResultDataController extends FieldFormResultDataController {
     if (is_array($value)) {
       $ret = array();
       foreach($element->options as $option => $set) {
-        if ($option === $value) {
+        if (in_array($option, $value)) {
           $ret[] = $set;
         }
       }
       return $ret;
     }
-    return $element->options[$value];
+    return isset($element->options[$value]) ? $element->options[$value] : NULL;
   }
 
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
