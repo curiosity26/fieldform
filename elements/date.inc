@@ -43,7 +43,7 @@ class DateResultDataController extends FieldFormResultDataController {
     if (!isset($default_value) || !is_array($default_value)) {
       $value = isset($default_value) ? $default_value : $result->value();
       if (!is_array($value)) {
-        $time = strtotime($value);
+        $time = strtotime($value, time());
         dpm($value, 'Date Build Value as String');
         dpm($time, 'Date Build Value as Time');
         $value = array(
