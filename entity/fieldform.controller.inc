@@ -302,9 +302,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     if (isset($separator)) {
       $form['actions']['back'] = array(
         '#type' => 'button',
-        '#value' => $entity->settings['back_button_text'],
-        '#limit_validation_errors' => TRUE,
-        '#executes_submit_callback' => FALSE
+        '#value' => $entity->settings['back_button_text']
       );
     }
 
@@ -373,7 +371,6 @@ class FieldFormController extends EntityAPIControllerExportable {
       $form_state['rebuild'] = TRUE;
       $form_state['input'] = array();
       $form = $entity->buildForm($form, $form_state);
-      dpm($form_state, 'Form State');
     }
     else{
       $entity->completedFormBehavior($form, $form_state);
