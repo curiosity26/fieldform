@@ -288,7 +288,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       );
       return $form;
     }
-
+    usnet($form_state['form_separator']);
     $elements = self::getSection($entity, $separator, $form, $form_state);
 
     foreach ($elements as $element) {
