@@ -82,6 +82,7 @@ class FieldFormResultController extends EntityAPIController {
     if (is_array($data) && isset($data['name']) && isset($data['type'])) {
       $data = fieldform_result_create($data['type'], $data);
     }
+    dpm($data->value(), 'save data '.$data->name);
     if (!empty($entity->data[$data->name])) {
       dpm($data->value(), 'save data '.$data->name);
       $entity->data[$data->name] = $data;
