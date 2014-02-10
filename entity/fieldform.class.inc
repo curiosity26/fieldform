@@ -58,9 +58,14 @@ class FieldFormEntity extends Entity {
     return $class::findElementsByType($this, $type);
   }
 
+  public function getSection($separator, $form, &$form_state) {
+    $class = entity_get_controller($this->entityType);
+    return $class::getSection($this, $separator, $form, $form_state);
+  }
+
   public function processElements(&$form, &$form_state) {
     $class = entity_get_controller($this->entityType);
-    $class::processElements($this, $this->elements, $form, $form_state);
+    $class::processElements($this, $form, $form_state);
   }
 
   public function buildForm($form, &$form_state) {

@@ -20,6 +20,10 @@ class SeparatorElementController extends FieldFormElementController {
       '#value' => $element->name
     );
   }
+
+  static public function submit(FieldFormElementInterface $element, &$form, &$form_state) {
+    $form_state['form_separator'] = $element->_id;
+  }
 }
 
 class SeparatorResultDataController extends FieldFormResultDataController {

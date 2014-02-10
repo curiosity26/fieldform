@@ -239,11 +239,47 @@ class FieldFormController extends EntityAPIControllerExportable {
     return $children[$type];
   }
 
-  static public function processElements($entity, $elements, &$form, &$form_state) {
-    $page = isset($form_state['form_separator']) ? $form_state['form_separator'] : NULL;
-    $separators = array_keys($entity->findElementsByType('separator'));
-    $iterator = new ArrayIterator($elements);
+  static public function getSectionIndex($entity, $separator) {
+    return array_search($separator, array_keys($entity->elements));
+  }
 
+  static public function getSection($entity, $separator, $form, &$form_state) {
+    $separators = array_keys($entity->findElementsByType('separator'));
+    $iterator = new ArrayIterator($entity->elements);
+    $ret = array();
+
+    if (isset($separator) && !empty($separators)) {
+      if ($form_state['values']['op'] === $entity->settings['back_button_text']) {
+        $index = array_search($separator, $separators);
+        unset($page);
+        if ($index > 0) {
+          $index--;
+          $separator = $separators[$index];
+        }
+      }
+
+      $seek = self::getSectionIndex($entity, $separator);
+      $iterator->seek($seek);
+
+      if ($iterator->valid()) {
+        $iterator->next();
+      }
+
+      while($iterator->valid()) {
+        $ret[] = $iterator->current();
+        if ($iterator->current()->elementType() === 'separator') {
+          break;
+        }
+        $iterator->next();
+      }
+    }
+
+    return $ret;
+  }
+
+  static public function processElements($entity, &$form, &$form_state) {
+    $separator = isset($form_state['form_separator']) ? $form_state['form_separator'] : NULL;
+    $separators = array_keys($entity->findElementsByType('separator'));
     // If the redirect option were chosen, it would already be redirected by now
     if (isset($form_state['storage']['complete'])) {
       $form['completed'] = array(
@@ -252,45 +288,29 @@ class FieldFormController extends EntityAPIControllerExportable {
       return $form;
     }
 
-    if (isset($page) && !empty($separators)) {
-      if ($form_state['values']['op'] === $entity->settings['back_button_text']) {
-        $index = array_search($page, $separators);
-        unset($page);
-        if ($index > 0) {
-          $index--;
-          $page = $separators[$index];
-        }
-      }
-      if (isset($page)) {
-        $seek = array_search($page, array_keys($elements));
-        $iterator->seek($seek);
-        if ($iterator->valid()) {
-          $iterator->next();
-        }
-      }
+    if (isset($separator) && !empty($separators)) {
+      $elements = self::getSection($entity, $separator, $form, $form_state);
     }
-    while($iterator->valid()) {
-      $element = $iterator->current();
+    else {
+      $elements = $entity->elements;
+    }
+
+    foreach ($elements as $element) {
       $form[$element->name] = $element->buildElement();
-      if ($element->elementType() === 'separator') {
-        $form_state['form_separator'] = $element->_id;
-        break;
-      }
-      $iterator->next();
     }
 
     $form['actions'] = array(
       '#type' => 'actions'
     );
 
-    if (isset($page)) {
+    if (isset($separator)) {
       $form['actions']['back'] = array(
         '#type' => 'button',
         '#value' => $entity->settings['back_button_text']
       );
     }
 
-    if ($iterator->valid() && $iterator->current()->elementType() === 'separator') {
+    if (end($elements)->elementType() === 'separator') {
       // If the last element processed was a form separator
       // Process the Continue button
 
@@ -341,20 +361,24 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function submit($entity, &$form, &$form_state) {
-    foreach ($entity->elements as $element) {
-      if (method_exists($element, 'submit')) {
-        $element->submit($form, $form_state);
-      }
-    }
-
 
     if (isset($form_state['form_separator'])
       && $form_state['values']['op'] !== $entity->settings['submit_button_text']) {
+      foreach ($entity->getSection($form_state['form_separator'], $form, $form_state) as $element) {
+        if (method_exists($element, 'submit')) {
+          $element->submit($form, $form_state);
+        }
+      }
       $form_state['rebuild'] = TRUE;
       $form_state['input'] = array();
       $form = $entity->buildForm($form, $form_state);
     }
     else{
+      foreach ($entity->elements as $element) {
+        if (method_exists($element, 'submit')) {
+          $element->submit($form, $form_state);
+        }
+      }
       $entity->completedFormBehavior($form, $form_state);
     }
   }
