@@ -240,7 +240,7 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function getSectionIndex($entity, $separator = NULL) {
-    return !$separator ? 0 : array_search($separator, array_keys($entity->elements));
+    return !isset($separator) ? 0 : array_search($separator, array_keys($entity->elements));
   }
 
   static public function getSection($entity, $separator = NULL, $form, &$form_state) {
