@@ -45,7 +45,8 @@ class DateResultDataController extends FieldFormResultDataController {
       if (!is_array($value)) {
         $format = variable_get('date_format_medium', 'D, m/d/Y - H:i');
         dpm($format, 'Date Build Format');
-        $time = DateTime::createFromFormat($format, $value, new DateTimeZone(drupal_get_user_timezone()));
+        $time = DateTime::createFromFormat($format, $value, new DateTimeZone(drupal_get_user_timezone()))
+          ->getTimestamp();
         dpm($value, 'Date Build Value as String');
         dpm($time, 'Date Build Value as Time');
         $value = array(
