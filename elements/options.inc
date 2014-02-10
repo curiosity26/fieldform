@@ -134,9 +134,9 @@ class OptionsResultDataController extends FieldFormResultDataController {
     if (is_array($value)) {
       dpm($value, 'Options Process Value');
       $ret = array();
-      foreach($element->options as $option => $set) {
-        if (in_array($option, $value)) {
-          $ret[] = $set;
+      foreach($value as $option) {
+        if ($option != FALSE) {
+          $ret[] = $element->options[$option];
         }
       }
       dpm($ret, 'Options Process Return');
