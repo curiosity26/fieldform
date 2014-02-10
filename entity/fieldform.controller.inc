@@ -239,8 +239,8 @@ class FieldFormController extends EntityAPIControllerExportable {
     return $children[$type];
   }
 
-  static public function getSectionIndex($entity, $separator) {
-    return array_search($separator, array_keys($entity->elements));
+  static public function getSectionIndex($entity, $separator = NULL) {
+    return !$separator ? 0 : array_search($separator, array_keys($entity->elements));
   }
 
   static public function getSection($entity, $separator = NULL, $form, &$form_state) {
