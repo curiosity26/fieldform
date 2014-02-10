@@ -243,15 +243,19 @@ class FieldFormController extends EntityAPIControllerExportable {
     return array_search($separator, array_keys($entity->elements));
   }
 
-  static public function getSection($entity, $separator, $form, &$form_state) {
+  static public function getSection($entity, $separator = NULL, $form, &$form_state) {
     $separators = array_keys($entity->findElementsByType('separator'));
     $iterator = new ArrayIterator($entity->elements);
     $ret = array();
 
-    if (isset($separator) && !empty($separators)) {
+    if (!empty($separators)) {
+      if (!$separator) {
+        $separator = $separators[0];
+      }
+
       if ($form_state['values']['op'] === $entity->settings['back_button_text']) {
         $index = array_search($separator, $separators);
-        unset($page);
+        unset($separator);
         if ($index > 0) {
           $index--;
           $separator = $separators[$index];
@@ -288,12 +292,13 @@ class FieldFormController extends EntityAPIControllerExportable {
       return $form;
     }
 
-    if (isset($separator) && !empty($separators)) {
+    if (!empty($separators)) {
       $elements = self::getSection($entity, $separator, $form, $form_state);
     }
     else {
       $elements = $entity->elements;
     }
+    dpm($elements);
 
     foreach ($elements as $element) {
       $form[$element->name] = $element->buildElement();
