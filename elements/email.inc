@@ -110,6 +110,26 @@ class EmailElementController extends FieldFormElementController {
 }
 
 class EmailResultDataController extends FieldFormResultDataController {
+
+  static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
+    $user = $GLOBALS['user'];
+    $default_value = isset($default_value) ? $default_value : $result->value();
+
+    if ($element['#type'] === 'hidden') {
+      if ($default_value !== $user->mail) {
+        $element['#type'] = 'textfield';
+        $element['#default_value'] = $default_value;
+        unset($element['#value']);
+      }
+      else {
+        $element['#value'] = $default_value;
+      }
+    }
+    else {
+      $element['#default_value'] = $default_value;
+    }
+}
+
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $value) {
     $user = $GLOBALS['user'];
