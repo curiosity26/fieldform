@@ -288,12 +288,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       return $form;
     }
 
-    if (!empty($separators)) {
-      $elements = self::getSection($entity, $separator, $form, $form_state);
-    }
-    else {
-      $elements = $entity->elements;
-    }
+    $elements = self::getSection($entity, $separator, $form, $form_state);
 
     foreach ($elements as $element) {
       $form[$element->name] = $element->buildElement();
@@ -362,8 +357,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
   static public function submit($entity, &$form, &$form_state) {
 
-    if (isset($form_state['form_separator'])
-      && $form_state['values']['op'] !== $entity->settings['submit_button_text']) {
+    if ($form_state['values']['op'] !== $entity->settings['submit_button_text']) {
       foreach ($entity->getSection($form_state['form_separator'], $form, $form_state) as $element) {
         if (method_exists($element, 'submit')) {
           $element->submit($form, $form_state);
