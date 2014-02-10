@@ -33,30 +33,26 @@ class DateElementController extends FieldFormElementController {
 }
 
 class DateResultDataController extends FieldFormResultDataController {
-  static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
-                                       FieldFormElementInterface $element, $value) {
-    $time = strtotime($value['year'].'-'.$value['month'].'-'.$value['day']);
-    return format_date($time, 'medium');
-  }
-
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
     if (!isset($default_value) || !is_array($default_value)) {
       $value = isset($default_value) ? $default_value : $result->value();
       if (!is_array($value)) {
         $format = variable_get('date_format_medium', 'D, m/d/Y - H:i');
-        dpm($format, 'Date Build Format');
         $time = DateTime::createFromFormat($format, $value, new DateTimeZone(drupal_get_user_timezone()))
           ->getTimestamp();
-        dpm($value, 'Date Build Value as String');
-        dpm($time, 'Date Build Value as Time');
         $value = array(
           'month' => date('n', $time),
           'day' => date('j', $time),
           'year' => date('Y', $time)
         );
       }
-      dpm($value, 'Date Build Value');
       $element['#default_value'] = $value;
     }
+  }
+
+  static public function preRender(FieldFormResultDataInterface $result, &$vars) {
+    $value = $result->value();
+    $time = strtotime($value['year'].'-'.$value['month'].'-'.$value['day']);
+    $vars['content'] = format_date($time, 'medium');
   }
 }
