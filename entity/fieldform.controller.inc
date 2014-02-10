@@ -264,9 +264,9 @@ class FieldFormController extends EntityAPIControllerExportable {
       if (isset($page)) {
         $seek = array_search($page, array_keys($elements));
         $iterator->seek($seek);
-        /*if ($iterator->valid()) {
+        if ($iterator->valid()) {
           $iterator->next();
-        }*/
+        }
       }
     }
     while($iterator->valid()) {

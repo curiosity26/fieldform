@@ -19,6 +19,6 @@ class FieldsetElementController extends FieldFormElementController {
 class FieldsetResultDataController extends FieldFormResultDataController {
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $value) {
-    return NULL;
+    return $element->title;
   }
 }
