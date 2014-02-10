@@ -50,6 +50,7 @@ class DateResultDataController extends FieldFormResultDataController {
           'year' => date('Y', $time)
         );
       }
+      dpm($value, 'Date Build Value');
       $element['#default_value'] = $value;
     }
   }
