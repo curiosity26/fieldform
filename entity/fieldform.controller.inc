@@ -280,7 +280,8 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function processElements($entity, &$form, &$form_state) {
-    $separator = isset($form_state['form_separator']) ? $form_state['form_separator'] : NULL;
+    $separator = isset($form_state['input']['separator']) ?
+      $entity->findElementByName($form_state['input']['separator'])->_id : NULL;
     // If the redirect option were chosen, it would already be redirected by now
     if (isset($form_state['storage']['complete'])) {
       $form['completed'] = array(

@@ -20,12 +20,6 @@ class SeparatorElementController extends FieldFormElementController {
       '#value' => $element->name
     );
   }
-
-  static public function submit(FieldFormElementInterface $element, &$form, &$form_state) {
-    dpm($element);
-    $form_state['form_separator'] = $element->_id;
-    $form_state['rebuild'] = TRUE;
-  }
 }
 
 class SeparatorResultDataController extends FieldFormResultDataController {
