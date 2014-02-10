@@ -127,17 +127,8 @@ class OptionsElementController extends FieldFormElementController {
     return render($form['default_value']);
   }
 
-  static public function validate(FieldFormElementInterface $element, &$form, &$form_state) {
-    $field = drupal_array_get_nested_value($form, $element->parents);
-    dpm($field['#value'], "Value {$element->name}");
-    dpm($field['#options'], "Options {$element->name}");
-  }
-
   static public function buildElement(FieldFormElementInterface $element) {
     $form = parent::buildElement($element);
-    if (is_array($form['#value']) && empty($form['#value'])) {
-      $form['#value'] = NULL;
-    }
 
     if (is_array($form['#default_value']) && empty($form['#default_value'])) {
       $form['#default_value'] = NULL;

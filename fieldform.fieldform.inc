@@ -239,6 +239,12 @@ function fieldform_result_info() {
     'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
+  $info['radios'] = array(
+    'result controller' => 'SelectResultDataController',
+    'file' => 'select.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
+  );
+
   $info['checkboxes'] = array(
     'result controller' => 'OptionsResultDataController',
     'file' => 'options.inc',
@@ -246,8 +252,8 @@ function fieldform_result_info() {
   );
 
   $info['radios'] = array(
-    'result controller' => 'OptionsResultDataController',
-    'file' => 'options.inc',
+    'result controller' => 'RadiosResultDataController',
+    'file' => 'radios.inc',
     'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
