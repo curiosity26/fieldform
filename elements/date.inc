@@ -38,4 +38,19 @@ class DateResultDataController extends FieldFormResultDataController {
     $time = strtotime($value['year'].'-'.$value['month'].'-'.$value['day']);
     return format_date($time, 'medium');
   }
+
+  static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
+    if (!isset($default_value)) {
+      $value = $result->value();
+      if (!is_array($value)) {
+        $time = strtotime($value);
+        $value = array(
+          'month' => date('n', $time),
+          'day' => date('j', $time),
+          'year' => date('Y', $time)
+        );
+      }
+      $element['#default_value'] = $value;
+    }
+  }
 }
