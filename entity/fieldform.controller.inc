@@ -302,7 +302,9 @@ class FieldFormController extends EntityAPIControllerExportable {
     if (isset($separator)) {
       $form['actions']['back'] = array(
         '#type' => 'button',
-        '#value' => $entity->settings['back_button_text']
+        '#value' => $entity->settings['back_button_text'],
+        '#limit_validation_errors' => TRUE,
+        '#executes_submit_callback' => FALSE
       );
     }
 
