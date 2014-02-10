@@ -280,8 +280,9 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function processElements($entity, &$form, &$form_state) {
-    $separator = isset($form_state['values']['separator']) ?
-      $entity->findElementByName($form_state['values']['separator']) : NULL;
+    $separator = isset($form_state['input']['separator']) ?
+      $entity->findElementByName($form_state['input']['separator']) : NULL;
+    dpm($separator, 'Separator');
     if (isset($separator)) {
       $separator = $separator->_id;
     }
@@ -369,7 +370,6 @@ class FieldFormController extends EntityAPIControllerExportable {
   static public function submit($entity, &$form, &$form_state) {
     $separator = isset($form_state['input']['separator']) ?
       $entity->findElementByName($form_state['input']['separator']) : NULL;
-    dpm($separator, 'Separator');
     if (isset($separator)) {
       $separator = $separator->_id;
     }
