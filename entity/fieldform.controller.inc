@@ -251,12 +251,9 @@ class FieldFormController extends EntityAPIControllerExportable {
     if (!empty($separators)) {
       if (isset($form_state['values']) && $form_state['values']['op'] === $entity->settings['back_button_text']) {
         $index = array_search($separator, $separators);
-        unset($separator);
-        if ($index > 1) {
-          $index -= 2;
-          $separator = $separators[$index];
-          dpm($separator, 'Separator');
-        }
+        $index = max($index - 2, 0);
+        $separator = $separators[$index];
+        dpm($separator, 'Separator');
       }
       if (isset($separator)) {
         $seek = self::getSectionIndex($entity, $separator);
