@@ -132,33 +132,36 @@ class OptionsResultDataController extends FieldFormResultDataController {
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $value) {
     if (is_array($value)) {
-      dpm($value, 'Options Process Value');
       $ret = array();
       foreach($value as $option) {
         if ($option != FALSE) {
           $ret[] = $element->options[$option];
         }
       }
-      dpm($ret, 'Options Process Return');
       return $ret;
     }
-    dpm($element->options[$value], 'Options Process Return');
     return isset($element->options[$value]) ? $element->options[$value] : NULL;
   }
 
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
     if (!isset($default_value) && isset($element['#options'])) {
       $value = $result->value();
-      foreach ($element['#options'] as $key => $option) {
-        if (is_array($value) && in_array($option, $value)) {
-          if (!is_array($default_value)) {
-            $default_value = array($default_value);
-          }
-          $default_value[] = $key;
+      if (is_array($value)) {
+        if (!is_array($default_value)) {
+          $default_value = array($default_value);
         }
-        elseif (!is_array($value) && $option === $value) {
-          $default_value = $key;
-          break;
+        foreach ($value as $option) {
+          if (($key = array_search($option, $element['#options'])) !== FALSE) {
+            $default_value[] = $key;
+          }
+        }
+      }
+      else {
+        foreach ($element['#options'] as $k => $o) {
+          if ($o === $value) {
+            $default_value = $k;
+            break;
+          }
         }
       }
       dpm($default_value, 'Options Result Build');
