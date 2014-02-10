@@ -24,6 +24,8 @@ class SeparatorElementController extends FieldFormElementController {
   static public function submit(FieldFormElementInterface $element, &$form, &$form_state) {
     $form_state['form_separator'] = $element->_id;
     $form_state['rebuild'] = TRUE;
+    $form_state['submitted'] = FALSE;
+    $form_state['executed'] = FALSE;
   }
 }
 

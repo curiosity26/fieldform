@@ -328,7 +328,7 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function buildForm($entity, $form, &$form_state) {
-    unset($form_state['values']['form_build_id'], $form_state['values']['form_build_token']);
+    unset($form_state['values']['form_token']);
     $entity->processElements($form, $form_state);
 
     $form_state += array(
