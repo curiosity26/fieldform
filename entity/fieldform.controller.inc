@@ -601,6 +601,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
 
   static public function buildElement(FieldFormElementInterface $element) {
     $array = $element->toArray();
+    unset($array['id']);
     $form = array();
     foreach ($array as $key => $value) {
       if ($element->findChildByName($key) === FALSE) {
