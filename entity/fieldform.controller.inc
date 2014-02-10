@@ -353,6 +353,7 @@ class FieldFormController extends EntityAPIControllerExportable {
   static public function validate($entity, &$form, &$form_state) {
     $separator = isset($form_state['form_separator']) ? $form_state['form_separator'] : NULL;
     $elements = $entity->getSection($separator, $form, $form_state);
+    dpm($elements, 'Validate Elements');
     foreach ($elements as $element) {
       if (method_exists($element, 'validate')) {
         $element->validate($form, $form_state);
