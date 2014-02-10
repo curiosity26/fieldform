@@ -369,6 +369,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       $form_state['rebuild'] = TRUE;
       $form_state['input'] = array();
       $form = $entity->buildForm($form, $form_state);
+      drupal_rebuild_form($form['#form_id'], $form_state, $form);
       dpm($form_state, 'Form State');
     }
     else{
