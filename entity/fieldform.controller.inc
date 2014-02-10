@@ -66,6 +66,28 @@ class FieldFormController extends EntityAPIControllerExportable {
     return $entity;
   }
 
+  public function export($entity, $prefix = '') {
+    $vars = get_object_vars($entity);
+    unset($vars[$this->statusKey], $vars[$this->moduleKey], $vars['is_new']);
+    if ($this->nameKey != $this->idKey) {
+      unset($vars[$this->idKey]);
+    }
+
+    $elements = array();
+
+    foreach ($entity->elements as $child) {
+      if (is_array($child)) {
+        $elements[] = $child;
+      }
+      else {
+        $elements[] = $child->toArray();
+      }
+    }
+    $vars['elements'] = $elements;
+
+    return entity_var_json_export($vars, $prefix);
+  }
+
   static public function hookForms() {
     $forms = array();
     $entities = fieldform_load_multiple();
