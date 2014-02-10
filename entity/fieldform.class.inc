@@ -58,7 +58,7 @@ class FieldFormEntity extends Entity {
     return $class::findElementsByType($this, $type);
   }
 
-  public function getSection($separator, $form, &$form_state) {
+  public function getSection($separator = NULL, $form, &$form_state) {
     $class = entity_get_controller($this->entityType);
     return $class::getSection($this, $separator, $form, $form_state);
   }

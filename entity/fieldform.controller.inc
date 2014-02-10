@@ -358,7 +358,8 @@ class FieldFormController extends EntityAPIControllerExportable {
   static public function submit($entity, &$form, &$form_state) {
 
     if ($form_state['values']['op'] !== $entity->settings['submit_button_text']) {
-      foreach ($entity->getSection($form_state['form_separator'], $form, $form_state) as $element) {
+      $separator = isset($form_state['form_separator']) ? $form_state['form_separator'] : NULL;
+      foreach ($entity->getSection($separator, $form, $form_state) as $element) {
         if (method_exists($element, 'submit')) {
           $element->submit($form, $form_state);
         }
