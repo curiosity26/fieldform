@@ -113,31 +113,39 @@ class FieldFormResultController extends EntityAPIController {
     }
   }
 
-  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform,
-                                        &$form, &$form_state) {
-    foreach ($fieldform->elements as $element) {
-      $name = $element->name;
-      $child = drupal_array_get_nested_value($form, array($name));
-      if (is_array($child) && is_array($child['#parents'])) {
-        $child = $form[$name];
-        $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
-        $data = array(
-          'name' => $name,
-          'type' => $element->elementType(),
-          'value' => $value,
-          'title' => $element->title
-        );
-        $result = fieldform_result_create($element->elementType(), $data);
-        $value = $result->processResult($entity, $element, $value);
-        $result->value($value);
-        if ($entity->update($result) === FALSE) {
-          $entity->add($result);
-        }
+  static public function processResultElement(FieldFormResultEntity $entity, FieldFormElementInterface $element,
+                                              &$form, &$form_state) {
+    $name = $element->name;
+    $child = drupal_array_get_nested_value($form, array($name));
+    if (is_array($child) && is_array($child['#parents'])) {
+      $child = $form[$name];
+      $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
+      $data = array(
+        'name' => $name,
+        'type' => $element->elementType(),
+        'value' => $value,
+        'title' => $element->title
+      );
+      $result = fieldform_result_create($element->elementType(), $data);
+      $value = $result->processResult($entity, $element, $value);
+      $result->value($value);
+      if ($entity->update($result) === FALSE) {
+        $entity->add($result);
+      }
 
-        if ($element->hasChildren()) {
-          self::processResults($entity, $fieldform, $child, $form_state);
+      if ($element->hasChildren()) {
+        foreach ($element->children as $element_child) {
+          self::processResultElement($entity, $element_child, $child, $form_state);
         }
       }
+    }
+  }
+
+  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform,
+                                        &$form, &$form_state) {
+    $separator = $form_state['form_separator'];
+    foreach ($fieldform->getSection($separator, $form, $form_state) as $element) {
+      self::processResultElement($entity, $element, $form, $form_state);
     }
   }
 
