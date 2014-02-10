@@ -29,7 +29,7 @@ class MarkupResultDataController extends FieldFormResultDataController {
   }
 
   static public function preRender(FieldFormResultDataInterface $result, &$vars) {
-    unset($vars['title']);
+    $vars['title'] = NULL;
     $vars['content'] = $result->value();
   }
 
