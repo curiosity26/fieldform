@@ -1003,11 +1003,11 @@ function fieldform_view_form($form, &$form_state, $entity_type, Entity $entity) 
   $form_state['result'] = $result;
   return $form;
 }
-
+/*
 function fieldform_view_form_validate(&$form, &$form_state) {
   $entity = $form_state[$form_state['entity_type']];
   $entity->validate($form, $form_state);
-}
+}*/
 
 function fieldform_view_form_submit(&$form, &$form_state) {
   $entity = $form_state[$form_state['entity_type']];

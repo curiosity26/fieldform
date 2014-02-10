@@ -328,7 +328,6 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function buildForm($entity, $form, &$form_state) {
-    unset($form_state['values']['form_token']);
     $entity->processElements($form, $form_state);
 
     $form_state += array(
@@ -339,7 +338,6 @@ class FieldFormController extends EntityAPIControllerExportable {
     );
 
     $form_state[$entity->entityType()] = $entity;
-    dpm($form_state, 'Load Form State');
     return $form;
   }
 
