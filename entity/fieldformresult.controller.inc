@@ -119,7 +119,7 @@ class FieldFormResultController extends EntityAPIController {
                                         &$form, &$form_state) {
     foreach ($fieldform->elements as $element) {
       try {
-        if (isset($form[$element->name])) {
+        if (!empty($form[$element->name])) {
           $child = $form[$element->name];
           $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
           $data = array(
