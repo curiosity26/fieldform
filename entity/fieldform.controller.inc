@@ -339,6 +339,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     );
 
     $form_state[$entity->entityType()] = $entity;
+    dpm($form_state, 'Load Form State');
     return $form;
   }
 
