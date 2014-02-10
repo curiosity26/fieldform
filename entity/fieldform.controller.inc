@@ -598,6 +598,11 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
   static public function toArray(FieldFormElementInterface $element) {
     $array = get_object_vars($element);
     unset($array['_id'], $array['parents'], $array['children']);
+    if ($element->hasChildren()) {
+      foreach ($element->children as $child) {
+        $array[$child->name] = $child->toArray();
+      }
+    }
     return $array;
   }
 
@@ -798,12 +803,6 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
   }
 
   static public function save(FieldFormElementInterface $element) {
-    $array = $element->toArray();
-    if ($element->hasChildren()) {
-      foreach ($element->children as $child) {
-        $array[$child->name] = $child->save();
-      }
-    }
-    return $array;
+    return $element->toArray();
   }
 }
