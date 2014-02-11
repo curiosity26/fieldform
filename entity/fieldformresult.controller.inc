@@ -166,9 +166,7 @@ class FieldFormResultController extends EntityAPIController {
   static public function processResultElement(FieldFormResultEntity $entity, FieldFormElementInterface $element,
                                               $form, $form_state) {
     $name = $element->name;
-    dpm($form, 'form for '.$name);
     $child = drupal_array_get_nested_value($form, $element->parents);
-    dpm($child, 'child for '.$name);
     if (is_array($child) && is_array($child['#parents'])) {
       $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
       $data = array(
@@ -179,7 +177,6 @@ class FieldFormResultController extends EntityAPIController {
       );
       $result = fieldform_result_create($element->elementType(), $data);
       $value = $result->processResult($entity, $element, $value);
-      dpm($value, 'Value for '.$result->name);
       $result->value($value);
       if ($entity->update($result) === FALSE) {
         $entity->add($result);
