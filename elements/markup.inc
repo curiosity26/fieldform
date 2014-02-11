@@ -25,11 +25,11 @@ class MarkupElementController extends FieldFormElementController {
 class MarkupResultDataController extends FieldFormResultDataController {
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $value) {
-    return $value['value'];
+    return $element->markup['value'];
   }
 
   static public function preRender(FieldFormResultDataInterface $result, &$vars) {
-    $vars['title'] = NULL;
+    $vars['title_attributes_array']['class'][] = 'element-invisible';
     $vars['content'] = $result->value();
   }
 

@@ -762,6 +762,7 @@ function fieldform_field_results_print_page($entity, $result) {
   $output = array(
     '#type' => 'page',
     '#theme' => 'fieldform_print_page',
+    '#theme_wrapper' => 'fieldform_print_html',
     '#entity' => $entity,
     '#result' => $result,
     '#fieldform' => $fieldform,
@@ -1397,6 +1398,11 @@ function fieldform_theme() {
     'path' => drupal_get_path('module', 'fieldform').'/templates'
   );
 
+  $themes['fieldform_print_html'] = array(
+    'render element' => 'page',
+    'template' => 'html'
+  );
+
   $themes['fieldform_print_page'] = array(
     'render element' => 'page',
     'template' => 'fieldform_print_page',
@@ -1601,6 +1607,45 @@ function template_process_fieldform_result(&$vars) {
       $vars['title_attributes_array']['class'][] = 'element-invisible';
       break;
   }
+}
+
+function template_preprocess_fieldform_print_html(&$vars) {
+  template_preprocess_html($vars);
+}
+
+function template_process_fieldform_print_html(&$vars) {
+  $vars['page_top'] = drupal_render($vars['page']['page_top']);
+  $vars['page_bottom'] = drupal_render($vars['page']['page_bottom']);
+  // Place the rendered HTML for the page body into a top level variable.
+  $vars['page'] = $vars['page']['#children'];
+  $vars['page_bottom'] .= drupal_get_js('footer');
+
+  $vars['head'] = drupal_get_html_head();
+  $vars['css'] = drupal_add_css();
+
+  // Pull styles from #attached
+  $styles = array(
+    '#type' => 'styles',
+    '#items' => array()
+  );
+
+  if (isset($vars['page']['#attached'])) {
+    foreach ($vars['page']['#attached'] as $op => $options) {
+      $callback = 'drupal_add_'.$op;
+      if (is_array($options) && function_exists($callback)) {
+        foreach ($options as $path => $settings) {
+          if (!is_array($settings)) {
+            $path = $settings;
+            $settings = array();
+          }
+          $styles['#items'][] = $callback($path, $settings);
+        }
+      }
+    }
+  }
+
+  $vars['styles'] = drupal_render($styles);
+  $vars['scripts'] = drupal_get_js();
 }
 
 function template_preprocess_fieldform_print_page(&$vars) {
