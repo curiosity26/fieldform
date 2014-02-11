@@ -187,7 +187,7 @@ class FieldFormResultController extends EntityAPIController {
 
       if ($element->hasChildren()) {
         foreach ($element->children as $element_child) {
-          self::processResultElement($entity, $element_child, $child, $form_state);
+          self::processResultElement($entity, $element_child, $form, $form_state);
         }
       }
     }
