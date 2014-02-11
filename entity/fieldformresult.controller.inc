@@ -80,6 +80,10 @@ class FieldFormResultController extends EntityAPIController {
   }
 
   static public function update(FieldFormResultEntity $entity, $data) {
+    if (empty($entity->data)) {
+      return FALSE;
+    }
+
     if (is_array($data) && isset($data['name']) && isset($data['type'])) {
       $data = fieldform_result_create($data['type'], $data);
     }
