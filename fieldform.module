@@ -1619,15 +1619,6 @@ function template_preprocess_fieldform_print_html(&$vars) {
 }
 
 function template_process_fieldform_print_html(&$vars) {
-  $vars['page_top'] = drupal_render($vars['page']['page_top']);
-  $vars['page_bottom'] = drupal_render($vars['page']['page_bottom']);
-  // Place the rendered HTML for the page body into a top level variable.
-  $vars['page'] = $vars['page']['#children'];
-  $vars['page_bottom'] .= drupal_get_js('footer');
-
-  $vars['head'] = drupal_get_html_head();
-  $vars['css'] = drupal_add_css();
-
   // Pull styles from #attached
   $styles = array(
     '#type' => 'styles',
@@ -1652,6 +1643,15 @@ function template_process_fieldform_print_html(&$vars) {
   }
 
   dpm($styles, 'Styles');
+
+  $vars['page_top'] = drupal_render($vars['page']['page_top']);
+  $vars['page_bottom'] = drupal_render($vars['page']['page_bottom']);
+  // Place the rendered HTML for the page body into a top level variable.
+  $vars['page'] = $vars['page']['#children'];
+  $vars['page_bottom'] .= drupal_get_js('footer');
+
+  $vars['head'] = drupal_get_html_head();
+  $vars['css'] = drupal_add_css();
 
   $vars['styles'] = drupal_render($styles);
   $vars['scripts'] = drupal_get_js();
