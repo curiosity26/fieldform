@@ -158,7 +158,7 @@ class FieldFormResultController extends EntityAPIController {
       $ret[] = $iterator->current();
       $iterator->next();
     }
-
+    dpm($ret, 'result elements');
     return $ret;
   }
 
