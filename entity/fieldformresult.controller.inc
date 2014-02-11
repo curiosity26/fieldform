@@ -131,6 +131,7 @@ class FieldFormResultController extends EntityAPIController {
       $result->value($value);
       if ($entity->update($result) === FALSE) {
         $entity->add($result);
+        dpm($result, 'Added result');
       }
 
       if ($element->hasChildren()) {
@@ -143,7 +144,7 @@ class FieldFormResultController extends EntityAPIController {
 
   static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform,
                                         &$form, &$form_state) {
-    dpm($form_state);
+
     $separator = isset($form_state['input']['separator']) ?
       $fieldform->findElementByName($form_state['input']['separator']) : NULL;
     if (isset($separator)) {
@@ -152,6 +153,8 @@ class FieldFormResultController extends EntityAPIController {
     foreach ($fieldform->getSection($separator, $form, $form_state) as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
     }
+
+    dpm($entity, 'result Entity');
   }
 
   static public function buildResult(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form, $form_state) {
