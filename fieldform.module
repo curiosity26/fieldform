@@ -1644,6 +1644,8 @@ function template_process_fieldform_print_html(&$vars) {
     }
   }
 
+  dpm($styles, 'Styles');
+
   $vars['styles'] = drupal_render($styles);
   $vars['scripts'] = drupal_get_js();
 }
