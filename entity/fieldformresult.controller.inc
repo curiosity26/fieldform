@@ -192,17 +192,13 @@ class FieldFormResultController extends EntityAPIController {
 
   static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form_state) {
     $separator = $fieldform->getSeparatorId($form_state);
-    dpm($separator, 'First Separator');
     $separator = $fieldform->getPreviousSeparatorId($separator);
-    dpm($separator, 'Second Separator');
     if ($separator && ($separator = $fieldform->findElementByID($separator)) !== FALSE) {
       $form_state['input']['separator'] = $separator->name;
     }
-    dpm($form_state, 'Form State Result Before');
     $elements = $fieldform->getSection($separator, $form_state);
+    dpm($elements, 'Form Elements');
     $form = drupal_rebuild_form('fieldform_'.$fieldform->identifier().'_form', $form_state);
-    dpm($form, 'Form Rebuilt');
-    dpm($form_state, 'Form State Result After');
     foreach ($elements as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
     }
