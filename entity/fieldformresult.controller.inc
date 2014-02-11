@@ -75,7 +75,6 @@ class FieldFormResultController extends EntityAPIController {
 
     if (isset($data->name)) {
       $entity->data[$data->name] = $data;
-      dpm($data->save(), 'Add Result For '.$data->name);
     }
   }
 
@@ -127,12 +126,8 @@ class FieldFormResultController extends EntityAPIController {
 
   static public function buildForm(FieldFormResultEntity $entity, FieldFormEntity $fieldform, &$form, &$form_state) {
     if (!empty($entity->data)) {
-      dpm($entity, 'Result');
-      dpm($form_state, 'Form_state');
       $separator = $fieldform->getSeparatorId($form_state);
-      dpm($separator, 'Separator');
       $elements = $fieldform->getSection($separator, $form_state);
-      dpm($elements, 'Elements to build with');
       foreach ($elements as $element) {
         self::buildFormElement($entity, $element, $form, $form_state);
       }
