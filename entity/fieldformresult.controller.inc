@@ -176,7 +176,6 @@ class FieldFormResultController extends EntityAPIController {
         'title' => $element->title
       );
       $result = fieldform_result_create($element->elementType(), $data);
-      dpm(get_class($result), 'Class for '.$result->name);
       $value = $result->processResult($entity, $element, $value);
       $result->value($value);
       if ($entity->update($result) === FALSE) {
@@ -192,16 +191,17 @@ class FieldFormResultController extends EntityAPIController {
   }
 
   static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, &$form_state) {
+    // Because of the nature of referenced variables, the form array is populated with the results of
+    // $fieldform->submit() even though it hasn't actually been called yet. So! We have to rebuild the form
+    // in its previous state
+
     $form = array();
     $separator = $fieldform->getSeparatorId($form_state);
     $form = $fieldform->buildForm($form, $form_state);
     drupal_process_form('fieldform_'.$fieldform->identifier().'_form', $form, $form_state);
-    //form_builder('fieldform_'.$fieldform->identifier().'_form', $form, $form_state);
     foreach ($entity->getSection($fieldform, $separator) as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
     }
-
-    dpm($entity, 'result Entity');
   }
 
   static public function buildResult(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form_state) {
@@ -212,7 +212,7 @@ class FieldFormResultController extends EntityAPIController {
     }
 
     self::processResults($entity, $fieldform, $form_state);
-
+    dpm($entity, 'result entity');
     return $entity;
   }
 }
