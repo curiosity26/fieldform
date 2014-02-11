@@ -1616,7 +1616,6 @@ function template_process_fieldform_result(&$vars) {
 
 function template_preprocess_fieldform_print_html(&$vars) {
   template_preprocess_html($vars);
-  dpm($vars, 'Preprocess Print HTML');
 }
 
 function template_process_fieldform_print_html(&$vars) {
@@ -1638,12 +1637,14 @@ function template_process_fieldform_print_html(&$vars) {
   if (isset($vars['page']['#attached'])) {
     foreach ($vars['page']['#attached'] as $op => $options) {
       $callback = 'drupal_add_'.$op;
+      dpm($options, 'Ops');
       if (is_array($options) && function_exists($callback)) {
         foreach ($options as $path => $settings) {
           if (!is_array($settings)) {
             $path = $settings;
             $settings = array();
           }
+          dpm($path, 'Path');
           $styles['#items'][] = $callback($path, $settings);
         }
       }
