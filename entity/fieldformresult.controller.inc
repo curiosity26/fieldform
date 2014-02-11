@@ -177,6 +177,7 @@ class FieldFormResultController extends EntityAPIController {
       );
       $result = fieldform_result_create($element->elementType(), $data);
       $value = $result->processResult($entity, $element, $value);
+      dpm($value, 'Value for '.$result->name);
       $result->value($value);
       if ($entity->update($result) === FALSE) {
         $entity->add($result);
@@ -197,9 +198,7 @@ class FieldFormResultController extends EntityAPIController {
       $form_state['input']['separator'] = $separator->name;
       $separator = $separator->_id;
     }
-    dpm($separator, 'Separator');
     $elements = $fieldform->getSection($separator, $form_state);
-    dpm($elements, 'Form Elements');
     $form = drupal_rebuild_form('fieldform_'.$fieldform->identifier().'_form', $form_state);
     foreach ($elements as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
