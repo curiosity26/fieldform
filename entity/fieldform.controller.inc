@@ -241,7 +241,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
   static public function getPreviousSeparatorId(FieldFormEntity $entity, $separator) {
     $separators = array_keys($entity->findElementsByType('separator'));
-    $index = self::getSectionIndex($entity, $separator);
+    $index = array_search($separator, $separators);
     unset($separator);
     if ($index > 1) {
       $index--;
@@ -280,11 +280,9 @@ class FieldFormController extends EntityAPIControllerExportable {
 
     if (!empty($separators)) {
       if (isset($form_state['values']) && $form_state['values']['op'] === $entity->settings['back_button_text']) {
-        $index = array_search($separator, $separators);
-        $index -= 2;
-        unset($separator);
-        if ($index >= 0) {
-          $separator = $separators[$index];
+        $separator = self::getPreviousSeparatorId($entity, $separator); // The current page
+        if (isset($separator)) {
+          $separator = self::getPreviousSeparatorId($entity, $separator); // The previous page
         }
       }
 
