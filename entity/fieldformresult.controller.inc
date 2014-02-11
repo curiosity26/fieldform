@@ -164,10 +164,11 @@ class FieldFormResultController extends EntityAPIController {
   }
 
   static public function processResultElement(FieldFormResultEntity $entity, FieldFormElementInterface $element,
-                                              $form_state) {
+                                              $form, $form_state) {
     $name = $element->name;
-    $value = drupal_array_get_nested_value($form_state['values'], array($name));
-    if (isset($value)) {
+    $child = drupal_array_get_nested_value($form, $element->parents);
+    if (is_array($child) && is_array($child['#parents'])) {
+      $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
       $data = array(
         'name' => $name,
         'type' => $element->elementType(),
@@ -183,7 +184,7 @@ class FieldFormResultController extends EntityAPIController {
 
       if ($element->hasChildren()) {
         foreach ($element->children as $element_child) {
-          self::processResultElement($entity, $element_child, $form_state);
+          self::processResultElement($entity, $element_child, $child, $form_state);
         }
       }
     }
@@ -195,9 +196,8 @@ class FieldFormResultController extends EntityAPIController {
     $form_state['input']['separator'] = $separator;
     $elements = $fieldform->getSection($separator, $form_state);
     $form = drupal_rebuild_form('fieldform_'.$fieldform->identifier().'_form', $form_state);
-    dpm($form, 'process Results');
     foreach ($elements as $element) {
-      self::processResultElement($entity, $element, $form_state);
+      self::processResultElement($entity, $element, $form, $form_state);
     }
   }
 

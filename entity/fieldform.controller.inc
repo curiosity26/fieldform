@@ -388,7 +388,6 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function submit($entity, $form, &$form_state) {
-    dpm($form_state, "Elements");
     $separator = self::getSeparatorId($entity, $form_state);
     $prev_separator = self::getPreviousSeparatorId($entity, $separator);
     $elements = $entity->getSection($prev_separator, $form_state);
