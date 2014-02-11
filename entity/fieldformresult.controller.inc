@@ -146,7 +146,6 @@ class FieldFormResultController extends EntityAPIController {
         if (($end--) > 0) {
           $separator = $separators[$end];
           $seek = array_search($separator, array_keys($fieldform->elements));
-          dpm($seek, 'result seek');
           $iterator->seek($seek);
 
           if ($iterator->valid()) {
@@ -160,14 +159,14 @@ class FieldFormResultController extends EntityAPIController {
       $ret[] = $iterator->current();
       $iterator->next();
     }
-    dpm($ret, 'result elements');
     return $ret;
   }
 
   static public function processResultElement(FieldFormResultEntity $entity, FieldFormElementInterface $element,
                                               &$form, &$form_state) {
     $name = $element->name;
-    $child = drupal_array_get_nested_value($form, array($name));
+    $child = drupal_array_get_nested_value($form, $element->parents);
+    dpm($child, 'result process child');
     if (is_array($child) && is_array($child['#parents'])) {
       $child = $form[$name];
       $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
