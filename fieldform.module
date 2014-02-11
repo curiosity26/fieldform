@@ -1403,6 +1403,10 @@ function fieldform_theme() {
     'path' => drupal_get_path('module', 'fieldform').'/templates'
   );
 
+  $themes['fieldform_print_separator'] = array(
+    'render element' => 'separator',
+  );
+
   return $themes;
 }
 
@@ -1637,4 +1641,10 @@ function template_preprocess_fieldform_print_page(&$vars) {
   if ($suggestions = theme_get_suggestions($params, 'fieldform_result_page')) {
     $vars['theme_hook_suggestions'] = $suggestions;
   }
+}
+
+function theme_fieldform_print_separator(&$vars) {
+  $separator = $vars['separator']['#result'];
+  $classes = $separator->name.'-separator';
+  return '<div class="page-separator '.$classes.'"></div>';
 }
