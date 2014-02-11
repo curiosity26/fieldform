@@ -101,16 +101,17 @@ class FieldFormResultController extends EntityAPIController {
       $default_value = isset($child['#parents']) && is_array($child['#parents']) ?
         drupal_array_get_nested_value($form_state, $child['#parents']) : NULL;
     }
-    else {
+    elseif (isset($form[$element->name])) {
       $child = &$form[$element->name];
       $default_value = isset($child['#parents']) && is_array($child['#parents']) ?
         drupal_array_get_nested_value($form_state, $child['#parents']) : NULL;
     }
-    $result = $entity->data[$element->name];
-    if (isset($result)) {
+
+    if (isset($entity->data[$element->name]) && is_array($child)) {
+      $result = $entity->data[$element->name];
       $result->buildElement($child, $default_value);
     }
-    if ($element->hasChildren()) {
+    if ($element->hasChildren() && is_array($child)) {
       foreach($element->children as $element_child) {
         self::buildFormElement($entity, $element_child, $child, $form_state);
       }
