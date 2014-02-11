@@ -768,7 +768,8 @@ function fieldform_field_results_print_page($entity, $result) {
     '#fieldform' => $fieldform,
     '#attached' => array(
       'css' => array(drupal_get_path('module', 'fieldform').'/css/print-page.css')
-    )
+    ),
+    '#cache' => NULL
   );
 
   return $output;
@@ -1400,7 +1401,8 @@ function fieldform_theme() {
 
   $themes['fieldform_print_html'] = array(
     'render element' => 'page',
-    'template' => 'html'
+    'template' => 'fieldform_print_html',
+    'path' => drupal_get_path('module', 'fieldform').'/templates'
   );
 
   $themes['fieldform_print_page'] = array(
@@ -1652,7 +1654,6 @@ function template_process_fieldform_print_html(&$vars) {
 }
 
 function template_preprocess_fieldform_print_page(&$vars) {
-  dpm($vars, 'Default Vars');
   $elements = $vars['page'];
   $entity = $elements['#entity'];
   $result = $elements['#result'];
