@@ -127,7 +127,8 @@ class FieldFormResultController extends EntityAPIController {
     }
   }
 
-  static public function getSection(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $separator = NULL, &$form, &$form_state) {
+  static public function getSection(FieldFormResultEntity $entity, FieldFormEntity $fieldform,
+                                    $separator = NULL, &$form, &$form_state) {
     /**
      * The separator, in this case, is the to initiate the next section. But here we need to get the
      * previous results. So we need to use the separator as an end parameter and use it to determine the start
