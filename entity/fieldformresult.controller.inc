@@ -239,7 +239,8 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
     return array(
       '#title' => $result->title,
       '#result' => $result,
-      '#theme' => 'fieldform_result'
+      '#theme' => 'fieldform_result',
+      '#view_mode' => $view_mode
     );
   }
 

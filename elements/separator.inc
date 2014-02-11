@@ -24,6 +24,12 @@ class SeparatorElementController extends FieldFormElementController {
 
 class SeparatorResultDataController extends FieldFormResultDataController {
   static public function render(FieldFormResultDataInterface $result, $view_mode = 'full') {
+    if ($view_mode == 'print') {
+      return array(
+        '#result' => $result,
+        '#theme' => 'fieldform_print_separator'
+      );
+    }
     return NULL;
   }
 }

@@ -1563,10 +1563,11 @@ function theme_namevalue_table($variables) {
 
 function template_preprocess_fieldform_result(&$vars) {
   $result = $vars['element']['#result'];
+  $view_mode = $vars['element']['#view_mode'];
   $controller = fieldform_result_controller($result->resultType());
   $vars['result'] = $result;
 
-  $vars['title_attributes_array']['class'][] = 'label';
+  $vars['title_attributes_array']['class'][] = 'title';
   $vars['title'] = $vars['element']['#title'];
 
   $data = $result->data();
@@ -1579,7 +1580,8 @@ function template_preprocess_fieldform_result(&$vars) {
 
   $controller->preRender($result, $vars);
 
-  if ($suggestions = theme_get_suggestions(array($data['type'], $data['name']), 'fieldform_result')) {
+  if ($suggestions = theme_get_suggestions(array($data['type'], $data['name'], $data[$view_mode]),
+    'fieldform_result')) {
     $vars['theme_hook_suggestions'] = $suggestions;
   }
 
@@ -1598,6 +1600,7 @@ function template_process_fieldform_result(&$vars) {
 }
 
 function template_preprocess_fieldform_print_page(&$vars) {
+  dpm($vars, 'Default Vars');
   $elements = $vars['page'];
   $entity = $elements['#entity'];
   $result = $elements['#result'];
@@ -1618,7 +1621,7 @@ function template_preprocess_fieldform_print_page(&$vars) {
   unset($vars['page']['#post_render']);
 
   foreach ($result->data as $render) {
-    $vars['results'][$render->name] = $render->render();
+    $vars['results'][$render->name] = $render->render('print');
   }
 
   $vars['classes_array'][] = 'fieldform-result-'.$result->identifier();
