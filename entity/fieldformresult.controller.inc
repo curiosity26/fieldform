@@ -164,12 +164,10 @@ class FieldFormResultController extends EntityAPIController {
   }
 
   static public function processResultElement(FieldFormResultEntity $entity, FieldFormElementInterface $element,
-                                              $form, $form_state) {
+                                              $form_state) {
     $name = $element->name;
-    $child = drupal_array_get_nested_value($form, $element->parents);
-    if (is_array($child) && is_array($child['#parents'])) {
-      $child = $form[$name];
-      $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
+    $value = drupal_array_get_nested_value($form_state['values'], array($name));
+    if (isset($value)) {
       $data = array(
         'name' => $name,
         'type' => $element->elementType(),
@@ -185,27 +183,27 @@ class FieldFormResultController extends EntityAPIController {
 
       if ($element->hasChildren()) {
         foreach ($element->children as $element_child) {
-          self::processResultElement($entity, $element_child, $child, $form_state);
+          self::processResultElement($entity, $element_child, $form_state);
         }
       }
     }
   }
 
-  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form, $form_state) {
+  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form_state) {
     $separator = $fieldform->getSeparatorId($form_state);
     foreach ($entity->getSection($fieldform, $separator) as $element) {
-      self::processResultElement($entity, $element, $form, $form_state);
+      self::processResultElement($entity, $element, $form_state);
     }
   }
 
-  static public function buildResult(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form, $form_state) {
+  static public function buildResult(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form_state) {
     $entity->form_name = $fieldform->identifier();
     if (!isset($entity->uid)) {
       $entity->uid = $GLOBALS['user']->uid;
       $entity->hostname = $GLOBALS['user']->hostname;
     }
-    dpm($form, 'Process Form');
-    self::processResults($entity, $fieldform, $form, $form_state);
+    self::processResults($entity, $fieldform, $form_state);
+    dpm($entity, 'Result');
     return $entity;
   }
 }
