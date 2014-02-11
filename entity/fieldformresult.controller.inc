@@ -172,8 +172,8 @@ class FieldFormResultController extends EntityAPIController {
   static public function processResultElement(FieldFormResultEntity $entity, FieldFormElementInterface $element,
                                               $form, $form_state) {
     $name = $element->name;
-    dpm($element, 'Element');
-    dpm($form[$name], 'Child Element');
+    //dpm($element, 'Element');
+    //dpm($form[$name], 'Child Element');
     if (isset($form[$name])) {
       $child = $form[$name];
       $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
@@ -208,6 +208,7 @@ class FieldFormResultController extends EntityAPIController {
       $form_state['input']['separator'] = $separator->name;
       $separator = $separator->_id;
     }
+    dpm($form_state, 'Form State');
     $elements = $fieldform->getSection($separator, $form_state);
     $form = drupal_rebuild_form('fieldform_'.$fieldform->identifier().'_form', $form_state);
     dpm($form, 'Form Element');
