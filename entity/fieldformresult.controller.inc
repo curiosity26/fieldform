@@ -194,7 +194,7 @@ class FieldFormResultController extends EntityAPIController {
     $separator = $fieldform->getSeparatorId($form_state);
     $separator = $fieldform->getPreviousSeparatorId($separator);
     if ($separator && ($separator = $fieldform->findElementByID($separator)) !== FALSE) {
-      $form_state['input']['separator'] = $separator->name;
+      $separator = $form_state['input']['separator'] = $separator->name;
     }
     $elements = $fieldform->getSection($separator, $form_state);
     dpm($elements, 'Form Elements');
