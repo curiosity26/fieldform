@@ -243,7 +243,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $separators = array_keys($entity->findElementsByType('separator'));
     $index = array_search($separator, $separators);
     unset($separator);
-    if ($index > 1) {
+    if ($index > 0) {
       $index--;
       return $separators[$index];
     }
