@@ -760,16 +760,13 @@ function fieldform_field_results_print_page($entity, $result) {
   $fieldform = fieldform_load($result->form_name);
 
   $output = array(
-    '#type' => 'page',
-    '#theme' => 'fieldform_print_page',
-    '#theme_wrapper' => array('fieldform_print_html'),
+    '#type' => 'fieldform_print_page',
     '#entity' => $entity,
     '#result' => $result,
     '#fieldform' => $fieldform,
     '#attached' => array(
       'css' => array(drupal_get_path('module', 'fieldform').'/css/print-page.css')
-    ),
-    '#cache' => NULL
+    )
   );
 
   return $output;
@@ -790,6 +787,7 @@ function fieldform_print_page_delivery($page_callback_result) {
   else {
     // Process attached won't attach page attachments.
     //drupal_process_attached($page_callback_result);
+    drupal_alter('fieldform_print_page', $page_callback_result);
     print drupal_render($page_callback_result);
     // Perform end-of-request tasks.
     drupal_page_footer();
@@ -987,6 +985,11 @@ function fieldform_element_info() {
       '#caption' => NULL,
       '#title_display' => 'before',
       '#theme' => 'namevalue_table'
+    ),
+    'fieldform_print_page' => array(
+      '#show_messages' => FALSE,
+      '#theme' => 'fieldform_print_page',
+      '#theme_wrappers' => array('fieldform_print_html')
     )
   );
 }
