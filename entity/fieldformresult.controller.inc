@@ -126,54 +126,21 @@ class FieldFormResultController extends EntityAPIController {
 
   static public function buildForm(FieldFormResultEntity $entity, FieldFormEntity $fieldform, &$form, &$form_state) {
     if (!empty($entity->data)) {
+      dpm($entity, 'Result');
+      dpm($form_state, 'Form_state');
       $separator = $fieldform->getSeparatorId($form_state);
+      dpm($separator, 'Separator');
       $elements = $fieldform->getSection($separator, $form_state);
+      dpm($elements, 'Elements to build with');
       foreach ($elements as $element) {
         self::buildFormElement($entity, $element, $form, $form_state);
       }
     }
   }
 
-  static public function getSection(FieldFormResultEntity $entity, FieldFormEntity $fieldform,
-                                    $separator = NULL) {
-    /**
-     * The separator, in this case, is the to initiate the next section. But here we need to get the
-     * previous results. So we need to use the separator as an end parameter and use it to determine the start
-     */
-
-    $separators = array_keys($fieldform->findElementsByType('separator'));
-    $iterator = new ArrayIterator($fieldform->elements);
-    $iterator->rewind();
-    $ret = array();
-
-    if (!empty($separators)) {
-      if (isset($separator)) {
-        $end = array_search($separator, $separators);
-        // Get the previous separator, if exists.
-        if (($end--) > 0) {
-          $separator = $separators[$end];
-          $seek = array_search($separator, array_keys($fieldform->elements));
-          $iterator->seek($seek);
-
-          if ($iterator->valid()) {
-            $iterator->next();
-          }
-        }
-      }
-    }
-
-    while($iterator->valid() && $iterator->current()->elementType() !== 'separator') {
-      $ret[] = $iterator->current();
-      $iterator->next();
-    }
-    return $ret;
-  }
-
   static public function processResultElement(FieldFormResultEntity $entity, FieldFormElementInterface $element,
                                               $form, $form_state) {
     $name = $element->name;
-    //dpm($element, 'Element');
-    //dpm($form[$name], 'Child Element');
     if (isset($form[$name])) {
       $child = $form[$name];
       $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
@@ -186,10 +153,7 @@ class FieldFormResultController extends EntityAPIController {
       $result = fieldform_result_create($element->elementType(), $data);
       $value = $result->processResult($entity, $element, $value);
       $result->value($value);
-      dpm($result->save(), 'Result Info');
-      $update = $entity->update($result);
-      dpm($update, 'UPdate');
-      if ($update === FALSE) {
+      if ($entity->update($result) === FALSE) {
         $entity->add($result);
       }
 
@@ -203,22 +167,16 @@ class FieldFormResultController extends EntityAPIController {
 
   static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form_state) {
     $separator = $fieldform->getSeparatorId($form_state);
-    dpm($separator, 'First Separator');
     $separator = $fieldform->getPreviousSeparatorId($separator);
-    dpm($separator, 'Second Separator');
     if ($separator && ($separator = $fieldform->findElementByID($separator)) !== FALSE) {
       $form_state['input']['separator'] = $separator->name;
-      dpm($separator, 'Separator Object');
       $separator = $separator->_id;
     }
     else {
       $form_state['input']['separator'] = NULL;
     }
-    dpm($form_state, 'Form State');
-    dpm($separator, 'Separator');
     $elements = $fieldform->getSection($separator, $form_state);
     $form = drupal_rebuild_form('fieldform_'.$fieldform->identifier().'_form', $form_state);
-    dpm($form, 'Form Element');
     foreach ($elements as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
     }
@@ -231,7 +189,6 @@ class FieldFormResultController extends EntityAPIController {
       $entity->hostname = $GLOBALS['user']->hostname;
     }
     self::processResults($entity, $fieldform, $form_state);
-    dpm($entity, 'Result');
     return $entity;
   }
 }

@@ -18,13 +18,11 @@ class FieldFormResultEntity extends Entity {
   }
 
   public function add($data) {
-    dpm($data, 'Add has been called');
     $class = $this->entityInfo['controller class'];
     $class::add($this, $data);
   }
 
   public function update($data) {
-    dpm($data, 'Update has been called');
     $class = $this->entityInfo['controller class'];
     return $class::update($this, $data);
   }
