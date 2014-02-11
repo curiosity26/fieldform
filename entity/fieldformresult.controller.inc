@@ -94,21 +94,35 @@ class FieldFormResultController extends EntityAPIController {
     $entity->data = array();
   }
 
+  static public function buildFormElement(FieldFormResultEntity $entity, FieldFormElementInterface $element,
+                                          &$form, &$form_state) {
+    if (is_array($element->parents)) {
+      $child = &drupal_array_get_nested_value($form, $element->parents);
+      $default_value = isset($child['#parents']) && is_array($child['#parents']) ?
+        drupal_array_get_nested_value($form_state, $child['#parents']) : NULL;
+    }
+    else {
+      $child = &$form[$element->name];
+      $default_value = isset($child['#parents']) && is_array($child['#parents']) ?
+        drupal_array_get_nested_value($form_state, $child['#parents']) : NULL;
+    }
+    $result = $entity->data[$element->name];
+    if (isset($result)) {
+      $result->buildElement($child, $default_value);
+    }
+    if ($element->hasChildren()) {
+      foreach($element->children as $element_child) {
+        self::buildFormElement($entity, $element_child, $child, $form_state);
+      }
+    }
+  }
+
   static public function buildForm(FieldFormResultEntity $entity, FieldFormEntity $fieldform, &$form, &$form_state) {
     if (!empty($entity->data)) {
-      foreach ($entity->data as $result) {
-        $element = $fieldform->findElementByName($result->name);
-        if (is_array($element->parents)) {
-          $ret = &drupal_array_get_nested_value($form, $element->parents);
-          $default_value = isset($ret['#parents']) && is_array($ret['#parents']) ?
-            drupal_array_get_nested_value($form_state, $ret['#parent']) : NULL;
-        }
-        else {
-          $ret = &$form[$element->name];
-          $default_value = isset($ret['#parents']) && is_array($ret['#parents']) ?
-            drupal_array_get_nested_value($form_state, $ret['#parent']) : NULL;
-        }
-        $result->buildElement($ret, $default_value);
+      $separator = $fieldform->getSeparatorId($entity, $form, $form_state);
+      $elements = $fieldform->getSection($separator, $form, $form_state);
+      foreach ($elements as $element) {
+        self::buildFormElement($entity, $element, $form, $form_state);
       }
     }
   }
