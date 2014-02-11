@@ -210,6 +210,7 @@ class FieldFormResultController extends EntityAPIController {
     }
     $elements = $fieldform->getSection($separator, $form_state);
     $form = drupal_rebuild_form('fieldform_'.$fieldform->identifier().'_form', $form_state);
+    dpm($form, 'Form Element');
     foreach ($elements as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
     }
