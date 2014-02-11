@@ -75,6 +75,7 @@ class FieldFormResultController extends EntityAPIController {
 
     if (isset($data->name)) {
       $entity->data[$data->name] = $data;
+      dpm($data->save(), 'Add Result For '.$data->name);
     }
   }
 
@@ -85,6 +86,7 @@ class FieldFormResultController extends EntityAPIController {
 
     if (!empty($entity->data[$data->name])) {
       $entity->data[$data->name] = $data;
+      dpm($data->save(), 'Update Result For '.$data->name);
       return $entity;
     }
     return FALSE;
@@ -178,7 +180,6 @@ class FieldFormResultController extends EntityAPIController {
       $result = fieldform_result_create($element->elementType(), $data);
       $value = $result->processResult($entity, $element, $value);
       $result->value($value);
-      dpm($result->save(), 'Result For '.$result->name);
       if ($entity->update($result) === FALSE) {
         $entity->add($result);
       }
