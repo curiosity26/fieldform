@@ -119,7 +119,7 @@ class FieldFormResultController extends EntityAPIController {
 
   static public function buildForm(FieldFormResultEntity $entity, FieldFormEntity $fieldform, &$form, &$form_state) {
     if (!empty($entity->data)) {
-      $separator = $fieldform->getSeparatorId($entity, $form_state);
+      $separator = $fieldform->getSeparatorId($form_state);
       $elements = $fieldform->getSection($separator, $form_state);
       foreach ($elements as $element) {
         self::buildFormElement($entity, $element, $form, $form_state);
@@ -194,7 +194,7 @@ class FieldFormResultController extends EntityAPIController {
 
   static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, &$form_state) {
     $form = array();
-    $separator = $fieldform->getSeparatorId($entity, $form_state);
+    $separator = $fieldform->getSeparatorId($form_state);
     $form = $fieldform->buildForm($form, $form_state);
     foreach ($entity->getSection($fieldform, $separator) as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
