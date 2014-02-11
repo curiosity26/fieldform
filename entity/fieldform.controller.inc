@@ -241,7 +241,9 @@ class FieldFormController extends EntityAPIControllerExportable {
 
   static public function getPreviousSeparatorId(FieldFormEntity $entity, $separator) {
     $separators = array_keys($entity->findElementsByType('separator'));
-    $name = is_object($separator) || ($separator = $entity->findElementByID($separator)) ? $separator->name : NULL;
+    $name = is_object($separator) || ($separator = $entity->findElementByID($separator)) !== FALSE
+      ? $separator->name : NULL;
+    dpm($name, 'name');
     if ($name) {
       $index = array_search($name, $separators);
       if ($index > 0) {
