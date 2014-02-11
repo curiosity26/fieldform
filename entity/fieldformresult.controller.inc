@@ -172,8 +172,8 @@ class FieldFormResultController extends EntityAPIController {
   static public function processResultElement(FieldFormResultEntity $entity, FieldFormElementInterface $element,
                                               $form, $form_state) {
     $name = $element->name;
-    $child = drupal_array_get_nested_value($form, $element->parents);
-    if (is_array($child) && is_array($child['#parents'])) {
+    if (isset($form[$name])) {
+      $child = $form[$name];
       $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
       $data = array(
         'name' => $name,
@@ -190,7 +190,7 @@ class FieldFormResultController extends EntityAPIController {
 
       if ($element->hasChildren()) {
         foreach ($element->children as $element_child) {
-          self::processResultElement($entity, $element_child, $form, $form_state);
+          self::processResultElement($entity, $element_child, $child, $form_state);
         }
       }
     }
