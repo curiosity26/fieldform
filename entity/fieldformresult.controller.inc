@@ -135,7 +135,6 @@ class FieldFormResultController extends EntityAPIController {
      */
 
     $separators = array_keys($fieldform->findElementsByType('separator'));
-    dpm($separators, 'result separators');
     $iterator = new ArrayIterator($fieldform->elements);
     $iterator->rewind();
     $ret = array();
@@ -144,7 +143,6 @@ class FieldFormResultController extends EntityAPIController {
       if (isset($separator)) {
         $end = array_search($separator, array_keys($fieldform->elements));
         // Get the previous separator, if exists.
-        dpm($end, 'result end separator');
         if (($end--) > 0) {
           $separator = $separators[$end];
           $seek = array_search($separator, array_keys($fieldform->elements));
@@ -158,9 +156,7 @@ class FieldFormResultController extends EntityAPIController {
       }
     }
 
-    dpm($iterator->current(), 'Result element current');
-
-    while($iterator->valid() && $iterator->current()->elementType() === 'separator') {
+    while($iterator->valid() && $iterator->current()->elementType() !== 'separator') {
       $ret[] = $iterator->current();
       $iterator->next();
     }
