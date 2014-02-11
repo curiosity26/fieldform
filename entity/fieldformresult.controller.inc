@@ -236,12 +236,15 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
   }
 
   static public function render(FieldFormResultDataInterface $result, $view_mode = 'full') {
-    return array(
-      '#title' => $result->title,
-      '#result' => $result,
-      '#theme' => 'fieldform_result',
-      '#view_mode' => $view_mode
-    );
+    if ($result->value()) {
+      return array(
+        '#title' => $result->title,
+        '#result' => $result,
+        '#theme' => 'fieldform_result',
+        '#view_mode' => $view_mode
+      );
+    }
+    return NULL;
   }
 
   static public function save(FieldFormResultDataInterface $result) {
