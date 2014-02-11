@@ -789,8 +789,7 @@ function fieldform_print_page_delivery($page_callback_result) {
   else {
     // Process attached won't attach page attachments.
     //drupal_process_attached($page_callback_result);
-    dpm($page_callback_result, 'Page');
-    print drupal_render_page($page_callback_result);
+    print drupal_render($page_callback_result);
     // Perform end-of-request tasks.
     drupal_page_footer();
   }
