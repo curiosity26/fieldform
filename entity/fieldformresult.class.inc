@@ -26,6 +26,11 @@ class FieldFormResultEntity extends Entity {
     $class = $this->entityInfo['controller class'];
     return $class::update($this, $data);
   }
+
+  public function getSection(FieldFormEntity $fieldform, &$form, &$form_state) {
+    $class = fieldform_result_controller($this->resultType);
+    return $class::getSection($this, $fieldform, $form, $form_state);
+  }
 }
 
 interface FieldFormResultDataInterface {
@@ -95,11 +100,6 @@ class FieldFormResultData implements FieldFormResultDataInterface {
   public function buildElement(&$element, $value = NULL) {
     $class = fieldform_result_controller($this->resultType);
     $class::buildElement($this, $element, $value);
-  }
-
-  public function getSection(FieldFormEntity $fieldform, &$form, &$form_state) {
-    $class = fieldform_result_controller($this->resultType);
-    return $class::getSection($this, $fieldform, $form, $form_state);
   }
 
   public function processResult(FieldFormResultEntity $entity, FieldFormElementInterface $element, $value) {
