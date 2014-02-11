@@ -404,7 +404,8 @@ class FieldFormController extends EntityAPIControllerExportable {
       $path = drupal_get_path_alias();
       $options = array();
       if (isset($separator)) {
-        $options['query']['page'] = self::getSectionIndex($entity, $separator);
+        $separators = array_keys($entity->findElementsByType('separator'));
+        $options['query']['page'] = array_search($separator, $separators);
       }
       drupal_goto($path, $options);
     }

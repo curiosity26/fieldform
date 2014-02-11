@@ -142,7 +142,7 @@ class FieldFormResultController extends EntityAPIController {
 
     if (!empty($separators)) {
       if (isset($separator)) {
-        $end = array_search($separator, array_keys($fieldform->elements));
+        $end = array_search($separator, $separators);
         // Get the previous separator, if exists.
         if (($end--) > 0) {
           $separator = $separators[$end];
