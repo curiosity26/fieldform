@@ -195,7 +195,6 @@ class FieldFormResultController extends EntityAPIController {
   static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform,
                                         &$form, &$form_state) {
     $separator = $fieldform->getSeparatorId($entity, $form, $form_state);
-    dpm($form, 'result process form');
     foreach ($entity->getSection($fieldform, $separator, $form, $form_state) as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
     }

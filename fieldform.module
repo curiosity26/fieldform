@@ -1001,6 +1001,7 @@ function fieldform_view_form($form, &$form_state, $entity_type, Entity $entity) 
   $result_controller = entity_get_controller($result->entityType());
   $result_controller::buildForm($result, $entity, $form, $form_state);
   $form_state['result'] = $result;
+  $form['#submit'] = array('fieldform_view_result_form_submit', 'fieldform_view_form_submit');
   return $form;
 }
 
@@ -1009,14 +1010,18 @@ function fieldform_view_form_validate(&$form, &$form_state) {
   $entity->validate($form, $form_state);
 }
 
-function fieldform_view_form_submit(&$form, &$form_state) {
+function fieldform_view_result_form_submit(&$form, &$form_state) {
   $entity = $form_state[$form_state['entity_type']];
   $result = &$form_state['result'];
   $result_controller = entity_get_controller($result->entityType());
   $result_controller::buildResult($result, $entity, $form, $form_state);
-  $entity->submit($form, $form_state);
   entity_save($result->entityType(), $result);
   $form_state['result'] = $result;
+}
+
+function fieldform_view_form_submit(&$form, &$form_state) {
+  $entity = $form_state[$form_state['entity_type']];
+  $entity->submit($form, $form_state);
 }
 
 function _fieldform_field_form_submit($form, &$form_state) {
