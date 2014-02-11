@@ -164,7 +164,7 @@ class FieldFormResultController extends EntityAPIController {
   }
 
   static public function processResultElement(FieldFormResultEntity $entity, FieldFormElementInterface $element,
-                                              &$form, &$form_state) {
+                                              $form, $form_state) {
     $name = $element->name;
     $child = drupal_array_get_nested_value($form, $element->parents);
     if (is_array($child) && is_array($child['#parents'])) {
@@ -191,7 +191,7 @@ class FieldFormResultController extends EntityAPIController {
     }
   }
 
-  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, &$form, &$form_state) {
+  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form, $form_state) {
     $separator = $fieldform->getSeparatorId($form_state);
     foreach ($entity->getSection($fieldform, $separator) as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
@@ -204,7 +204,7 @@ class FieldFormResultController extends EntityAPIController {
       $entity->uid = $GLOBALS['user']->uid;
       $entity->hostname = $GLOBALS['user']->hostname;
     }
-
+    dpm($form, 'Process Form');
     self::processResults($entity, $fieldform, $form, $form_state);
     return $entity;
   }

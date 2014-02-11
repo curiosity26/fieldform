@@ -1009,18 +1009,8 @@ function fieldform_view_form_validate(&$form, &$form_state) {
   $entity->validate($form, $form_state);
 }
 
-function fieldform_view_form_submit(&$form, &$form_state) {
+function fieldform_view_form_submit($form, &$form_state) {
   $entity = $form_state[$form_state['entity_type']];
-  $separators = array_keys($entity->findElementsByType('separator'));
-  $params = drupal_get_query_parameters();
-  if (isset($params['page'])) {
-    $page = max($params['page'], 0);
-    $form_state['separator'] = $separators[$page];
-  }
-  else {
-    $form_state['separator'] = NULL;
-  }
-
   $result = &$form_state['result'];
   $result_controller = entity_get_controller($result->entityType());
   $result_controller::buildResult($result, $entity, $form, $form_state);

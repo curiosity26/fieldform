@@ -399,15 +399,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
     if ($form_state['values']['op'] !== $entity->settings['submit_button_text']) {
       $form_state['rebuild'] = TRUE;
-      //$form_state['input'] = array();
-      //$form = $entity->buildForm($form, $form_state);
-      $path = drupal_get_path_alias();
-      $options = array();
-      if (isset($separator)) {
-        $separators = array_keys($entity->findElementsByType('separator'));
-        $options['query']['page'] = array_search($separator, $separators);
-      }
-      drupal_goto($path, $options);
+      $form = $entity->buildForm($form, $form_state);
     }
     else{
       $entity->completedFormBehavior($form, $form_state);
@@ -872,7 +864,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     }
   }
 
-  static public function submit(FieldFormElementInterface $element, &$form, &$form_state) {
+  static public function submit(FieldFormElementInterface $element, $form, &$form_state) {
     if ($element->hasChildren()) {
       foreach ($element->children as $child) {
         $child->submit($form, $form_state);

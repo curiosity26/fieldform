@@ -83,7 +83,7 @@ class FieldFormEntity extends Entity {
     $class::validate($this, $form, $form_state);
   }
 
-  public function submit(&$form, &$form_state) {
+  public function submit($form, &$form_state) {
     $class = entity_get_controller($this->entityType);
     $class::submit($this, $form, $form_state);
   }
