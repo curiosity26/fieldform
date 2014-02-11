@@ -788,7 +788,8 @@ function fieldform_print_page_delivery($page_callback_result) {
   }
   else {
     // Process attached won't attach page attachments.
-    drupal_process_attached($page_callback_result);
+    //drupal_process_attached($page_callback_result);
+    dpm($page_callback_result, 'Page');
     print drupal_render_page($page_callback_result);
     // Perform end-of-request tasks.
     drupal_page_footer();
@@ -1611,6 +1612,7 @@ function template_process_fieldform_result(&$vars) {
 
 function template_preprocess_fieldform_print_html(&$vars) {
   template_preprocess_html($vars);
+  dpm($vars, 'Preprocess Print HTML');
 }
 
 function template_process_fieldform_print_html(&$vars) {
