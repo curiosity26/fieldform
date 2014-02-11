@@ -387,7 +387,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     }
   }
 
-  static public function submit($entity, &$form, &$form_state) {
+  static public function submit($entity, $form, &$form_state) {
     $separator = self::getSeparatorId($entity, $form_state);
     $prev_separator = self::getPreviousSeparatorId($entity, $separator);
     $elements = $entity->getSection($prev_separator, $form_state);
@@ -399,17 +399,21 @@ class FieldFormController extends EntityAPIControllerExportable {
 
     if ($form_state['values']['op'] !== $entity->settings['submit_button_text']) {
       $form_state['rebuild'] = TRUE;
-      $form = $entity->buildForm($form, $form_state);
+      //$new = $entity->buildForm($form, $form_state);
     }
     else{
+      //$new = array();
       $entity->completedFormBehavior($form, $form_state);
     }
+
+    //return $new;
   }
 
-  static public function completedFormBehavior(FieldFormEntity $entity, &$form, &$form_state) {
+  static public function completedFormBehavior(FieldFormEntity $entity, $form, &$form_state) {
     if ($entity->settings['completed_behavior'] === 'message') {
       $form_state['rebuild'] = TRUE;
       $form_state['storage']['complete'] = TRUE;
+      ///$form = $entity->buildForm($form, $form_state);
     }
     else {
       $form_state['rebuild'] = FALSE;

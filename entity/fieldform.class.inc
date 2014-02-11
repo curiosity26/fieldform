@@ -58,6 +58,11 @@ class FieldFormEntity extends Entity {
     return $class::findElementsByType($this, $type);
   }
 
+  public function getPreviousSeparatorId($separator) {
+    $class = entity_get_controller($this->entityType);
+    return $class::getPreviousSeparatorId($this, $separator);
+  }
+
   public function getSeparatorId($form_state) {
     $class = entity_get_controller($this->entityType);
     return $class::getSeparatorId($this, $form_state);
@@ -88,7 +93,7 @@ class FieldFormEntity extends Entity {
     $class::submit($this, $form, $form_state);
   }
 
-  public function completedFormBehavior(&$form, &$form_state) {
+  public function completedFormBehavior($form, &$form_state) {
     $class = entity_get_controller($this->entityType);
     $class::completedFormBehavior($this, $form, $form_state);
   }
