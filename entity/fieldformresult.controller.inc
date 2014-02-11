@@ -279,7 +279,7 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
     $value = $result->value();
     if (is_array($value)) {
       $items = array('items' => $value);
-      if ($vars['title_display'] == 'inline') {
+      if (isset($vars['title_display']) && $vars['title_display'] == 'inline') {
         $items =+ array(
           'class' => 'inline'
         );

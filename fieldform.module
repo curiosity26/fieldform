@@ -762,7 +762,7 @@ function fieldform_field_results_print_page($entity, $result) {
   $output = array(
     '#type' => 'page',
     '#theme' => 'fieldform_print_page',
-    '#theme_wrapper' => 'fieldform_print_html',
+    '#theme_wrapper' => array('fieldform_print_html'),
     '#entity' => $entity,
     '#result' => $result,
     '#fieldform' => $fieldform,
