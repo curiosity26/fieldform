@@ -236,7 +236,7 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
   }
 
   static public function render(FieldFormResultDataInterface $result, $view_mode = 'full') {
-    if ($result->value()) {
+    if ($result->value() || $view_mode == 'print') {
       return array(
         '#title' => $result->title,
         '#result' => $result,

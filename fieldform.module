@@ -1580,7 +1580,7 @@ function template_preprocess_fieldform_result(&$vars) {
 
   $controller->preRender($result, $vars);
 
-  if ($suggestions = theme_get_suggestions(array($data['type'], $data['name'], $data[$view_mode]),
+  if ($suggestions = theme_get_suggestions(array($data['type'], $data['name'], $view_mode),
     'fieldform_result')) {
     $vars['theme_hook_suggestions'] = $suggestions;
   }
