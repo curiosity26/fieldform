@@ -191,29 +191,21 @@ class FieldFormResultController extends EntityAPIController {
     }
   }
 
-  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, &$form_state) {
-    // Because of the nature of referenced variables, the form array is populated with the results of
-    // $fieldform->submit() even though it hasn't actually been called yet. So! We have to rebuild the form
-    // in its previous state
-
-    $form = array();
+  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, &$form, &$form_state) {
     $separator = $fieldform->getSeparatorId($form_state);
-    $form = $fieldform->buildForm($form, $form_state);
-    drupal_process_form('fieldform_'.$fieldform->identifier().'_form', $form, $form_state);
     foreach ($entity->getSection($fieldform, $separator) as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
     }
   }
 
-  static public function buildResult(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form_state) {
+  static public function buildResult(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form, $form_state) {
     $entity->form_name = $fieldform->identifier();
     if (!isset($entity->uid)) {
       $entity->uid = $GLOBALS['user']->uid;
       $entity->hostname = $GLOBALS['user']->hostname;
     }
 
-    self::processResults($entity, $fieldform, $form_state);
-    dpm($entity, 'result entity');
+    self::processResults($entity, $fieldform, $form, $form_state);
     return $entity;
   }
 }

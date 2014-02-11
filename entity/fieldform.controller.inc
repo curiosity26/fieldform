@@ -239,7 +239,22 @@ class FieldFormController extends EntityAPIControllerExportable {
     return $children[$type];
   }
 
+  static public function getPreviousSeparatorId(FieldFormEntity $entity, $separator) {
+    $separators = array_keys($entity->findElementsByType('separator'));
+    $index = self::getSectionIndex($entity, $separator);
+    unset($separator);
+    if ($index > 1) {
+      $index--;
+      return $separators[$index];
+    }
+    return NULL;
+  }
+
   static public function getSeparatorId(FieldFormEntity $entity, $form_state) {
+    if (isset($form_state['separator'])) {
+      return $form_state['separator'];
+    }
+
     $separator = isset($form_state['values']['separator']) ?
       $entity->findElementByName($form_state['values']['separator']) : NULL;
 
@@ -365,6 +380,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
   static public function validate($entity, &$form, &$form_state) {
     $separator = self::getSeparatorId($entity, $form_state);
+    $separator = self::getPreviousSeparatorId($entity, $separator);
     $elements = $entity->getSection($separator, $form_state);
     foreach ($elements as $element) {
       if (method_exists($element, 'validate')) {
@@ -375,7 +391,8 @@ class FieldFormController extends EntityAPIControllerExportable {
 
   static public function submit($entity, &$form, &$form_state) {
     $separator = self::getSeparatorId($entity, $form_state);
-    $elements = $entity->getSection($separator, $form_state);
+    $prev_separator = self::getPreviousSeparatorId($entity, $separator);
+    $elements = $entity->getSection($prev_separator, $form_state);
     foreach ($elements as $element) {
       if (method_exists($element, 'submit')) {
         $element->submit($form, $form_state);
@@ -385,7 +402,13 @@ class FieldFormController extends EntityAPIControllerExportable {
     if ($form_state['values']['op'] !== $entity->settings['submit_button_text']) {
       $form_state['rebuild'] = TRUE;
       //$form_state['input'] = array();
-      $form = $entity->buildForm($form, $form_state);
+      //$form = $entity->buildForm($form, $form_state);
+      $path = drupal_get_path_alias();
+      $options = array();
+      if (isset($separator)) {
+        $options['query']['page'] = self::getSectionIndex($entity, $separator);
+      }
+      drupal_goto($path, $options);
     }
     else{
       $entity->completedFormBehavior($form, $form_state);
