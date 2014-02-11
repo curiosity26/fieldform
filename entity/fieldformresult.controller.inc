@@ -72,7 +72,7 @@ class FieldFormResultController extends EntityAPIController {
     if (is_array($data) && isset($data['name']) && isset($data['type'])) {
       $data = fieldform_result_create($data['type'], $data);
     }
-    dpm($data->name, 'Result Name before add');
+
     if (isset($data->name)) {
       $entity->data[$data->name] = $data;
       dpm($data->save(), 'Add Result For '.$data->name);
@@ -90,7 +90,6 @@ class FieldFormResultController extends EntityAPIController {
 
     if (!empty($entity->data[$data->name])) {
       $entity->data[$data->name] = $data;
-      dpm($data->save(), 'Update Result For '.$data->name);
       return $entity;
     }
     return FALSE;
@@ -103,7 +102,7 @@ class FieldFormResultController extends EntityAPIController {
   static public function buildFormElement(FieldFormResultEntity $entity, FieldFormElementInterface $element,
                                           &$form, &$form_state) {
     if (is_array($element->parents)) {
-      $child = &drupal_array_get_nested_value($form, $element->parents);
+      $child = &$form[$element->name];
       $default_value = isset($child['#parents']) && is_array($child['#parents']) ?
         drupal_array_get_nested_value($form_state, $child['#parents']) : NULL;
     }
@@ -112,14 +111,16 @@ class FieldFormResultController extends EntityAPIController {
       $default_value = isset($child['#parents']) && is_array($child['#parents']) ?
         drupal_array_get_nested_value($form_state, $child['#parents']) : NULL;
     }
+    if (is_array($child)) {
+      if (isset($entity->data[$element->name])) {
+        $result = $entity->data[$element->name];
+        $result->buildElement($child, $default_value);
+      }
 
-    if (isset($entity->data[$element->name]) && is_array($child)) {
-      $result = $entity->data[$element->name];
-      $result->buildElement($child, $default_value);
-    }
-    if ($element->hasChildren() && is_array($child)) {
-      foreach($element->children as $element_child) {
-        self::buildFormElement($entity, $element_child, $child, $form_state);
+      if ($element->hasChildren()) {
+        foreach($element->children as $element_child) {
+          self::buildFormElement($entity, $element_child, $child, $form_state);
+        }
       }
     }
   }
