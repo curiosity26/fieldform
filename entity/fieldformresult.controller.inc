@@ -166,7 +166,6 @@ class FieldFormResultController extends EntityAPIController {
                                               &$form, &$form_state) {
     $name = $element->name;
     $child = drupal_array_get_nested_value($form, $element->parents);
-    dpm($child, 'result process child');
     if (is_array($child) && is_array($child['#parents'])) {
       $child = $form[$name];
       $value = drupal_array_get_nested_value($form_state['values'], $child['#parents']);
@@ -196,6 +195,7 @@ class FieldFormResultController extends EntityAPIController {
     $form = array();
     $separator = $fieldform->getSeparatorId($form_state);
     $form = $fieldform->buildForm($form, $form_state);
+    drupal_build_form($form['#form_id'], $form, $form_state);
     foreach ($entity->getSection($fieldform, $separator) as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
     }
