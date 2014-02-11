@@ -113,6 +113,40 @@ class FieldFormResultController extends EntityAPIController {
     }
   }
 
+  static public function getSection(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $separator = NULL, &$form, &$form_state) {
+    /**
+     * The separator, in this case, is the to initiate the next section. But here we need to get the
+     * previous results. So we need to use the separator as an end parameter and use it to determine the start
+     */
+
+    $separators = array_keys($fieldform->findElementsByType('separator'));
+    $iterator = new ArrayIterator($fieldform->elements);
+    $ret = array();
+
+    if (!empty($separators)) {
+      if (isset($separator)) {
+        $end = array_search($separator, array_keys($fieldform->elements));
+        // Get the previous separator, if exists.
+        if ($end-- > 0) {
+          $separator = $separators[$end];
+          $seek = array_search($separator, array_keys($fieldform->elements));
+          $iterator->seek($seek);
+
+          if ($iterator->valid()) {
+            $iterator->next();
+          }
+        }
+      }
+    }
+
+    while($iterator->valid() && $iterator->current()->elementType() === 'separator') {
+      $ret[] = $iterator->current();
+      $iterator->next();
+    }
+
+    return $ret;
+  }
+
   static public function processResultElement(FieldFormResultEntity $entity, FieldFormElementInterface $element,
                                               &$form, &$form_state) {
     $name = $element->name;
@@ -127,11 +161,11 @@ class FieldFormResultController extends EntityAPIController {
         'title' => $element->title
       );
       $result = fieldform_result_create($element->elementType(), $data);
+      dpm(get_class($result), 'Class for '.$result->name);
       $value = $result->processResult($entity, $element, $value);
       $result->value($value);
       if ($entity->update($result) === FALSE) {
         $entity->add($result);
-        dpm($result, 'Added result');
       }
 
       if ($element->hasChildren()) {
@@ -144,13 +178,8 @@ class FieldFormResultController extends EntityAPIController {
 
   static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform,
                                         &$form, &$form_state) {
-
-    $separator = isset($form_state['input']['separator']) ?
-      $fieldform->findElementByName($form_state['input']['separator']) : NULL;
-    if (isset($separator)) {
-      $separator = $separator->_id;
-    }
-    foreach ($fieldform->getSection($separator, $form, $form_state) as $element) {
+    $separator = $fieldform->getSeparatorId($entity, $form, $form_state);
+    foreach ($entity->getSection($separator, $form, $form_state) as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
     }
 

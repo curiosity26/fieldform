@@ -239,6 +239,21 @@ class FieldFormController extends EntityAPIControllerExportable {
     return $children[$type];
   }
 
+  static public function getSeparatorId(FieldFormEntity $entity, $form, $form_state) {
+    $separator = isset($form_state['values']['separator']) ?
+      $entity->findElementByName($form_state['values']['separator']) : NULL;
+
+    if (!isset($separator)) {
+      $separator = isset($form_state['input']['separator']) ?
+        $entity->findElementByName($form_state['input']['separator']) : NULL;
+    }
+
+    if (isset($separator)) {
+      return $separator->_id;
+    }
+    return NULL;
+  }
+
   static public function getSectionIndex($entity, $separator) {
     return array_search($separator, array_keys($entity->elements));
   }
@@ -280,11 +295,7 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function processElements($entity, &$form, &$form_state) {
-    $separator = isset($form_state['input']['separator']) ?
-      $entity->findElementByName($form_state['input']['separator']) : NULL;
-    if (isset($separator)) {
-      $separator = $separator->_id;
-    }
+    $separator = self::getSeparatorId($entity, $form, $form_state);
     // If the redirect option were chosen, it would already be redirected by now
     if (isset($form_state['storage']['complete'])) {
       $form['completed'] = array(
@@ -353,11 +364,7 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function validate($entity, &$form, &$form_state) {
-    $separator = isset($form_state['input']['separator']) ?
-      $entity->findElementByName($form_state['input']['separator']) : NULL;
-    if (isset($separator)) {
-      $separator = $separator->_id;
-    }
+    $separator = self::getSeparatorId($entity, $form, $form_state);
     $elements = $entity->getSection($separator, $form, $form_state);
     foreach ($elements as $element) {
       if (method_exists($element, 'validate')) {
@@ -367,11 +374,7 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function submit($entity, &$form, &$form_state) {
-    $separator = isset($form_state['input']['separator']) ?
-      $entity->findElementByName($form_state['input']['separator']) : NULL;
-    if (isset($separator)) {
-      $separator = $separator->_id;
-    }
+    $separator = self::getSeparatorId($entity, $form, $form_state);
     $elements = $entity->getSection($separator, $form, $form_state);
     foreach ($elements as $element) {
       if (method_exists($element, 'submit')) {

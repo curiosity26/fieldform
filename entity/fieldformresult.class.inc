@@ -97,6 +97,11 @@ class FieldFormResultData implements FieldFormResultDataInterface {
     $class::buildElement($this, $element, $value);
   }
 
+  public function getSection(FieldFormEntity $fieldform, &$form, &$form_state) {
+    $class = fieldform_result_controller($this->resultType);
+    return $class::getSection($this, $fieldform, $form, $form_state);
+  }
+
   public function processResult(FieldFormResultEntity $entity, FieldFormElementInterface $element, $value) {
     $class = fieldform_result_controller($this->resultType);
     return $class::processResult($this, $entity, $element, $value);
