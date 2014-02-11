@@ -1633,7 +1633,7 @@ function template_process_fieldform_print_html(&$vars) {
     '#type' => 'styles',
     '#items' => array()
   );
-  dpm($vars['page']['#attached'], 'Attached');
+  dpm($vars, 'Vars');
   if (isset($vars['page']['#attached'])) {
     foreach ($vars['page']['#attached'] as $op => $options) {
       $callback = 'drupal_add_'.$op;
