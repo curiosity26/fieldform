@@ -367,6 +367,7 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function submit($entity, &$form, &$form_state) {
+    dpm($form_state);
     $separator = isset($form_state['input']['separator']) ?
       $entity->findElementByName($form_state['input']['separator']) : NULL;
     if (isset($separator)) {
