@@ -196,6 +196,7 @@ class FieldFormResultController extends EntityAPIController {
     if ($separator && ($separator = $fieldform->findElementByID($separator)) !== FALSE) {
       $separator = $form_state['input']['separator'] = $separator->name;
     }
+    dpm($separator, 'Separator');
     $elements = $fieldform->getSection($separator, $form_state);
     dpm($elements, 'Form Elements');
     $form = drupal_rebuild_form('fieldform_'.$fieldform->identifier().'_form', $form_state);
