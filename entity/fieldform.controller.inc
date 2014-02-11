@@ -317,7 +317,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       return $form;
     }
 
-    $elements = self::getSection($entity, $separator, $form, $form_state);
+    $elements = self::getSection($entity, $separator, $form_state);
 
     foreach ($elements as $element) {
       $form[$element->name] = $element->buildElement();
@@ -388,10 +388,11 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function submit($entity, $form, &$form_state) {
+    dpm($form_state, "Elements");
     $separator = self::getSeparatorId($entity, $form_state);
     $prev_separator = self::getPreviousSeparatorId($entity, $separator);
     $elements = $entity->getSection($prev_separator, $form_state);
-    dpm($elements, "Elements");
+
     foreach ($elements as $element) {
       if (method_exists($element, 'submit')) {
         $element->submit($form, $form_state);

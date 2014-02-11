@@ -1013,8 +1013,10 @@ function fieldform_view_form_submit($form, &$form_state) {
   $entity = $form_state[$form_state['entity_type']];
   $result = &$form_state['result'];
   dpm($form, 'Form Before Save');
+  $clone = (array)clone ((object)$form);
+  dpm($clone, 'Cloned Form');
   $result_controller = entity_get_controller($result->entityType());
-  $result_controller::buildResult($result, $entity, $form_state);
+  $result_controller::buildResult($result, $entity, $clone, $form_state);
   entity_save($result->entityType(), $result);
   $form_state['result'] = $result;
   $entity->submit($form, $form_state);
