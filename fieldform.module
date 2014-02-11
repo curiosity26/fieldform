@@ -1654,8 +1654,6 @@ function template_process_fieldform_print_html(&$vars) {
   }
   drupal_process_attached($vars['page']); // Process the rest. We just want to constrain the css
 
-  dpm($styles, 'Styles');
-
   $vars['page_top'] = drupal_render($vars['page']['page_top']);
   $vars['page_bottom'] = drupal_render($vars['page']['page_bottom']);
   // Place the rendered HTML for the page body into a top level variable.
