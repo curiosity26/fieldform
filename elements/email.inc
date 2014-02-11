@@ -133,7 +133,6 @@ class EmailResultDataController extends FieldFormResultDataController {
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $value) {
     $user = $GLOBALS['user'];
-    dpm($element, 'Element');
     if ($user->uid == 0 && $element->settings['anonymous_account']['user_lookup'] == TRUE) {
       if (($account = user_load_by_mail($value)) !== FALSE) {
         $state['values']['name'] = $account->name;

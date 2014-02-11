@@ -194,8 +194,11 @@ class FieldFormResultController extends EntityAPIController {
     $separator = $fieldform->getSeparatorId($form_state);
     $separator = $fieldform->getPreviousSeparatorId($separator);
     $form_state['input']['separator'] = $separator;
+    dpm($form_state, 'Form State Result Before');
     $elements = $fieldform->getSection($separator, $form_state);
     $form = drupal_rebuild_form('fieldform_'.$fieldform->identifier().'_form', $form_state);
+    dpm($form, 'Form Rebuilt');
+    dpm($form_state, 'Form State Result After');
     foreach ($elements as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
     }
