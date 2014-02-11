@@ -119,8 +119,8 @@ class FieldFormResultController extends EntityAPIController {
 
   static public function buildForm(FieldFormResultEntity $entity, FieldFormEntity $fieldform, &$form, &$form_state) {
     if (!empty($entity->data)) {
-      $separator = $fieldform->getSeparatorId($entity, $form, $form_state);
-      $elements = $fieldform->getSection($separator, $form, $form_state);
+      $separator = $fieldform->getSeparatorId($entity, $form_state);
+      $elements = $fieldform->getSection($separator, $form_state);
       foreach ($elements as $element) {
         self::buildFormElement($entity, $element, $form, $form_state);
       }
@@ -128,7 +128,7 @@ class FieldFormResultController extends EntityAPIController {
   }
 
   static public function getSection(FieldFormResultEntity $entity, FieldFormEntity $fieldform,
-                                    $separator = NULL, &$form, &$form_state) {
+                                    $separator = NULL) {
     /**
      * The separator, in this case, is the to initiate the next section. But here we need to get the
      * previous results. So we need to use the separator as an end parameter and use it to determine the start
@@ -192,24 +192,25 @@ class FieldFormResultController extends EntityAPIController {
     }
   }
 
-  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform,
-                                        &$form, &$form_state) {
-    $separator = $fieldform->getSeparatorId($entity, $form, $form_state);
-    foreach ($entity->getSection($fieldform, $separator, $form, $form_state) as $element) {
+  static public function processResults(FieldFormResultEntity $entity, FieldFormEntity $fieldform, &$form_state) {
+    $form = array();
+    $separator = $fieldform->getSeparatorId($entity, $form_state);
+    $form = $fieldform->buildForm($form, $form_state);
+    foreach ($entity->getSection($fieldform, $separator) as $element) {
       self::processResultElement($entity, $element, $form, $form_state);
     }
 
     dpm($entity, 'result Entity');
   }
 
-  static public function buildResult(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form, $form_state) {
+  static public function buildResult(FieldFormResultEntity $entity, FieldFormEntity $fieldform, $form_state) {
     $entity->form_name = $fieldform->identifier();
     if (!isset($entity->uid)) {
       $entity->uid = $GLOBALS['user']->uid;
       $entity->hostname = $GLOBALS['user']->hostname;
     }
 
-    self::processResults($entity, $fieldform, $form, $form_state);
+    self::processResults($entity, $fieldform, $form_state);
 
     return $entity;
   }

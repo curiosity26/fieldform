@@ -27,9 +27,9 @@ class FieldFormResultEntity extends Entity {
     return $class::update($this, $data);
   }
 
-  public function getSection(FieldFormEntity $fieldform, $separator = NULL, &$form, &$form_state) {
+  public function getSection(FieldFormEntity $fieldform, $separator = NULL, &$form_state) {
     $class = $this->entityInfo['controller class'];
-    return $class::getSection($this, $fieldform, $separator, $form, $form_state);
+    return $class::getSection($this, $fieldform, $separator, $form_state);
   }
 }
 

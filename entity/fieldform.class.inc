@@ -58,14 +58,14 @@ class FieldFormEntity extends Entity {
     return $class::findElementsByType($this, $type);
   }
 
-  public function getSeparatorId($form, $form_state) {
+  public function getSeparatorId($form_state) {
     $class = entity_get_controller($this->entityType);
-    return $class::getSeparatorId($this, $form, $form_state);
+    return $class::getSeparatorId($this, $form_state);
   }
 
-  public function getSection($separator = NULL, $form, &$form_state) {
+  public function getSection($separator = NULL, &$form_state) {
     $class = entity_get_controller($this->entityType);
-    return $class::getSection($this, $separator, $form, $form_state);
+    return $class::getSection($this, $separator, $form_state);
   }
 
   public function processElements(&$form, &$form_state) {
@@ -75,7 +75,7 @@ class FieldFormEntity extends Entity {
 
   public function buildForm($form, &$form_state) {
     $class = entity_get_controller($this->entityType);
-    $class::buildForm($this, $form, $form_state);
+    return $class::buildForm($this, $form, $form_state);
   }
 
   public function validate(&$form, &$form_state) {
