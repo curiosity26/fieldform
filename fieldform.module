@@ -1703,6 +1703,9 @@ function template_preprocess_fieldform_print_page(&$vars) {
   if ($suggestions = theme_get_suggestions($params, 'fieldform_result_page')) {
     $vars['theme_hook_suggestions'] = $suggestions;
   }
+
+  $hook = 'preprocess_fieldform_'.$result->form_name.'_page_result';
+  drupal_alter($hook, $vars);
 }
 
 function theme_fieldform_print_separator(&$vars) {
