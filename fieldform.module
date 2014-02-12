@@ -1601,7 +1601,7 @@ function template_preprocess_fieldform_result(&$vars) {
 
 }
 
-function fielform_process_fieldform_result(&$vars) {
+function fieldform_process_fieldform_result(&$vars) {
   $vars['title_display'] = isset($vars['element']['#title_display']) ? $vars['element']['#title_display'] : 'before';
   switch($vars['title_display']) {
     case 'inline':
