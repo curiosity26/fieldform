@@ -22,9 +22,11 @@ class FieldFormController extends EntityAPIControllerExportable {
         }
         $entity->elements = $elements;
         if (!$entity->hasElement('form_complete')) {
-          $terminator = fieldform_result_create('separator', array(
+          $terminator = fieldform_element_create('separator', array(
             '_id' => 'form_complete',
-            'name' => 'form_complete'
+            'name' => 'form_complete',
+            'title' => 'Form Terminator',
+            'weight' => 100000
           ));
           $entity->addElement($terminator);
           entity_save($entity->entityType(), $entity);
@@ -432,7 +434,9 @@ class FieldFormController extends EntityAPIControllerExportable {
     if (($terminator = $entity->findElementByName('terminator')) === FALSE) {
       $terminator = fieldform_element_create('separator', array(
         '_id' => 'form_complete',
-        'name' => 'form_complete'
+        'name' => 'form_complete',
+        'title' => 'Form Terminator',
+        'weight' => 100000
       ));
       $entity->addElement($terminator);
     }
