@@ -269,6 +269,7 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function getSection($entity, $separator = NULL, &$form_state) {
+    $init_sep = $separator;
     $separators = array_keys($entity->findElementsByType('separator'));
     $iterator = new ArrayIterator($entity->elements);
     $ret = array();
@@ -297,6 +298,10 @@ class FieldFormController extends EntityAPIControllerExportable {
         break;
       }
       $iterator->next();
+    }
+
+    if (empty($separators) || (end($separators) === $init_sep)) {
+      $ret[] = fieldform_element_create('separator', array('_id' => 'form_complete', 'name' => 'form_complete'));
     }
 
     return $ret;
@@ -329,7 +334,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       );
     }
 
-    if (end($elements)->elementType() === 'separator') {
+    if (end($elements)->elementType() === 'separator' && end($elements)->name !== 'form_complete') {
       // If the last element processed was a form separator
       // Process the Continue button
 
@@ -393,7 +398,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       }
     }
 
-    if (!isset($separator)) {
+    if ($form_state['input']['separator'] === 'form_complete') {
       $entity->completedFormBehavior($form, $form_state);
     }
     else {
