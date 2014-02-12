@@ -1611,7 +1611,6 @@ function template_process_fieldform_result(&$vars) {
       $vars['title_attributes_array']['class'][] = 'element-invisible';
       break;
   }
-  dpm($vars, 'Result Process');
 }
 
 function template_preprocess_fieldform_print_html(&$vars) {
