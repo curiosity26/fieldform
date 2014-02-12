@@ -21,6 +21,14 @@ class FieldFormController extends EntityAPIControllerExportable {
           $elements[$element->_id] = $element;
         }
         $entity->elements = $elements;
+        if (!$entity->hasElement('form_complete')) {
+          $terminator = fieldform_result_create('separator', array(
+            '_id' => 'form_complete',
+            'name' => 'form_complete'
+          ));
+          $entity->addElement($terminator);
+          entity_save($entity->entityType(), $entity);
+        }
       }
 
       if (!isset($entity->settings) || !is_array($entity->settings)) {
@@ -269,12 +277,11 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function getSection($entity, $separator = NULL, &$form_state) {
-    $init_sep = $separator;
     $separators = array_keys($entity->findElementsByType('separator'));
     $iterator = new ArrayIterator($entity->elements);
     $ret = array();
 
-    if (!empty($separators)) {
+    if (!empty($separators) && count($separators) > 1) {
       if (isset($form_state['values']) && $form_state['values']['op'] === $entity->settings['back_button_text']) {
         $separator = self::getPreviousSeparatorId($entity, $separator); // The current page
         if (isset($separator)) {
@@ -298,10 +305,6 @@ class FieldFormController extends EntityAPIControllerExportable {
         break;
       }
       $iterator->next();
-    }
-
-    if (empty($separators) || (end($separators) === $init_sep)) {
-      $ret[] = fieldform_element_create('separator', array('_id' => 'form_complete', 'name' => 'form_complete'));
     }
 
     return $ret;
@@ -398,7 +401,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       }
     }
 
-    if ($form_state['input']['separator'] === 'form_complete') {
+    if ($separator === 'form_complete') {
       $entity->completedFormBehavior($form, $form_state);
     }
     else {
@@ -424,6 +427,20 @@ class FieldFormController extends EntityAPIControllerExportable {
       $entity->created = REQUEST_TIME;
     }
     $entity->module = isset($entity->entityInfo()['module']) ? $entity->entityInfo()['module'] : 'fieldform';
+
+    // Ensure the terminator exists and is at the bottom always
+    if (($terminator = $entity->findElementByName('terminator')) === FALSE) {
+      $terminator = fieldform_element_create('separator', array(
+        '_id' => 'form_complete',
+        'name' => 'form_complete'
+      ));
+      $entity->addElement($terminator);
+    }
+    else {
+      $clone = clone $terminator;
+      $entity->deleteElement($terminator);
+      $entity->addElement($clone);
+    }
 
     /*
     Convert the elements array from an array of FieldFormElementInterface items to a general array.

@@ -26,6 +26,6 @@ class TextAreaResultDataController extends FieldFormResultDataController {
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $value) {
 
-    return nl2br($value, FALSE); // This is 2014. Use HTML5 or get lost
+    return preg_replace('/(\r\n|\r|\n)+/', '<br>', $value); // This is 2014. Use HTML5 or get lost
   }
 }
