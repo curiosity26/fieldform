@@ -1705,6 +1705,7 @@ function template_preprocess_fieldform_print_page(&$vars) {
   }
 
   $hook = 'preprocess_fieldform_'.$result->form_name.'_page_result';
+  dpm($hook);
   drupal_alter($hook, $vars);
 }
 
