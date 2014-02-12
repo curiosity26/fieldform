@@ -174,7 +174,7 @@ class OptionsResultDataController extends FieldFormResultDataController {
           }
         }
       }
-      $element['#default_value'] = is_array($default_value) && empty($default_value) ? NULL : $default_value;
+      $element['#default_value'] = empty($default_value) ? NULL : $default_value;
     }
   }
 }
