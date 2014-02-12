@@ -17,6 +17,12 @@ class TextAreaElementController extends FieldFormElementController {
 }
 
 class TextAreaResultDataController extends FieldFormResultDataController {
+  static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
+    $value = isset($default_value) ? $default_value : $result->value();
+    $value = preg_replace('#<br\s*/?>#i', "\n", $value);
+    parent::buildElement($result, $element, $value);
+  }
+
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $value) {
 
