@@ -217,7 +217,7 @@ function _fieldform_element_form_row(&$form, $elements, $entity) {
   $temp = array();
   if (!empty($elements)) {
     foreach ($elements as $element) {
-      if (!is_object($element)) {
+      if (!is_object($element) || $element->_id === 'form_complete') {
         continue;
       }
 
