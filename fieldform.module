@@ -1587,7 +1587,6 @@ function template_preprocess_fieldform_result(&$vars) {
 
   $data = $result->data();
 
-  $vars['classes_array'][] = 'fieldform-result';
   $vars['classes_array'][] = 'fieldform-result-'.$data['type'];
   $vars['classes_array'][] = 'fieldform-result-'.$data['name'];
 

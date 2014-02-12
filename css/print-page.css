@@ -29,4 +29,9 @@
     .no-print {
         display: none;
     }
+
+    .page-separator {
+        display: none;
+        page-break-before: right;
+    }
 }
