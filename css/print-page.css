@@ -13,16 +13,17 @@
     font-family: "Helvetica Neue", Helvetica, sans-serif;
 }
 
-.label {
-    font-weight: bold;
+.element-invisible {
+    display: none;
+}
+
+.title.inline {
+    display: inline-block;
+    margin-right: 1em;
 }
 
 @media print {
     .region {
-        display: none;
-    }
-
-    .element-invisible {
         display: none;
     }
 
