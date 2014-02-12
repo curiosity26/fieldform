@@ -1692,7 +1692,7 @@ function template_preprocess_fieldform_print_page(&$vars) {
 
   $vars['classes_array'][] = 'fieldform-result-'.$result->identifier();
 
-  $params = arg();
+  $params = array_merge(array($result->form_name), arg());
   $params[] = $result->identifier();
 
   if (!!$form) {
