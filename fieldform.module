@@ -1598,6 +1598,8 @@ function template_preprocess_fieldform_result(&$vars) {
     'fieldform_result')) {
     $vars['theme_hook_suggestions'] = $suggestions;
   }
+
+  dpm($vars['theme_hook_suggestions']);
 }
 
 function template_process_fieldform_result(&$vars) {
