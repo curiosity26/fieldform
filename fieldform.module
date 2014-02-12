@@ -1598,7 +1598,6 @@ function template_preprocess_fieldform_result(&$vars) {
     'fieldform_result')) {
     $vars['theme_hook_suggestions'] = $suggestions;
   }
-
 }
 
 function template_process_fieldform_result(&$vars) {
@@ -1611,6 +1610,9 @@ function template_process_fieldform_result(&$vars) {
       $vars['title_attributes_array']['class'][] = 'element-invisible';
       break;
   }
+
+  $vars['title_attributes'] = $vars['title_attributes_array']
+    ? drupal_attributes($vars['title_attributes_array']) : '';
 }
 
 function template_preprocess_fieldform_print_html(&$vars) {
