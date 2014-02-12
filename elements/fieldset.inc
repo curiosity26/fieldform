@@ -21,4 +21,10 @@ class FieldsetResultDataController extends FieldFormResultDataController {
                                        FieldFormElementInterface $element, $value) {
     return $element->title;
   }
+
+  static public function render(FieldFormResultDataInterface $result, $view_mode = 'full') {
+    $output = parent::render($result, $view_mode);
+    $output['#title_display'] = 'hidden';
+    return $output;
+  }
 }
