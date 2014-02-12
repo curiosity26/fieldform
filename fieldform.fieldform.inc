@@ -275,5 +275,11 @@ function fieldform_result_info() {
     'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
+  $info['textarea'] = array(
+    'result controller' => 'TextAreaResultDataController',
+    'file' => 'textarea.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
+  );
+
   return $info;
 }
