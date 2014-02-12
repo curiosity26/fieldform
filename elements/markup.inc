@@ -28,9 +28,9 @@ class MarkupResultDataController extends FieldFormResultDataController {
     return $element->markup['value'];
   }
 
-  static public function preRender(FieldFormResultDataInterface $result, &$vars) {
-    $vars['title_attributes_array']['class'][] = 'element-invisible';
-    $vars['content'] = $result->value();
+  static public function render(FieldFormResultDataInterface $result, $view_mode = 'full') {
+    $output = parent::render($result, $view_mode);
+    $output['#title_display'] = 'hidden';
+    return $output;
   }
-
 }
