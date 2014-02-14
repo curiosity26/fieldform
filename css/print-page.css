@@ -27,7 +27,7 @@
 }
 
 @media print {
-    h1, h2, h3 {
+    h1, h2, h3, .fieldform-result-fieldset {
         page-break-after: avoid;
     }
 
