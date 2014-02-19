@@ -154,7 +154,8 @@ function fieldform_nodefield_autocomplete($entity, $name, $string = '') {
     ->execute()->fetchAllAssoc('nid');
 
   foreach ($results as $nid => $result) {
-    $matches[$nid] = t($result->title).' ('.$nid.')';
+    $name = t($result->title).' ('.$nid.')';
+    $matches[$name] = t($result->title);
   }
 
   drupal_json_output($matches);
