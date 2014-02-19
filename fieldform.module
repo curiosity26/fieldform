@@ -249,7 +249,7 @@ function fieldform_menu() {
   $menu['fieldform/%fieldform/nodefield/%'] = array(
     'access arguments' => array('view published content'),
     'page callback' => 'fieldform_nodefield_autocomplete',
-    'page arguments' => array(1, 3, 4),
+    'page arguments' => array(1, 3),
     'type' => MENU_CALLBACK
   );
 
