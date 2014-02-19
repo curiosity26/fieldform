@@ -14,7 +14,7 @@ class NodeFieldElementController extends FieldFormElementController {
       '#title' => t('Settings'),
       '#collapsible' => TRUE,
       '#weight' => $form['details']['#weight'] - 0.01,
-      '#tree' => TRUE
+      '#tree' => TRUE,
     );
 
     $types = node_type_get_types();
@@ -31,7 +31,8 @@ class NodeFieldElementController extends FieldFormElementController {
           ? $form_state['values']['settings']['node_type'] : (
             isset($element->settings['node_type']) ? $element->settings['node_type'] : ''
           ),
-      '#multiple' => TRUE
+      '#multiple' => TRUE,
+      '#required' => TRUE
     );
 
     $form['settings']['multiple'] = array(
