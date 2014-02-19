@@ -79,8 +79,9 @@ class FileElementController extends FieldFormElementController {
     }
   }
 
-  static public function buildElement(FieldFormElementInterface $element) {
-    $output = parent::buildElement($element);
+  static public function buildElement(FieldFormElementInterface $element, FieldFormEntity $entity,
+                                      $form = array(), &$form_state = array()) {
+    $output = parent::buildElement($element, $entity, $form, $form_state);
     // Have to format the name so file_save_upload can see it. This is just retarded
     $output['#name'] = 'files['.$output['#name'].']';
     unset($output['#settings']);

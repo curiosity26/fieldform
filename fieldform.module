@@ -246,6 +246,15 @@ function fieldform_menu() {
     'access callback' => TRUE,
   );
 
+  $menu['fieldform/%fieldform/nodefield/%'] = array(
+    'delivery callback' => 'ajax_deliver',
+    'theme callback' => 'ajax_base_page_theme',
+    'access arguments' => array('view published content'),
+    'page callback' => 'fieldform_nodefield_autocomplete',
+    'page arguments' => array(1, 3),
+    'type' => MENU_CALLBACK
+  );
+
   foreach (fieldform_get_instances() as $instance) {
     $type = $instance['entity_type'];
     $menu[$type.'/%entity_object/results'] = array(

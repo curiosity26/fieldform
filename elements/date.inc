@@ -19,8 +19,9 @@ class DateElementController extends FieldFormElementController {
     return $form;
   }
 
-  static public function buildElement(FieldFormElementInterface $element) {
-    $output = parent::buildElement($element);
+  static public function buildElement(FieldFormElementInterface $element, FieldFormEntity $entity,
+                                      $form = array(), &$form_state = array()) {
+    $output = parent::buildElement($element, $entity, $form, $form_state);
     if (isset($element->current_date) && $element->current_date == TRUE) {
       $output['#default_value'] = array(
         'month' => date('n'),

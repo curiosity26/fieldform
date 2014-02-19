@@ -23,9 +23,10 @@ class EmailElementController extends FieldFormElementController {
     return $element;
   }
 
-  static public function buildElement(FieldFormElementInterface $element) {
+  static public function buildElement(FieldFormElementInterface $element, FieldFormEntity $entity,
+                                      $form = array(), &$form_state = array()) {
     $user = $GLOBALS['user'];
-    $form = parent::buildElement($element);
+    $form = parent::buildElement($element, $entity, $form, $form_state);
     $form['#type'] = 'textfield';
     unset($form['#settings']);
     if ($user->uid > 0 && $element->settings['authenticated_account']['hide_field'] == TRUE) {

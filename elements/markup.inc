@@ -15,8 +15,9 @@ class MarkupElementController extends FieldFormElementController {
     return $form;
   }
 
-  static public function buildElement(FieldFormElementInterface $element) {
-    $markup = parent::buildElement($element);
+  static public function buildElement(FieldFormElementInterface $element, FieldFormEntity $entity,
+                                      $form = array(), &$form_state = array()) {
+    $markup = parent::buildElement($element, $entity, $form, $form_state);
     $markup['#markup'] = $markup['#markup']['value'];
     return $markup;
   }

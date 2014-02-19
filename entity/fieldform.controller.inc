@@ -325,7 +325,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $elements = self::getSection($entity, $separator, $form_state);
 
     foreach ($elements as $element) {
-      $form[$element->name] = $element->buildElement();
+      $form[$element->name] = $element->buildElement($entity, $form, $form_state);
     }
 
     $form['actions'] = array(
@@ -547,7 +547,7 @@ interface FieldFormElementControllerInterface {
   static public function addElement(FieldFormElementInterface $element, $child);
   static public function updateElement(FieldFormElementInterface $element, array $values);
   static public function deleteElement(FieldFormElementInterface $element, FieldFormElementInterface $child);
-  static public function buildElement(FieldFormElementInterface $element);
+  static public function buildElement(FieldFormElementInterface $element, FieldFormEntity $entity);
   static public function toArray(FieldFormElementInterface $element);
   static public function hasChild(FieldFormElementInterface $element, $id);
   static public function hasChildren(FieldFormElementInterface $element);
@@ -647,23 +647,25 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     return FALSE;
   }
 
-  static public function buildElement(FieldFormElementInterface $element) {
+  static public function buildElement(FieldFormElementInterface $element, FieldFormEntity $entity,
+                                      $form = array(), &$form_state = array()) {
     $array = $element->toArray();
     unset($array['id']);
-    $form = array();
+    $field = array();
+
     foreach ($array as $key => $value) {
       if ($element->findChildByName($key) === FALSE) {
-        $form['#'.$key] = $value;
+        $field['#'.$key] = $value;
       }
     }
 
     if ($element->hasChildren()) {
       foreach ($element->children as $child) {
-        $form[$child->name] = $child->buildElement($child);
+        $field[$child->name] = $child->buildElement($child, $entity, $form, $form_state);
       }
     }
 
-    return $form;
+    return $field;
   }
 
   static public function toArray(FieldFormElementInterface $element) {

@@ -13,7 +13,8 @@ class SeparatorElementController extends FieldFormElementController {
     return $form;
   }
 
-  static public function buildElement(FieldFormElementInterface $element, $view_mode = 'full') {
+  static public function buildElement(FieldFormElementInterface $element, FieldFormEntity $entity,
+                                      $form = array(), &$form_state = array()) {
     return array(
       '#name' => $element->elementType(),
       '#type' => 'hidden',
