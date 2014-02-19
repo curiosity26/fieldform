@@ -8,7 +8,7 @@
 
 class NodeFieldElementController extends FieldFormElementController {
   static public function settingsForm($form, &$form_state, FieldFormElementInterface $element = NULL, $op = NULL) {
-    $form = parent::form($form, $form_state);
+    $form = parent::settingsForm($form, $form_state);
     $form['settings'] = array(
       '#type' => 'fieldset',
       '#title' => t('Settings'),
