@@ -143,6 +143,15 @@ class NodeFieldResultDataController extends FieldFormResultDataController {
 }
 
 function fieldform_nodefield_autocomplete($entity, $name, $string = '') {
+  $nids = array();
+  $titles = array();
+  if (preg_match_all('/\((?<nids>\d+)\)/', $string, $nids) !== FALSE) {
+    $nodes = node_load_multiple($nids['nids']);
+    foreach ($nodes as $node) {
+      $titles[] = t($node->title).' ('.$node->nid.')';
+    }
+  }
+
   $items = (array) explode(',', $string);
   $string = trim(end($items));
   $element = $entity->findElementByName($name);
@@ -156,8 +165,9 @@ function fieldform_nodefield_autocomplete($entity, $name, $string = '') {
     ->execute()->fetchAllAssoc('nid');
 
   foreach ($results as $nid => $result) {
-    $name = t($result->title).' ('.$nid.')';
-    $matches[$name] = t($result->title);
+    $titles[] = t($result->title).' ('.$nid.')';
+    $output = implode(', ', $titles);
+    $matches[$output] = t($result->title);
   }
 
   drupal_json_output($matches);
