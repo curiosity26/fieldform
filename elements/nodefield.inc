@@ -19,8 +19,8 @@ class NodeFieldElementController extends FieldFormElementController {
 
     $types = node_type_get_types();
     $options = array();
-    foreach ($types as $type => $info) {
-      $options[$type] = $info['name'];
+    foreach ($types as $type => $node_type) {
+      $options[$type] = $node_type->name;
     }
 
     $form['settings']['node_type'] = array(
