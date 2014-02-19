@@ -250,7 +250,9 @@ function fieldform_menu() {
     'access arguments' => array('view published content'),
     'page callback' => 'fieldform_nodefield_autocomplete',
     'page arguments' => array(1, 3),
-    'type' => MENU_CALLBACK
+    'type' => MENU_CALLBACK,
+    'file' => 'nodefield.inc',
+    'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
   foreach (fieldform_get_instances() as $instance) {
