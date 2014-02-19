@@ -157,11 +157,16 @@ function fieldform_nodefield_autocomplete($entity, $name, $string = '') {
   $element = $entity->findElementByName($name);
   $type = $element->settings['node_type'];
   $matches = array();
-  $results = db_select('node', 'n')
+  $query = db_select('node', 'n')
     ->fields('n', array('nid', 'title'))
     ->condition('type', $type)
-    ->condition('title', db_like($string).'%', 'LIKE')
-    ->range(0, 10)
+    ->condition('title', db_like($string).'%', 'LIKE');
+
+  if (isset($nids['nids'])) {
+    $query->condition(db_condition('nid', $nids['nids'], 'NOT IN'));
+  }
+
+  $results = $query->range(0, 10)
     ->execute()->fetchAllAssoc('nid');
 
   foreach ($results as $nid => $result) {
