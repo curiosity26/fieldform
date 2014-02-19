@@ -162,7 +162,7 @@ function fieldform_nodefield_autocomplete($entity, $name, $string = '') {
     ->condition('type', $type)
     ->condition('title', db_like($string).'%', 'LIKE');
 
-  if (isset($nids['nids'])) {
+  if (isset($nids['nids']) && !empty($nids['nids'])) {
     $query->condition('nid', $nids['nids'], 'NOT IN');
   }
 
