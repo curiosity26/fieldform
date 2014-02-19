@@ -193,7 +193,7 @@ function fieldform_fieldform_info() {
 
   $info['nodefield'] = array(
     'label' => t('Node Field'),
-    'element controller' => 'NodeFieldController',
+    'element controller' => 'NodeFieldElementController',
     'properties' => array(
       'default_value' => array(
         'type' => FIELDFORM_PROPERTY_NONE
