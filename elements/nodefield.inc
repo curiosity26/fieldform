@@ -143,6 +143,8 @@ class NodeFieldResultDataController extends FieldFormResultDataController {
 }
 
 function fieldform_nodefield_autocomplete($entity, $name, $string = '') {
+  $items = (array) explode(',', $string);
+  $string = trim(end($items));
   $element = $entity->findElementByName($name);
   $type = $element->settings['node_type'];
   $matches = array();
