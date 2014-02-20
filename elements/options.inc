@@ -130,7 +130,6 @@ class OptionsElementController extends FieldFormElementController {
   static public function buildElement(FieldFormElementInterface $element, FieldFormEntity $entity,
                                       $form = array(), &$form_state = array()) {
     $form = parent::buildElement($element, $entity, $form, $form_state);
-    $form = parent::buildElement($element, $entity, $form, $form_state);
 
     if (is_array($form['#default_value']) && empty($form['#default_value'])) {
       $form['#default_value'] = NULL;
