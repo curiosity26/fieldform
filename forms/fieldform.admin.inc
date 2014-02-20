@@ -260,7 +260,7 @@ function _fieldform_element_form_row(&$form, $elements, $entity) {
       $temp['weight'] = array(
         '#type' => 'weight',
         '#value' => is_numeric($element->weight) ? $element->weight : 0,
-        '#delta' => 100
+        '#delta' => 500
       );
 
       $temp['parent'] = array(
