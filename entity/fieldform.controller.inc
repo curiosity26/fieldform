@@ -86,11 +86,13 @@ class FieldFormController extends EntityAPIControllerExportable {
     $elements = array();
 
     foreach ($entity->elements as $child) {
-      if (is_array($child)) {
-        $elements[] = $child;
-      }
-      else {
-        $elements[] = $child->toArray();
+      if ($child->name !== 'form_complete') {
+        if (is_array($child)) {
+          $elements[] = $child;
+        }
+        else {
+          $elements[] = $child->toArray();
+        }
       }
     }
     $vars['elements'] = $elements;
@@ -431,7 +433,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $entity->module = isset($entity->entityInfo()['module']) ? $entity->entityInfo()['module'] : 'fieldform';
 
     // Ensure the terminator exists and is at the bottom always
-    if (($terminator = $entity->findElementByName('terminator')) === FALSE) {
+    if (($terminator = $entity->findElementByName('form_complete')) === FALSE) {
       $terminator = fieldform_element_create('separator', array(
         '_id' => 'form_complete',
         'name' => 'form_complete',

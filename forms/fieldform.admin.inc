@@ -338,7 +338,7 @@ function fieldform_elements_list_submit($form, &$form_state) {
     }
   }
 
-  $entity->elements = NULL;
+  $entity->elements = array();
 
   try {
     _fieldform_process_elements($entity, $process);
