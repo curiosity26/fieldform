@@ -661,7 +661,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
 
     if ($element->hasChildren()) {
       foreach ($element->children as $child) {
-        $field[$child->name] = $child->buildElement($child, $entity, $form, $form_state);
+        $field[$child->name] = $child->buildElement($entity, $form, $form_state);
       }
     }
 
