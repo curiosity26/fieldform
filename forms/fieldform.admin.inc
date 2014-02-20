@@ -181,7 +181,7 @@ function fieldform_elements_list($form, &$form_state, $entity) {
   $form['elements']['add_new_element']['type'] = array(
     '#type' => 'select',
     '#options' => $types,
-    '#default_value' => isset($values['elements']['add_new_element']) ?
+    '#default_value' => isset($values['elements']['add_new_element']['type']) ?
         $values['elements']['add_new_element']['type'] : NULL,
     '#ajax' => array(
       'callback' => 'fieldform_type_select_ajax'
