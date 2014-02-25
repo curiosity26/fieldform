@@ -130,7 +130,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     if (empty($entity->elements) || empty($element->parents) || count($element->parents) == 1) {
       if ($element->_id) {
         $entity->elements[$element->_id] = $element;
-        uasort($entity->elements, 'FieldFormController::softWeights');
+        uasort($entity->elements, 'FieldFormController::sortWeights');
         return TRUE;
       }
       return FALSE;
