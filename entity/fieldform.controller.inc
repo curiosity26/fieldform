@@ -854,9 +854,16 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       '#options' => array(
         'before' => t('Before'),
         'after' => t('Inline'),
-        'invisible' => t('Hide Label')
+        'invisible' => t('Hidden')
       ),
       '#default_value' => isset($values['title_display']) ? $values['title_display'] : 'before'
+    );
+
+    $form['details']['weight'] = array(
+      '#type' => 'weight',
+      '#title' => t('Weight'),
+      '#delta' => 100,
+      '#default_value' => isset($values['weight']) ? $values['weight'] : 0
     );
 
     return $form;

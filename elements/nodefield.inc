@@ -100,11 +100,11 @@ class NodeFieldResultDataController extends FieldFormResultDataController {
     if ($element->settings['tags'] == TRUE) {
       $matches = array();
       if (preg_match_all('/\((?<nid>\d+)\)/', $value, $matches) !== FALSE) {
-        return $matches['nid'];
+        return array('values' => $matches['nid'], 'tags' => $value);
       }
     }
 
-    return $value;
+    return array('values' => $value, 'tags' => NULL);
   }
 
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
@@ -112,27 +112,35 @@ class NodeFieldResultDataController extends FieldFormResultDataController {
     $value = (array)$value;
     if ($element['#type'] == 'textfield') {
       if (!empty($value)) {
-        $nodes = node_load_multiple($value);
-        $values = array();
-        foreach ($nodes as $node) {
-          $values[] = t($node->title).' ('.$node->nid.')';
+        if (isset($value['tags'])) {
+          $element['#default_value'] = preg_replace('/\(\d+\)/', '',$value['tags']);
         }
-        $element['#default_value'] = implode(',', $values);
+        else {
+          $nodes = node_load_multiple($value['values']);
+          $values = array();
+          foreach ($nodes as $node) {
+            $values[] = t($node->title).' ('.$node->nid.')';
+          }
+          $element['#default_value'] = implode(',', $values);
+        }
       }
     }
-    elseif (count($value) == 1 || (!isset($element['#multiple']) || $element['#mutliple'] != TRUE)
-      && in_array($value, array_keys($element['#options'])) !== FALSE) {
-      $element['#default_value'] = array_shift($value);
+    elseif (count($value['values']) == 1 || (!isset($element['#multiple']) || $element['#mutliple'] != TRUE)
+      && in_array($value['values'], array_keys($element['#options'])) !== FALSE) {
+      $element['#default_value'] = array_shift($value['values']);
     }
-    elseif (in_array($value, array_keys($element['#options'])) !== FALSE) {
-      $element['#default_value'] = $value;
+    elseif (in_array($value['values'], array_keys($element['#options'])) !== FALSE) {
+      $element['#default_value'] = $value['values'];
     }
   }
 
   static public function preRender(FieldFormResultDataInterface $result, &$vars) {
     $value = (array)$result->value();
-    if (!empty($value)) {
-      $nodes = node_load_multiple($value);
+    if (isset($value['tags'])) {
+      $vars['content'] = preg_replace('/\(\d+\)/', '', $value['tags']);
+    }
+    elseif (!empty($value['values'])) {
+      $nodes = node_load_multiple($value['values']);
       $titles = array();
       foreach ($nodes as $node) {
         $titles[] = t($node->title);
