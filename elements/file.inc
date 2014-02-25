@@ -120,7 +120,7 @@ class FileResultDataController extends FieldFormResultDataController {
       file_save($file);
       return $file->fid;
     }
-    elseif ($file == 'remove') {
+    elseif ($file == 'remove' &&  $result->value() !== FALSE) {
       // The user wishes the file to be removed.
       $file = $result->value();
       file_delete($file);
