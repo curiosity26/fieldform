@@ -209,6 +209,8 @@ function fieldform_elements_list($form, &$form_state, $entity) {
     '#value' => t('Save configuration')
   );
 
+  $form['#submit'] = array('fieldform_elements_list_submit'); // Ensure that this is the valid callback
+
   return $form;
 }
 
