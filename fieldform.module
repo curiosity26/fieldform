@@ -1436,6 +1436,7 @@ function theme_fieldform_elements_list($variables) {
 
   $rows = array();
 
+  uasort($form['elements'], 'drupal_sort_weight');
   foreach(element_children($form['elements']) as $name) {
     $element = $form['elements'][$name];
     $class = array('draggable');
