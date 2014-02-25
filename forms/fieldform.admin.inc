@@ -210,8 +210,12 @@ function fieldform_elements_list($form, &$form_state, $entity) {
   );
 
   $form['#submit'] = array('fieldform_elements_list_submit'); // Ensure that this is the valid callback
-
   return $form;
+}
+
+function fieldform_form_fieldform_elements_list_alter(&$form, &$form_state) {
+  dpm($form,'Alter Elements Form');
+  dpm($form_state, 'Alter Elements Form State');
 }
 
 function _fieldform_element_form_row(&$form, $elements, $entity) {
@@ -319,13 +323,10 @@ function fieldform_type_select_ajax($form, $form_state) {
   }
 }
 
-function fieldform_elements_list_validate($form, $form_state) {
-  dpm($form_state, 'Form State in Validate');
-}
-
 function fieldform_elements_list_submit($form, &$form_state) {
   $entity = $form_state['fieldform'];
-  dpm($form_state, 'Form State');
+  dpm($form_state['values'], 'Form State VAlues');
+  dpm($form_state['input'], 'Form State Input');
   $form_state['redirect'] = $entity->entityInfo()['admin ui']['path'].'/manage/'.$entity->identifier().'/elements';
   $values = $form_state['input'];
   $elements = $values['elements'];
