@@ -323,8 +323,8 @@ function fieldform_elements_list_validate($form, $form_state) {
 
 function fieldform_elements_list_submit($form, &$form_state) {
   $entity = $form_state['fieldform'];
+  dpm($form_state, 'Form State');
   $form_state['redirect'] = $entity->entityInfo()['admin ui']['path'].'/manage/'.$entity->identifier().'/elements';
-  dd($form_state, 'Form State');
   $values = $form_state['input'];
   $elements = $values['elements'];
   $process = array();
