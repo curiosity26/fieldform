@@ -16,9 +16,6 @@ class FieldFormEntity extends Entity {
     if (!empty($this->elements) && is_array($this->elements)) {
       $elements = array();
       foreach ($this->elements as $value) {
-        if (is_string($value)) {
-          $value = unserialize($value);
-        }
         $element = is_array($value) ? fieldform_element_create($value['type'], $value) : $value;
         $elements[$element->_id] = $element;
       }
@@ -174,9 +171,6 @@ class FieldFormElement implements FieldFormElementInterface {
     if (!empty($children)) {
       // Process children after the parent has been processed
       foreach ($children as $child) {
-        if (is_string($child)) {
-          $child = unserialize($child);
-        }
         if (is_array($child)) {
           $child['parents'] = array_merge($this->parents, array($child['name']));
           $element = fieldform_element_controller($child['type'])->create($child);
@@ -275,36 +269,11 @@ class FieldFormElement implements FieldFormElementInterface {
 
   public function __sleep() {
     $vars = get_object_vars($this);
-    /*$vars['children'] = array();
-    foreach ($this->children as $child) {
-      $vars['children'][] = serialize($child);
-    }
-    $this->children = $vars['children'];*/
     unset($vars['elementInfo']);
     return drupal_map_assoc(array_keys($vars));
   }
 
   public function __wakeup() {
     $this->elementInfo = fieldform_get_info($this->elementType);
-    /*$children = $this->children;
-
-    if (!empty($children)) {
-      // Process children after the parent has been processed
-      foreach ($children as $child) {
-        if (is_string($child) == TRUE) {
-          $child = unserialize($child);
-        }
-        if (!!$child) {
-          if (is_array($child)) {
-            $child['parents'] = array_merge($this->parents, array($child['name']));
-            $element = fieldform_element_controller($child['type'])->create($child);
-          }
-          else {
-            $element = $child;
-          }
-          $this->children[$element->_id] = $element;
-        }
-      }
-    }*/
   }
 }

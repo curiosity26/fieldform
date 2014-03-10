@@ -459,27 +459,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       $entity->deleteElement($terminator);
       $entity->addElement($clone);
     }
-
-    /*
-    Convert the elements array from an array of FieldFormElementInterface items to a general array.
-    This is useful for at least two reasons:
-
-    1. Compression - Reduces the size of data saved in the database
-    2. More accessible to a wider variety of database drivers. MongoDB in specific.
-
-    dpm($entity, 'Presave');
-    $clone = $entity->elements;
-
-    if (!empty($clone)) {
-      $elements = array();
-      foreach ($clone as $element) {
-        $elements[$element->name] = $element->save();
-      }
-      $entity->elements = $elements;
-    }
-    dpm($entity, 'Compressed');*/
     $return = parent::save($entity);
-    //$entity->elements = $clone;
     $this->resetCache(array($entity->identifier()));
     return $return;
   }
