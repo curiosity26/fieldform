@@ -1303,8 +1303,14 @@ function _namevalue_table_ajax() {
   }
   $form_values = &drupal_array_get_nested_value($form_state['values'], $element['#parents']);
   $form_input = &drupal_array_get_nested_value($form_state['input'], $element['#parents']);
+  $input = array();
+  foreach ($form_input as $item) {
+    if (is_array($item) && isset($item['anme'])) {
+      $input[] = $item;
+    }
+  }
 
-  $values = !empty($form_values['values']) ? array_filter($form_values['values']) : array_filter($form_input);
+  $values = !empty($form_values['values']) ? array_filter($form_values['values']) : array_filter($input);
 
   // Cleanse the Element
   foreach (element_children($element) as $branch) {
