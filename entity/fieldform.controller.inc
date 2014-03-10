@@ -15,8 +15,8 @@ class FieldFormController extends EntityAPIControllerExportable {
     $entities = parent::load($ids, $conditions);
     foreach ($entities as $entity) {
       if (!empty($entity->elements) && is_array($entity->elements)) {
-        $elements = array();
         if (is_string(current($entity->elements))) {
+          $elements = array();
           foreach ($entity->elements as $value) {
             if (is_string($value)) {
               $value = unserialize($value);
@@ -27,7 +27,7 @@ class FieldFormController extends EntityAPIControllerExportable {
           $entity->elements = $elements;
           //dpm($entity->elements, 'Wakeup');
         }
-        if (!$entity->hasElement('form_complete')) {
+        /*if (!$entity->hasElement('form_complete')) {
           $terminator = fieldform_element_create('separator', array(
             '_id' => 'form_complete',
             'name' => 'form_complete',
@@ -36,7 +36,7 @@ class FieldFormController extends EntityAPIControllerExportable {
           ));
           $entity->addElement($terminator);
           entity_save($entity->entityType(), $entity);
-        }
+        }*/
       }
 
       if (!isset($entity->settings) || !is_array($entity->settings)) {
