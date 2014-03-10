@@ -288,8 +288,9 @@ class FieldFormElement implements FieldFormElementInterface {
     if (!empty($children)) {
       // Process children after the parent has been processed
       foreach ($children as $child) {
-        if (is_string($child)) {
+        if (is_string($child) == TRUE) {
           $child = unserialize($child);
+          dpm($child, 'Wakeup Element');
         }
         if (!!$child) {
           if (is_array($child)) {
@@ -299,7 +300,6 @@ class FieldFormElement implements FieldFormElementInterface {
           else {
             $element = $child;
           }
-          dpm($element, 'Wakeup Element');
           dpm(is_string($element), 'Wakeup Element Type');
           $this->children[$element->_id] = $element;
         }
