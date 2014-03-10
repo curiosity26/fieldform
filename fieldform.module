@@ -1306,7 +1306,7 @@ function _namevalue_table_ajax() {
   $input = array();
   foreach ($form_input as $item) {
     if (is_array($item) && isset($item['name'])) {
-      $input[] = $item;
+      $input[] = array($item['name'] => $item['value']);
     }
   }
 
@@ -1320,7 +1320,6 @@ function _namevalue_table_ajax() {
   }
 
   reset($values);
-  dpm($values, 'Values');
   $element['row_count']['#value'] = $count;
   unset($element['row_count']['#printed']);
 
