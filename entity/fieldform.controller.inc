@@ -462,7 +462,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     1. Compression - Reduces the size of data saved in the database
     2. More accessible to a wider variety of database drivers. MongoDB in specific.
     */
-
+    dpm($entity, 'Presave');
     $clone = $entity->elements;
 
     if (!empty($clone)) {
@@ -472,29 +472,12 @@ class FieldFormController extends EntityAPIControllerExportable {
       }
       $entity->elements = $elements;
     }
-
+    dpm($entity, 'Compressed');
     $return = parent::save($entity);
     $entity->elements = $clone;
+    dpm($entity, 'Post Save');
     return $return;
   }
-/*
-  public function cacheGet($ids, $conditions = array()) {
-    $entities = parent::cacheGet($ids, $conditions);
-
-    foreach($entities as $entity) {
-      $elements = array();
-      foreach ($entity->elements as $element) {
-        if (is_string($element)) {
-          $element = unserialize($element);
-        }
-        if (is_array($element)) {
-          $element = fieldform_element_create($element['type'], $element);
-        }
-        $elements[$element->_id] = $element;
-      }
-      $entity->elements = $elements;
-    }
-  }*/
 }
 
 class FieldFormAdminUIController extends EntityDefaultUIController {
