@@ -291,15 +291,17 @@ class FieldFormElement implements FieldFormElementInterface {
         if (is_string($child)) {
           $child = unserialize($child);
         }
-        if (is_array($child)) {
-          $child['parents'] = array_merge($this->parents, array($child['name']));
-          $element = fieldform_element_controller($child['type'])->create($child);
+        if (!!$child) {
+          if (is_array($child)) {
+            $child['parents'] = array_merge($this->parents, array($child['name']));
+            $element = fieldform_element_controller($child['type'])->create($child);
+          }
+          else {
+            $element = $child;
+          }
+          dpm($element, 'Wakeup Element');
+          $this->children[$element->_id] = $element;
         }
-        else {
-          $element = $child;
-        }
-        dpm($element, 'Wakeup Element');
-        $this->children[$element->_id] = $element;
       }
     }
   }
