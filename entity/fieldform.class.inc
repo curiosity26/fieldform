@@ -101,6 +101,7 @@ class FieldFormEntity extends Entity {
   public function setUp() {
     parent::setUp();
     dpm($this, 'Wakeup');
+    $this->elements = unserialize($this->elements);
   }
 }
 
