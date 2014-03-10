@@ -57,34 +57,25 @@ class FieldFormController extends EntityAPIControllerExportable {
     $values += array('is_new' => TRUE);
     if (isset($this->entityInfo['entity class']) && $class = $this->entityInfo['entity class']) {
       $entity = new $class($values, $this->entityType);
-    }
-
-    $elements = array();
-    if(!is_array($entity->elements)) {
-      $entity->elements = unserialize($entity->elements);
-    }
-
-    foreach ($entity->elements as $element) {
-      if (is_string($element)) {
-        $element = unserialize($element);
+      $elements = array();
+      foreach ($entity->elements as $element) {
+        if (is_string($element)) {
+          $element = unserialize($element);
+        }
+        $element = is_array($element) ? fieldform_element_create($element['type'], $element) : $element;
+        $elements[$element->_id] = $element;
       }
-      $element = is_array($element) ? fieldform_element_create($element['type'], $element) : $element;
-      $elements[$element->_id] = $element;
-    }
-    $entity->elements = $elements;
+      $entity->elements = $elements;
 
-    if(!is_array($entity->settings)) {
-      $this->settings = unserialize($entity->settings);
+      $entity->settings += array(
+        'completed_behavior' => 'message',
+        'completed_behavior_message' => array('value' => '', 'format' => NULL),
+        'completed_behavior_url' => '',
+        'submit_button_text' => t('Submit'),
+        'continue_button_text' => t('Continue'),
+        'back_button_text' => t('Back')
+      );
     }
-
-    $entity->settings += array(
-      'completed_behavior' => 'message',
-      'completed_behavior_message' => array('value' => '', 'format' => NULL),
-      'completed_behavior_url' => '',
-      'submit_button_text' => t('Submit'),
-      'continue_button_text' => t('Continue'),
-      'back_button_text' => t('Back')
-    );
 
     return $entity;
   }
@@ -111,6 +102,23 @@ class FieldFormController extends EntityAPIControllerExportable {
     $vars['elements'] = $elements;
 
     return entity_var_json_export($vars, $prefix);
+  }
+
+  public function import($export) {
+    $entity = parent::import($export);
+    if (!!$entity) {
+      $elements = array();
+      foreach ($entity->elements as $item) {
+        if (is_string($item)) {
+          $item = unserialize($item);
+        }
+        $element = is_array($item) ? fieldform_element_create($item['type'], $item) : $item;
+        $elements[$element->_id] = $element;
+      }
+      $entity->elements = $elements;
+      dpm($entity->elements, 'Import Entity');
+    }
+    return $entity;
   }
 
   static public function hookForms() {
