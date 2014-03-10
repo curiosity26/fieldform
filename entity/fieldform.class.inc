@@ -16,6 +16,9 @@ class FieldFormEntity extends Entity {
     if (!empty($this->elements) && is_array($this->elements)) {
       $elements = array();
       foreach ($this->elements as $value) {
+        if (is_string($value)) {
+          $value = unserialize($value);
+        }
         $element = is_array($value) ? fieldform_element_create($value['type'], $value) : $value;
         $elements[$element->_id] = $element;
       }
