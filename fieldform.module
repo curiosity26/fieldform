@@ -1366,21 +1366,22 @@ function _namevalue_table_ajax() {
 function form_type_namevalue_table_value(&$element, $input = FALSE) {
   $final = array();
   $dups = array();
+  dpm($element, 'Element');
   if ($input !== FALSE && isset($element['#validated']) && $element['#validated'] == TRUE) {
     unset($input['row_count']);
     uasort($input, 'drupal_sort_weight');
     foreach ($input as $value) {
+      dpm($value, $value['name'].' input');
       if (in_array($value['name'], array_keys($final))) {
         $dups[$value['name']] = isset($dups[$value['name']]) ? $dups[$value['name']]++ : 1;
         $value['name'] .= '_'.$dups[$value['name']];
       }
 
       $final[$value['name']] = (string) $value['value'];
-      dpm($final[$value['name']], $value['name'].' input');
+
     }
     $final = array_filter($final);
   }
-  dpm($final, 'Final Values');
   return array('values' => $final);
 }
 
