@@ -151,7 +151,7 @@ function fieldform_elements_list($form, &$form_state, $entity) {
   $form_state['fieldform'] = $entity;
   $values = isset($form_state['input']) ? $form_state['input'] : array();
   $elements = $entity->elements;
-
+  dpm($entity);
   $form['elements'] = array(
     '#tree' => TRUE
   );

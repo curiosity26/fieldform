@@ -471,7 +471,9 @@ class FieldFormController extends EntityAPIControllerExportable {
       $clone->elements = $elements;
     }
 
-    return parent::save($clone);
+    $return = parent::save($clone);
+    $entity->{$this->{$this->nameKey}} = $clone->identifier();
+    return $return;
   }
 }
 
