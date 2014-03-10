@@ -217,6 +217,9 @@ class FieldFormController extends EntityAPIControllerExportable {
     }
     reset($entity->elements);
     while ($element = current($entity->elements)) {
+      if (is_string($element)) {
+        $element = unserialize($element);
+      }
       if ($element->name === $name) {
         return $element;
       }
