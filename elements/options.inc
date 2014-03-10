@@ -62,13 +62,7 @@ class OptionsElementController extends FieldFormElementController {
       $form_state['input']['attributes']['multiple'] = ($form_state['input']['multiple'] == 1);
     }
 
-    $options = array();
-    foreach ($form_state['values']['options']['values'] as $values) {
-      if (is_array($values) && isset($values['name']) && $values['value']) {
-        $options[$values['name']] = $values['value'];
-      }
-    }
-    $form_state['values']['options'] = $options;
+    $form_state['values']['options'] = $form_state['values']['options']['values'];
 
     parent::settingsSubmitForm($form, $form_state, $entity_type, $entity, $element_type, $element);
   }
