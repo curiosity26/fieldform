@@ -24,7 +24,7 @@ class FieldFormController extends EntityAPIControllerExportable {
           $elements[$element->_id] = $element;
         }
         $entity->elements = $elements;
-        dpm($entities, 'Wakeup');
+        dpm($entity->elements, 'Wakeup');
         if (!$entity->hasElement('form_complete')) {
           $terminator = fieldform_element_create('separator', array(
             '_id' => 'form_complete',
