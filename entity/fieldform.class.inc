@@ -97,6 +97,11 @@ class FieldFormEntity extends Entity {
     $class = entity_get_controller($this->entityType);
     $class::completedFormBehavior($this, $form, $form_state);
   }
+
+  public function setUp() {
+    parent::setUp();
+    dpm($this, 'Wakeup');
+  }
 }
 
 interface FieldFormElementInterface {

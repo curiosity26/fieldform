@@ -116,7 +116,6 @@ class FieldFormController extends EntityAPIControllerExportable {
         $elements[$element->_id] = $element;
       }
       $entity->elements = $elements;
-      dpm($entity->elements, 'Import Entity');
     }
     return $entity;
   }
