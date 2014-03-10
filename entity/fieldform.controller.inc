@@ -706,6 +706,9 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     }
 
     foreach ($element->children as $child) {
+      if (is_string($child)) {
+        $child = unserialize($child);
+      }
       if (($found = $child->findChildById($id)) !== FALSE) {
         return $found;
       }
@@ -715,6 +718,9 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
 
   static public function findChildByName(FieldFormElementInterface $element, $name) {
     foreach ($element->children as $child) {
+      if (is_string($child)) {
+        $child = unserialize($child);
+      }
       if ($child->name === $name) {
         return $child;
       }
@@ -728,6 +734,9 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
   static public function findChildrenByType(FieldFormElementInterface $element, $type) {
     $children = array();
     foreach ($element->children as $child) {
+      if (is_string($child)) {
+        $child = unserialize($child);
+      }
       if ($child->elementType() === $type) {
         $children[$child->_id] = $child;
       }
