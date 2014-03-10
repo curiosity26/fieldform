@@ -343,14 +343,14 @@ function fieldform_elements_list_submit($form, &$form_state) {
 
   $entity->elements = array();
 
-  try {
+  //try {
     _fieldform_process_elements($entity, $process);
     entity_save($entity->entityType(), $entity);
-  }
+  /*}
   catch(Exception $e) {
     $entity->elements = $old_elements;
     throw $e;
-  }
+  }*/
 
   drupal_redirect_form($form_state);
 }
