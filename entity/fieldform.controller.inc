@@ -721,6 +721,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       if (is_string($child)) {
         $child = unserialize($child);
       }
+      dpm($child, 'Child');
       if ($child->name === $name) {
         return $child;
       }
