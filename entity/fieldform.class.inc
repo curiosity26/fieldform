@@ -21,6 +21,7 @@ class FieldFormEntity extends Entity {
       }
       $this->elements = $elements;
     }
+    dpm($this->elements, 'Wakeup');
   }
 
   public function addElement($element) {
@@ -96,12 +97,6 @@ class FieldFormEntity extends Entity {
   public function completedFormBehavior($form, &$form_state) {
     $class = entity_get_controller($this->entityType);
     $class::completedFormBehavior($this, $form, $form_state);
-  }
-
-  public function setUp() {
-    parent::setUp();
-    dpm($this, 'Wakeup');
-    $this->elements = unserialize($this->elements);
   }
 }
 
