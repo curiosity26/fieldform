@@ -100,7 +100,7 @@ class FieldFormEntity extends Entity {
 
   public function setUp() {
     parent::setUp();
-
+    dpm($this, 'Setup');
     foreach ($this->elements as &$element) {
       if (is_string($element)) {
         $element = unserialize($element);
@@ -289,7 +289,7 @@ class FieldFormElement implements FieldFormElementInterface {
     }
     $this->children = $vars['children'];
     unset($vars['elementInfo']);
-    return array_keys($vars);
+    return drupal_map_assoc(array_keys($vars));
   }
 
   public function __wakeup() {
