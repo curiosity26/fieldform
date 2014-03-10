@@ -631,6 +631,9 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     }
     elseif ($element->hasChildren()) {
       foreach ($element->children as $_id => &$kid) {
+        if (is_string($kid)) {
+          $kid = unserialize($kid);
+        }
         if ($kid->deleteElement($child) === TRUE) {
           return TRUE;
         }
