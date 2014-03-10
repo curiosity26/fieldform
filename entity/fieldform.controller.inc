@@ -95,23 +95,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
     return entity_var_json_export($vars, $prefix);
   }
-/*
-  public function import($export) {
-    $entity = parent::import($export);
-    if (!!$entity) {
-      $elements = array();
-      foreach ($entity->elements as $item) {
-        if (is_string($item)) {
-          $item = unserialize($item);
-        }
-        $element = is_array($item) ? fieldform_element_create($item['type'], $item) : $item;
-        $elements[$element->_id] = $element;
-      }
-      $entity->elements = $elements;
-    }
-    return $entity;
-  }
-*/
+
   static public function hookForms() {
     $forms = array();
     $entities = fieldform_load_multiple();
