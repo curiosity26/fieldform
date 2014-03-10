@@ -151,7 +151,6 @@ function fieldform_elements_list($form, &$form_state, $entity) {
   $form_state['fieldform'] = $entity;
   $values = isset($form_state['input']) ? $form_state['input'] : array();
   $elements = $entity->elements;
-  $mem_usage = memory_get_usage();
   $form['elements'] = array(
     '#tree' => TRUE
   );
