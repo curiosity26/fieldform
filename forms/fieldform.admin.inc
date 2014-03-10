@@ -136,14 +136,12 @@ function fieldform_form_submit($form, &$form_state) {
 
 function fieldform_name_exists($value, $element, $form_state) {
   list($entity) = $form_state['build_info']['args'];
-
   $query = db_select('fieldform', 'f')->fields('f', array('name', 'fid'))->condition('name', $value);
   $result = $query->execute();
   if ($result->rowCount() > 0) {
     $row = $result->fetchAssoc();
     return !($entity->name === $value && $entity->fid === $row['fid']);
   }
-
   return FALSE;
 }
 
