@@ -474,6 +474,24 @@ class FieldFormController extends EntityAPIControllerExportable {
     $entity->elements = $clone;
     return $return;
   }
+
+  public function cacheGet($ids, $conditions = array()) {
+    $entities = parent::cacheGet($ids, $conditions);
+
+    foreach($entities as $entity) {
+      $elements = array();
+      foreach ($entity->elements as $element) {
+        if (is_string($element)) {
+          $element = unserialize($element);
+        }
+        if (is_array($element)) {
+          $element = fieldform_element_create($element['type'], $element);
+        }
+        $elements[$element->_id] = $element;
+      }
+      $entity->elements = $elements;
+    }
+  }
 }
 
 class FieldFormAdminUIController extends EntityDefaultUIController {
