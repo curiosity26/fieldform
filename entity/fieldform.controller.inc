@@ -457,7 +457,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     2. More accessible to a wider variety of database drivers. MongoDB in specific.
     */
 
-    $clone = $entity->elements;
+    $clone = clone $entity;
 
     if (!empty($clone->elements)) {
       $elements = array();
@@ -465,13 +465,10 @@ class FieldFormController extends EntityAPIControllerExportable {
         $elements[$element->name] = $element->save();
       }
 
-      $entity->elements = $elements;
+      $clone->elements = $elements;
     }
 
-    $return = parent::save($entity);
-
-    $entity->elements = $clone; // Keep the in-memory element the same as it was
-    return $return;
+    return parent::save($clone);
   }
 }
 
@@ -886,7 +883,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
   }
 
   static public function save(FieldFormElementInterface $element) {
-    return $element->toArray();
+    return serialize($element);
   }
 
   static public function validate(FieldFormElementInterface $element, &$form, &$form_state) {
