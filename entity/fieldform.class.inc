@@ -12,7 +12,7 @@ class FieldFormEntity extends Entity {
 
   public function __construct($values = array()) {
     parent::__construct($values, 'fieldform');
-
+    /*
     if (is_string($this->elements)) {
       $this->elements = unserialize($this->elements);
     }
@@ -27,8 +27,7 @@ class FieldFormEntity extends Entity {
         $elements[$element->_id] = $element;
       }
       $this->elements = $elements;
-    }
-    dpm($this->elements, 'Wakeup');
+    }*/
   }
 
   public function addElement($element) {
