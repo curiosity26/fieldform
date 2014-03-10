@@ -275,18 +275,18 @@ class FieldFormElement implements FieldFormElementInterface {
 
   public function __sleep() {
     $vars = get_object_vars($this);
-    $vars['children'] = array();
+    /*$vars['children'] = array();
     foreach ($this->children as $child) {
       $vars['children'][] = serialize($child);
     }
-    $this->children = $vars['children'];
+    $this->children = $vars['children'];*/
     unset($vars['elementInfo']);
     return drupal_map_assoc(array_keys($vars));
   }
 
   public function __wakeup() {
     $this->elementInfo = fieldform_get_info($this->elementType);
-    $children = $this->children;
+    /*$children = $this->children;
 
     if (!empty($children)) {
       // Process children after the parent has been processed
@@ -305,6 +305,6 @@ class FieldFormElement implements FieldFormElementInterface {
           $this->children[$element->_id] = $element;
         }
       }
-    }
+    }*/
   }
 }
