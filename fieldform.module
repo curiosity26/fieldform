@@ -1382,7 +1382,7 @@ function form_type_namevalue_table_value(&$element, $input = FALSE) {
     }
     $final = array_filter($final);
   }
-  else {
+  elseif (isset($element['#default_value'])) {
     $default = $element['#default_value'];
     foreach ($default as $name => $value) {
       if (is_array($value) && isset($value['name'])) {
