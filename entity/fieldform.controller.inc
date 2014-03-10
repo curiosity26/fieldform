@@ -720,9 +720,10 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     foreach ($element->children as $child) {
       if (is_string($child) == 1) {
         $child = unserialize($child);
-        dpm(unserialize($child), 'Child after unserializing');
+        if (is_string($child) == 1) { // Double serializion issue. Finding source
+          $child = unserialize($child);
+        }
       }
-      dpm($child, 'Child');
       if ($child->name === $name) {
         return $child;
       }
