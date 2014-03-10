@@ -718,8 +718,9 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
 
   static public function findChildByName(FieldFormElementInterface $element, $name) {
     foreach ($element->children as $child) {
-      if (!in_array('FieldFormElementInterface', class_implements($child))) {
+      if (is_string($child) == 1) {
         $child = unserialize($child);
+        dpm($child, 'Child after unserializing');
       }
       dpm($child, 'Child');
       if ($child->name === $name) {
