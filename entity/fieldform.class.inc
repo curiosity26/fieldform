@@ -97,26 +97,6 @@ class FieldFormEntity extends Entity {
     $class = entity_get_controller($this->entityType);
     $class::completedFormBehavior($this, $form, $form_state);
   }
-
-  public function setUp() {
-    parent::setUp();
-    $elements = unserialize($this->elements);
-    if (!!$elements) {
-      $this->elements = $elements;
-    }
-
-    foreach ($this->elements as &$element) {
-      if (is_string($element)) {
-        $element = unserialize($element);
-      }
-
-      if (is_array($element)) {
-        $element = fieldform_element_create($element['type'], $element);
-      }
-    }
-
-    $this->elements = serialize($this->elements);
-  }
 }
 
 interface FieldFormElementInterface {
