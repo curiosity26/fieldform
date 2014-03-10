@@ -889,14 +889,13 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
   }
 
   static public function settingsSubmitForm(&$form, &$form_state, $entity_type, $entity, $element_type, $element) {
-   dpm($form_state, 'Submit Form State');
-    if (isset($form_state['input']['attributes']['values'])) {
-     $form_state['input']['attributes'] = $form_state['input']['attributes']['values'];
+    if (isset($form_state['values']['attributes']['values'])) {
+     $form_state['values']['attributes'] = $form_state['input']['attributes']['values'];
    }
 
-    if (isset($form_state['input']['attributes'])) {
-      $form_state['input']['attributes'] = $form_state['input']['attributes'] +
-        array('class' => $form_state['input']['class']);
+    if (isset($form_state['values']['attributes'])) {
+      $form_state['values']['attributes'] = $form_state['values']['attributes'] +
+        array('class' => $form_state['values']['class']);
     }
   }
 
