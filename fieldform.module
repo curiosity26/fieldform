@@ -1301,13 +1301,16 @@ function _namevalue_table_ajax() {
   if ($op == 'add' || $op == 'remove') {
     $count = max($op == 'remove' ? $count - 1 : $count + 1, 1);
   }
-  dpm($form_state, 'Form State');
   $form_values = &drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+  $form_input = &drupal_array_get_nested_value($form_state['input'], $element['#parents']);
+
   $values = isset($form_values['values']) ? array_filter($form_values['values']) : array_filter($form_values);
+  dpm($values, 'Values');
+  dpm($form_input, 'Input');
   // Cleanse the Element
   foreach (element_children($element) as $branch) {
     if (is_numeric($branch)) {
-      unset($element[$branch], $form_values[$branch]);
+      unset($element[$branch], $form_values[$branch], $form_input[$branch]);
     }
   }
 
@@ -1368,7 +1371,7 @@ function form_type_namevalue_table_value(&$element, $input = FALSE) {
         $dups[$value['name']] = isset($dups[$value['name']]) ? $dups[$value['name']]++ : 1;
         $value['name'] .= '_'.$dups[$value['name']];
       }
-      $final[$value['name']] = $value['value'];
+      $final[$value['name']] = (string) $value['value'];
     }
     $final = array_filter($final);
   }
