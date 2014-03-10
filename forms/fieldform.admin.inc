@@ -206,10 +206,9 @@ function fieldform_elements_list($form, &$form_state, $entity) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save configuration'),
-    '#submit' => array('fieldform_elements_list_submit')
+    '#value' => t('Save configuration')
   );
-  dpm(memory_get_usage() - $mem_usage, 'Memory Use');
+
   return $form;
 }
 
