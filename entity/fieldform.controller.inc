@@ -16,15 +16,17 @@ class FieldFormController extends EntityAPIControllerExportable {
     foreach ($entities as $entity) {
       if (!empty($entity->elements) && is_array($entity->elements)) {
         $elements = array();
-        foreach ($entity->elements as $value) {
-          if (is_string($value)) {
-            $value = unserialize($value);
+        if (is_string(current($entity->elements))) {
+          foreach ($entity->elements as $value) {
+            if (is_string($value)) {
+              $value = unserialize($value);
+            }
+            $element = is_array($value) ? fieldform_element_create($value['type'], $value) : $value;
+            $elements[$element->_id] = $element;
           }
-          $element = is_array($value) ? fieldform_element_create($value['type'], $value) : $value;
-          $elements[$element->_id] = $element;
+          $entity->elements = $elements;
+          dpm($entity->elements, 'Wakeup');
         }
-        $entity->elements = $elements;
-        dpm($entity->elements, 'Wakeup');
         if (!$entity->hasElement('form_complete')) {
           $terminator = fieldform_element_create('separator', array(
             '_id' => 'form_complete',
