@@ -1366,7 +1366,7 @@ function _namevalue_table_ajax() {
 function form_type_namevalue_table_value(&$element, $input = FALSE) {
   $final = array();
   $dups = array();
-
+  dpm($input, 'INput');
   if ($input !== FALSE && isset($element['#validated']) && $element['#validated'] == TRUE) {
     unset($input['row_count']);
     uasort($input, 'drupal_sort_weight');
@@ -1379,6 +1379,7 @@ function form_type_namevalue_table_value(&$element, $input = FALSE) {
     }
     $final = array_filter($final);
   }
+  dpm($final, 'Final Values');
   return array('values' => $final);
 }
 
