@@ -101,6 +101,10 @@ class FieldFormEntity extends Entity {
   public function setUp() {
     parent::setUp();
     dpm($this, 'Setup');
+    if (is_string($this->elements)) {
+      $this->elements = unserialize($this->elements);
+    }
+
     foreach ($this->elements as &$element) {
       if (is_string($element)) {
         $element = unserialize($element);
