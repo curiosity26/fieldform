@@ -266,4 +266,38 @@ class FieldFormElement implements FieldFormElementInterface {
     $class = fieldform_element_controller($this->elementType);
     return $class::save($this);
   }
+
+  public function __sleep() {
+    $vars = get_object_vars($this);
+    $vars['children'] = array();
+    foreach ($this->children as $child) {
+      $vars['children'][] = serialize($child);
+    }
+    $this->children = $vars['children'];
+    unset($vars['elementInfo']);
+    return array_keys($vars);
+  }
+
+  public function __wakeup() {
+    $this->elementInfo = fieldform_get_info($this->elementType);
+    $children = $this->children;
+
+    if (!empty($children)) {
+      // Process children after the parent has been processed
+      foreach ($children as $child) {
+        if (is_string($child)) {
+          $child = unserialize($child);
+        }
+        if (is_array($child)) {
+          $child['parents'] = array_merge($this->parents, array($child['name']));
+          $element = fieldform_element_controller($child['type'])->create($child);
+        }
+        else {
+          $element = $child;
+        }
+
+        $this->children[$element->_id] = $element;
+      }
+    }
+  }
 }

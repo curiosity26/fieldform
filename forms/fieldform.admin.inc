@@ -331,7 +331,6 @@ function fieldform_elements_list_submit($form, &$form_state) {
       $arr = get_object_vars($element);
       unset($arr['parents'], $arr['children'], $arr['weight']); // Ensure that these are made new
       $process[] = array_merge($arr, $value);
-      dpm($process, 'Process');
     }
     elseif($value['name'] !== '') {
       $process[] = $value;
