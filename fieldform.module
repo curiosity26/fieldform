@@ -1306,7 +1306,7 @@ function _namevalue_table_ajax() {
   $input = array();
   foreach ($form_input as $item) {
     if (is_array($item) && isset($item['name'])) {
-      $input[] = array($item['name'] => $item['value']);
+      $input[$item['name']] = $item['value'];
     }
   }
 
