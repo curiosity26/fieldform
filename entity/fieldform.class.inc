@@ -299,7 +299,8 @@ class FieldFormElement implements FieldFormElementInterface {
           else {
             $element = $child;
           }
-          dpm(get_class($element).' | '.$element, 'Wakeup Element');
+          dpm($element, 'Wakeup Element');
+          dpm(get_class($element), 'Wakeup Element Type');
           $this->children[$element->_id] = $element;
         }
       }
