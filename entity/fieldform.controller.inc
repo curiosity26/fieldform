@@ -474,7 +474,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $entity->elements = $clone;
     return $return;
   }
-
+/*
   public function cacheGet($ids, $conditions = array()) {
     $entities = parent::cacheGet($ids, $conditions);
 
@@ -491,7 +491,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       }
       $entity->elements = $elements;
     }
-  }
+  }*/
 }
 
 class FieldFormAdminUIController extends EntityDefaultUIController {
