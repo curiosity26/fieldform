@@ -481,7 +481,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $return = parent::save($entity);
     //$entity->elements = $clone;
     dpm($entity, 'Post Save');
-    $this->resetCache(array($entity->idKey));
+    $this->resetCache(array($entity->identifier()));
     return $return;
   }
 }
