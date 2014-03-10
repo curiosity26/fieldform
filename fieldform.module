@@ -1305,8 +1305,7 @@ function _namevalue_table_ajax() {
   $form_input = &drupal_array_get_nested_value($form_state['input'], $element['#parents']);
 
   $values = isset($form_values['values']) ? array_filter($form_values['values']) : array_filter($form_input);
-  dpm($values, 'Values');
-  dpm($form_input, 'Input');
+
   // Cleanse the Element
   foreach (element_children($element) as $branch) {
     if (is_numeric($branch)) {
@@ -1315,7 +1314,7 @@ function _namevalue_table_ajax() {
   }
 
   reset($values);
-
+  dpm($values, 'Values');
   $element['row_count']['#value'] = $count;
   unset($element['row_count']['#printed']);
 
