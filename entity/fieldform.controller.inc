@@ -9,14 +9,12 @@
 class FieldFormController extends EntityAPIControllerExportable {
   public function __construct($entityType = NULL) {
     parent::__construct('fieldform');
-    dpm($this, 'Wakeup Controller');
   }
 
   public function load($ids = array(), $conditions = array()) {
     $entities = parent::load($ids, $conditions);
-    dpm($entities, 'Wakeup');
     foreach ($entities as $entity) {
-      if (!empty($entity->elements) && is_array(current($entity->elements))) {
+      if (!empty($entity->elements) && is_array($entity->elements)) {
         $elements = array();
         foreach ($entity->elements as $value) {
           if (is_string($value)) {
@@ -26,6 +24,7 @@ class FieldFormController extends EntityAPIControllerExportable {
           $elements[$element->_id] = $element;
         }
         $entity->elements = $elements;
+        dpm($entities, 'Wakeup');
         if (!$entity->hasElement('form_complete')) {
           $terminator = fieldform_element_create('separator', array(
             '_id' => 'form_complete',
