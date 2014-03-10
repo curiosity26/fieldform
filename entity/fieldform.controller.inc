@@ -17,6 +17,9 @@ class FieldFormController extends EntityAPIControllerExportable {
       if (!empty($entity->elements) && is_array(current($entity->elements))) {
         $elements = array();
         foreach ($entity->elements as $value) {
+          if (is_string($value)) {
+            $value = unserialize($value);
+          }
           $element = is_array($value) ? fieldform_element_create($value['type'], $value) : $value;
           $elements[$element->_id] = $element;
         }
