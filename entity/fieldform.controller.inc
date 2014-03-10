@@ -106,7 +106,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
     return entity_var_json_export($vars, $prefix);
   }
-
+/*
   public function import($export) {
     $entity = parent::import($export);
     if (!!$entity) {
@@ -122,7 +122,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     }
     return $entity;
   }
-
+*/
   static public function hookForms() {
     $forms = array();
     $entities = fieldform_load_multiple();
