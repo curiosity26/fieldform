@@ -460,19 +460,18 @@ class FieldFormController extends EntityAPIControllerExportable {
     2. More accessible to a wider variety of database drivers. MongoDB in specific.
     */
 
-    $clone = clone $entity;
+    $clone = $entity->elements;
 
-    if (!empty($clone->elements)) {
+    if (!empty($clone)) {
       $elements = array();
-      foreach ($clone->elements as $element) {
+      foreach ($clone as $element) {
         $elements[$element->name] = $element->save();
       }
-
-      $clone->elements = $elements;
+      $entity->elements = $elements;
     }
 
-    $return = parent::save($clone);
-    $entity->{$this->{$this->nameKey}} = $clone->identifier();
+    $return = parent::save($entity);
+    $entity->elements = $clone;
     return $return;
   }
 }
