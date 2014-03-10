@@ -166,6 +166,9 @@ class FieldFormController extends EntityAPIControllerExportable {
     }
 
     foreach ($entity->elements as &$child) {
+      if (is_string($child)) {
+        $child = unserialize($child);
+      }
       if ($child->deleteElement($element) === TRUE) {
         return TRUE;
       }
