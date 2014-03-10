@@ -1163,7 +1163,7 @@ function namevalue_sort_weight($a, $b) {
   return ($a_weight < $b_weight) ? -1 : 1;
 }
 
-function form_namevalue_table_process($element, &$form_state, $complete_form) {
+function form_namevalue_table_process($element, &$form_state, $form) {
   $options = array();
   if (!empty($element['#options']) && !empty($element['#options']['values'])) {
     $options = array_filter($element['#options']['values']);
@@ -1210,7 +1210,7 @@ function form_namevalue_table_process($element, &$form_state, $complete_form) {
     '#type' => 'actions'
   );
 
-  $name_parameter = check_plain(implode('/', $element['#array_parents']));
+  $name_parameter = check_plain(implode('/', $element['#array_parents'])).'/'.$form['form_build_id']['#value'];
 
   $element['actions']['save'] = array(
     '#type' => 'button',
