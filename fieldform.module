@@ -1301,6 +1301,7 @@ function _namevalue_table_ajax() {
   if ($op == 'add' || $op == 'remove') {
     $count = max($op == 'remove' ? $count - 1 : $count + 1, 1);
   }
+  dpm($form_state, 'Form State');
   $form_values = &drupal_array_get_nested_value($form_state['values'], $element['#parents']);
   $values = isset($form_values['values']) ? array_filter($form_values['values']) : array_filter($form_values);
   // Cleanse the Element
@@ -1322,6 +1323,7 @@ function _namevalue_table_ajax() {
     $value = array('name' => array_search($current, $values), 'value' => $current);
     $data[$i] = _namevalue_table_blank_row();
     $data[$i]['weight']['#value'] = $i;
+    $data[$i]['#weight'] = $i;
     foreach(element_children($data[$i]) as $name) {
       if ($name !== 'weight') {
         $data[$i][$name]['#value'] = isset($value[$name]) ? $value[$name] : '';
