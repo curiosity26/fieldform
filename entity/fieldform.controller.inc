@@ -159,7 +159,8 @@ class FieldFormController extends EntityAPIControllerExportable {
     if (empty($entity->elements)) {
       return FALSE;
     }
-
+    dpm($entity->elements, 'Elements');
+    dpm($element, 'Element');
     if (array_key_exists($element->_id, $entity->elements)) {
       unset($entity->elements[$element->_id]);
       return TRUE;
