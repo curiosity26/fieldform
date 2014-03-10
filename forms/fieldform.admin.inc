@@ -151,7 +151,7 @@ function fieldform_elements_list($form, &$form_state, $entity) {
   $form_state['fieldform'] = $entity;
   $values = isset($form_state['input']) ? $form_state['input'] : array();
   $elements = $entity->elements;
-
+  $mem_usage = memory_get_usage();
   $form['elements'] = array(
     '#tree' => TRUE
   );
@@ -209,7 +209,7 @@ function fieldform_elements_list($form, &$form_state, $entity) {
     '#value' => t('Save configuration'),
     '#submit' => array('fieldform_elements_list_submit')
   );
-
+  dpm(memory_get_usage() - $mem_usage, 'Memory Use');
   return $form;
 }
 
@@ -326,7 +326,6 @@ function fieldform_elements_list_submit($form, &$form_state) {
   $form_state['redirect'] = $entity->entityInfo()['admin ui']['path'].'/manage/'.$entity->identifier().'/elements';
   $values = $form_state['input'];
   $elements = $values['elements'];
-  dpm($elements, 'Elements');
   $process = array();
   $old_elements = $entity->elements;
 
@@ -397,4 +396,5 @@ function _fieldform_update_entity(FieldFormEntity $entity, $element) {
     }
     return $success;
   }
+  return FALSE;
 }

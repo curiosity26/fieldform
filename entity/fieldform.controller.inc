@@ -204,14 +204,13 @@ class FieldFormController extends EntityAPIControllerExportable {
     }
 
     reset($entity->elements);
-    while ($element = &current($entity->elements)) {
+    foreach ($entity->elements as &$element) {
       if (is_string($element)) {
         $element = unserialize($element);
       }
       if (($found = $element->findChildByID($id)) !== FALSE) {
         return $found;
       }
-      next($entity->elements);
     }
 
     return FALSE;
@@ -222,7 +221,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       return FALSE;
     }
     reset($entity->elements);
-    while ($element = &current($entity->elements)) {
+    foreach ($entity->elements as &$element) {
       if (is_string($element)) {
         $element = unserialize($element);
       }
@@ -233,7 +232,6 @@ class FieldFormController extends EntityAPIControllerExportable {
       if (($found = $element->findChildByName($name)) !== FALSE) {
         return $found;
       }
-      next($entity->elements);
     }
 
     return FALSE;
@@ -249,7 +247,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
       reset($entity->elements);
       $children[$type] = array();
-      while ($element = &current($entity->elements)) {
+      foreach ($entity->elements as &$element) {
         if (is_string($element)) {
           $element = unserialize($element);
         }
@@ -259,8 +257,6 @@ class FieldFormController extends EntityAPIControllerExportable {
 
         $found = $element->findChildrenByType($type);
         $children[$type] += $found;
-
-        next($entity->elements);
       }
     }
 
