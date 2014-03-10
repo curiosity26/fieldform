@@ -12,22 +12,6 @@ class FieldFormEntity extends Entity {
 
   public function __construct($values = array()) {
     parent::__construct($values, 'fieldform');
-    /*
-    if (is_string($this->elements)) {
-      $this->elements = unserialize($this->elements);
-    }
-
-    if (!empty($this->elements) && is_array($this->elements)) {
-      $elements = array();
-      foreach ($this->elements as $value) {
-        if (is_string($value) == TRUE) {
-          $value = unserialize($value);
-        }
-        $element = is_array($value) ? fieldform_element_create($value['type'], $value) : $value;
-        $elements[$element->_id] = $element;
-      }
-      $this->elements = $elements;
-    }*/
   }
 
   public function addElement($element) {

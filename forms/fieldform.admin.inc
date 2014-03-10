@@ -332,7 +332,6 @@ function fieldform_elements_list_submit($form, &$form_state) {
     if ($name !== 'add_new_element') {
       $element = $entity->findElementByID($value['id']);
       if (!$element) {
-        dpm($value, 'Element not found');
         $entity->elements = $old_elements;
         throw new DrupalUpdateException();
       }
@@ -351,7 +350,6 @@ function fieldform_elements_list_submit($form, &$form_state) {
   try {
     _fieldform_process_elements($entity, $process);
     entity_save($entity->entityType(), $entity);
-    dpm($entity, 'Saved');
   }
   catch(Exception $e) {
     $entity->elements = $old_elements;
