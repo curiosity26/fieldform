@@ -13,6 +13,10 @@ class FieldFormEntity extends Entity {
   public function __construct($values = array()) {
     parent::__construct($values, 'fieldform');
 
+    if (is_string($this->elements)) {
+      $this->elements = unserialize($this->elements);
+    }
+
     if (!empty($this->elements) && is_array($this->elements)) {
       $elements = array();
       foreach ($this->elements as $value) {
