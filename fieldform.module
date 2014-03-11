@@ -1120,7 +1120,7 @@ function fieldform_element_settings_form_submit($form, &$form_state) {
 
   $values = $form_state['values'];
 
-  if (isset($values['attributes'])) {
+  if (isset($values['attributes']['values'])) {
     $values['attributes'] = $values['attributes']['values'];
   }
 
@@ -1302,11 +1302,14 @@ function _namevalue_table_ajax() {
     $count = max($op == 'remove' ? $count - 1 : $count + 1, 1);
   }
   $form_values = &drupal_array_get_nested_value($form_state['values'], $element['#parents']);
-  $form_input = &drupal_array_get_nested_value($form_state['input'], $element['#parents']);
   $input = array();
-  foreach ($form_input as $item) {
-    if (is_array($item) && isset($item['name'])) {
-      $input[$item['name']] = $item['value'];
+
+  if (isset($form_state['input'])) {
+    $form_input = &drupal_array_get_nested_value($form_state['input'], $element['#parents']);
+    foreach ($form_input as $item) {
+      if (is_array($item) && isset($item['name'])) {
+        $input[$item['name']] = $item['value'];
+      }
     }
   }
 
