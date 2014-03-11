@@ -1211,31 +1211,25 @@ function form_namevalue_table_process($element, &$form_state, $form) {
         'class' => array('namevalue-weight')
       )
     );
-    dpm($delta, 'Opt Delta');
-    dpm($option, 'Opt Opt');
-    dpm($element[$delta], 'Opt Element');
   }
 
   $element['#row_count'] = count($options);
-  $add = $element['#row_count'];
-  $element[$add] = $row + array(
-      '#title' => t('Row @num', array('@num' => $add)),
+  $delta = $element['#row_count'];
+  $element[$delta] = $row + array(
+      '#title' => t('Row @num', array('@num' => $delta)),
       '#title_display' => 'hidden'
     );
-  $element[$add]['weight'] = array(
+  $element[$delta]['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
     '#title_display' => 'hidden',
     '#delta' => $count,
-    '#default_value' => $add,
+    '#default_value' => $delta,
     '#weight' => 2,
     '#attributes' => array(
       'class' => array('namevalue-weight')
     )
   );
-
-  dpm($add, 'Opt Add Delta');
-  dpm($element[$add], 'Opt Add Element');
 
   $element['actions'] = array(
     '#type' => 'actions'
@@ -1595,17 +1589,18 @@ function theme_fieldform_elements_list($variables) {
 function theme_namevalue_table($variables) {
   $element = $variables['element'];
   $rows = array();
-
+  dpm(element_children($element), 'Kids');
   foreach (element_children($element) as $key) {
     $branch = &$element[$key];
     if ($key == 'actions') {
       $actions = &$branch;
       continue;
     }
+    dpm(render($branch), 'Branch');
     $row = array('data' => array(
-      drupal_render($branch['name']),
-      drupal_render($branch['value']),
-      drupal_render($branch['weight'])
+      render($branch['name']),
+      render($branch['value']),
+      render($branch['weight'])
     ),'class' => array('draggable', 'tabledrag-root'));
     $rows[] = $row;
   }
