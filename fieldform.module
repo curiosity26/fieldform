@@ -1748,12 +1748,9 @@ function template_preprocess_fieldform_print_page(&$vars) {
   $params = array_merge(array($result->form_name), arg());
   $params[] = $result->identifier();
 
-  if (!!$form) {
-    array_unshift($params, $form->identifier());
-    $vars['classes_array'][] = 'fieldform-form-'.$form->identifier();
-  }
+  $vars['classes_array'][] = 'fieldform-form-'.$result->form_name;
 
-  if ($suggestions = theme_get_suggestions($params, 'fieldform_result_page')) {
+  if ($suggestions = theme_get_suggestions($params, 'fieldform_print_page')) {
     $vars['theme_hook_suggestions'] = $suggestions;
   }
 
