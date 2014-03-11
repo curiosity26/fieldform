@@ -1195,7 +1195,7 @@ function form_namevalue_table_process($element, &$form_state, $form) {
   $delta = -1;
   foreach (element_children($options) as $delta => $option) {
     $element[$delta] = $row;
-    $element[$delta]['#default_value'] = array($option => $option[$delta]);
+    $element[$delta]['#default_value'] = array($option => $options[$option]);
     $element[$delta]['weight'] = array(
       '#type' => 'weight',
       '#title' => t('Weight'),
