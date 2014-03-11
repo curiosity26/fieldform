@@ -1591,9 +1591,7 @@ function theme_namevalue_table($variables) {
     uasort($branch, 'drupal_sort_weight');
     foreach (element_children($branch) as $name) {
       $col = &$branch[$name];
-      show($col);
-      $col['#access'] = TRUE;
-      $row['data'][] = drupal_render($col);
+      $row['data'][] = render($col);
     }
     $rows[] = $row;
   }
@@ -1609,7 +1607,7 @@ function theme_namevalue_table($variables) {
 
   $output = theme('form_element_label', array('element' => $element));
   $output .= $table;
-  $output .= drupal_render($actions);
+  $output .= render($actions);
 
   drupal_add_tabledrag($element['#attributes']['id'], 'order', 'sibling', 'namevalue-weight');
 
