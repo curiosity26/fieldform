@@ -798,7 +798,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
           case FIELDFORM_PROPERTY_TABLE:
             $value = empty($value) ? array() : $value;
             $form[$name]['#type'] = 'namevalue_table';
-            $form[$name]['#options'] = $value;
+            $form[$name]['#values'] = $value;
             break;
           case FIELDFORM_PROPERTY_DATE:
             $form[$name]['#type'] = 'date';
@@ -844,7 +844,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     $form['details']['attributes'] = array(
       '#type' => 'namevalue_table',
       '#title' => t('Attributes'),
-      '#options' => isset($values['attributes']) ? $values['attributes'] : array()
+      '#values' => isset($values['attributes']) ? $values['attributes'] : array()
     );
 
     $form['details']['title_display'] = array(
