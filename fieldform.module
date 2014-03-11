@@ -1192,13 +1192,12 @@ function form_namevalue_table_process($element, &$form_state, $form) {
     '#type' => 'namevalue_row',
   );
   $count = count($options);
+  dpm($options, 'Options');
   foreach ($options as $name => $value) {
-    $parents = $element['#parents'];
-    $parents[] = $i;
     $element[$i] = $row;
     $element[$i]['#default_value'] = array($name => $value);
     $element[$i]['#weight_value'] = $i;
-    $element['weight'] = array(
+    $element[$i]['weight'] = array(
       '#type' => 'weight',
       '#title' => t('Weight'),
       '#title_display' => 'hidden',
@@ -1325,7 +1324,6 @@ function _namevalue_table_ajax() {
   }
 
   if ($op == 'remove') {
-    $element_info = element_info('namevalue_table');
     $element['#process'] = array('form_namevalue_table_remove_process');
   }
 
@@ -1576,18 +1574,15 @@ function theme_namevalue_table($variables) {
 
   foreach (element_children($element) as $key) {
     $branch = &$element[$key];
-    dpm($branch, "Branch");
     if ($key == 'actions') {
       $actions = &$branch;
       continue;
     }
     $row = array('data' => array(),'class' => array('draggable', 'tabledrag-root'));
     foreach (element_children($branch) as $name) {
-      $col = array(
-        'data' => render($branch[$name])
-      );
-      $row['data'][] = $col;
+      $row['data'][] = render($branch[$name]);
     }
+    dpm($row, "Row");
     $rows[] = $row;
   }
 
