@@ -1587,11 +1587,9 @@ function theme_namevalue_table($variables) {
     }
     $row = array('data' => array(),'class' => array('draggable', 'tabledrag-root'));
     foreach (element_children($branch) as $name) {
-      $cols = &$branch[$name];
-      dpm($cols, 'Columns');
-      foreach (element_children($cols) as $col) {
-        $row['data'][] = render($cols[$col]);
-      }
+      $col = &$branch[$name];
+      dpm($col, 'Columns');
+      $row['data'][] = render($col);
     }
     $rows[] = $row;
   }
