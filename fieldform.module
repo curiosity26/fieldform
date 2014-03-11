@@ -1591,9 +1591,9 @@ function theme_namevalue_table($variables) {
     foreach (element_children($branch) as $name) {
       $row['data'][] = render($branch[$name]);
     }
-    dpm($row, "Row");
     $rows[] = $row;
   }
+  dpm($rows, "Rows");
 
   $table = theme('table', array(
       'header' => $element['#header'],
