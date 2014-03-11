@@ -1217,7 +1217,7 @@ function form_namevalue_table_process($element, &$form_state, $form) {
   }
 
   $element['#row_count'] = count($options);
-  $delta = $element['#row_count'] + 1;
+  $delta = $element['#row_count'];
   $element[$delta] = $row + array(
       '#title' => t('Row @num', array('@num' => $delta)),
       '#title_display' => 'hidden'
@@ -1288,7 +1288,7 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
     $options = array_filter($element['#values']);
   }
 
-  unset($options[$element['#row_count']]);
+  unset($options[$element['#row_count'] - 1]);
 
   $element['#values'] = $options;
 
