@@ -1193,7 +1193,6 @@ function form_namevalue_table_process($element, &$form_state, $form) {
   );
 
   $count = count($options);
-  $delta = -1;
 
   foreach (element_children($options) as $delta => $option) {
     $element[$delta] = $row + array(
@@ -1217,8 +1216,8 @@ function form_namevalue_table_process($element, &$form_state, $form) {
     dpm($element[$delta], 'Opt Element');
   }
 
-  $element['#row_count'] = $delta;
-  $delta++;
+  $element['#row_count'] = count($options);
+  $delta = $element['#row_count'] + 1;
   $element[$delta] = $row + array(
       '#title' => t('Row @num', array('@num' => $delta)),
       '#title_display' => 'hidden'
