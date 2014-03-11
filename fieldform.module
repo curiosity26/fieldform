@@ -1296,8 +1296,8 @@ function _namevalue_table_ajax() {
   }
 
   unset($element['actions'], $element['#printed']);
-
-  $count = drupal_array_get_nested_value($form_state['input'], $element['row_count']['#parents']);
+  $count_input = isset($form_state['input']) ? $form_state['input'] : $form_state['values'];
+  $count = drupal_array_get_nested_value($count_input, $element['row_count']['#parents']);
   if ($op == 'add' || $op == 'remove') {
     $count = max($op == 'remove' ? $count - 1 : $count + 1, 1);
   }
