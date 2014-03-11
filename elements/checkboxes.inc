@@ -10,8 +10,8 @@ class CheckboxesElementController extends FieldFormElementController {
   static public function settingsForm($form, &$form_state, FieldFormElement $element = NULL, $op = NULL) {
     $form = parent::settingsForm($form, $form_state, $element, $op);
 
-    $form['options']['#options'] = is_array($form['options']['#options']) ?
-      $form['options']['#options'] : array();
+    $form['options']['#values'] = is_array($form['options']['#values']) ?
+      $form['options']['#values'] : array();
 
     $form['options']['#push_values'] = array(
       '#default-value-element-ajax' => array(
