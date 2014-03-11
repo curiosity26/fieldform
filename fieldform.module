@@ -1285,7 +1285,6 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
 
 function form_namevalue_row_process($element, &$form_state, $form) {
   $value = isset($element['#value']) ? $element['#value'] : $element['#default_value'];
-  dpm($value, 'Row Value');
   $keys = array_keys($value);
   $name = !empty($keys) ? array_shift($keys) : '';
   $value = isset($value[$name]) ? $value[$name] : '';
@@ -1581,20 +1580,17 @@ function theme_namevalue_table($variables) {
   $element = $variables['element'];
   $rows = array();
 
-  //uasort($data, 'namevalue_sort_weight');
-
   foreach (element_children($element) as $key) {
     $branch = &$element[$key];
     if ($key == 'actions') {
       $actions = &$branch;
       continue;
     }
-    $row = array('data' => array(),'class' => array('draggable', 'tabledrag-root'));
-    uasort($branch, 'drupal_sort_weight');
-    dpm($branch, 'Branch');
-    foreach (element_children($branch) as $name) {
-      $row['data'][] = drupal_render($branch[$name]);
-    }
+    $row = array('data' => array(
+      drupal_render($branch['name']),
+      drupal_render($branch['value']),
+      drupal_render($branch['weight'])
+    ),'class' => array('draggable', 'tabledrag-root'));
     $rows[] = $row;
   }
 
