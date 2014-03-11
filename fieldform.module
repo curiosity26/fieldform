@@ -1589,19 +1589,21 @@ function theme_fieldform_elements_list($variables) {
 function theme_namevalue_table($variables) {
   $element = $variables['element'];
   $rows = array();
-  dpm(element_children($element), 'Kids');
+
   foreach (element_children($element) as $key) {
-    $branch = &$element[$key];
-    if ($key == 'actions') {
-      $actions = &$branch;
+    if ($key === 'actions') {
+      $actions = &$element[$key];
       continue;
     }
-    dpm(render($branch), 'Branch');
+
+    $branch = &$element[$key];
+
     $row = array('data' => array(
       render($branch['name']),
       render($branch['value']),
       render($branch['weight'])
     ),'class' => array('draggable', 'tabledrag-root'));
+
     $rows[] = $row;
   }
 
@@ -1622,7 +1624,7 @@ function theme_namevalue_table($variables) {
   return $output;
 }
 
-function namevalue_row($variables) {
+function theme_namevalue_row($variables) {
   $element = $variables['element'];
   $output = '<div id="'.$element['#id'].'"'.drupal_attributes($element).'>';
   $output .= drupal_render_children($element);
