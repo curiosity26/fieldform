@@ -1212,9 +1212,9 @@ function form_namevalue_table_process($element, &$form_state, $form) {
         'class' => array('namevalue-weight')
       )
     );
-    dpm(element_children($delta), 'Opt Delta');
-    dpm(element_children($option), 'Opt Opt');
-    dpm(element_children($element), 'Opt Element');
+    dpm($delta, 'Opt Delta');
+    dpm($option, 'Opt Opt');
+    dpm($element, 'Opt Element');
   }
 
   $element['#row_count'] = $delta;
