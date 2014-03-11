@@ -1285,7 +1285,7 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
 
 function form_namevalue_row_process($element, &$form_state, $form) {
   $value = isset($element['#value']) ? $element['#value'] : $element['#default_value'];
-  list($name) = array_keys($value);
+  $name = !empty($value) ? array_shift(array_keys($value)) : '';
   $value = isset($value[$name]) ? $value[$name] : '';
   $element['name'] = array(
     '#type' => 'textfield',
