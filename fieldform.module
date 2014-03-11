@@ -1214,7 +1214,6 @@ function form_namevalue_table_process($element, &$form_state, $form) {
   }
 
   $element['#row_count'] = $delta;
-  dpm($delta, 'Delta with a total of '.count(element_children($element)));
   $delta++;
   $element[$delta] = $row + array(
       '#title' => t('Row @num', array('@num' => $delta)),
@@ -1231,7 +1230,7 @@ function form_namevalue_table_process($element, &$form_state, $form) {
       'class' => array('namevalue-weight')
     )
   );
-
+  dpm($delta, 'Delta with a total of '.count(element_children($element)));
   $element['actions'] = array(
     '#type' => 'actions'
   );
