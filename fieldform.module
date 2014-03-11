@@ -1191,14 +1191,23 @@ function form_namevalue_table_process($element, &$form_state, $form) {
   $row = array(
     '#type' => 'namevalue_row',
   );
-
+  $count = count($options);
   foreach ($options as $name => $value) {
     $parents = $element['#parents'];
     $parents[] = $i;
     $element[$i] = $row;
     $element[$i]['#default_value'] = array($name => $value);
     $element[$i]['#weight_value'] = $i;
-    $element[$i]['#weight'] = $i;
+    $element['weight'] = array(
+      '#type' => 'weight',
+      '#title' => t('Weight'),
+      '#title_display' => 'hidden',
+      '#delta' => $count,
+      '#default_value' => $i,
+      '#attributes' => array(
+        'class' => array('namevalue-weight')
+      )
+    );
     $i++;
   }
 
@@ -1250,7 +1259,6 @@ function form_namevalue_table_process($element, &$form_state, $form) {
 
 function form_namevalue_table_row_process($element, &$form_state, $form) {
   $value = isset($element['#value']) ? $element['#value'] : $element['#default_value'];
-
   $element['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Name'),
@@ -1269,36 +1277,7 @@ function form_namevalue_table_row_process($element, &$form_state, $form) {
     '#attributes' => array('style' => 'max-width: 100%;')
   );
 
-  $element['weight'] = array(
-    '#type' => 'weight',
-    '#title' => t('Weight'),
-    '#title_display' => 'hidden',
-    '#delta' => 20,
-    '#default_value' => isset($value['weight']) ? $value['weight'] : $element['#weight_value']
-  );
-
   return $element;
-}
-
-function _namevalue_table_blank_row() {
-  return array(
-    'name' => array(
-      '#type' => 'textfield',
-      '#title_display' => 'invisible',
-    ),
-    'value' => array(
-      '#type' => 'textfield',
-      '#title_display' => 'invisible',
-    ),
-    'weight' => array(
-      '#type' => 'weight',
-      '#value' => 0,
-      '#attributes' => array(
-        'class' => array('namevalue-weight')
-      ),
-      '#delta' => 100
-    )
-  );
 }
 
 function _namevalue_table_ajax() {
@@ -1577,7 +1556,7 @@ function theme_namevalue_table($variables) {
     $row = array('data' => array(),'class' => array('draggable', 'tabledrag-root'));
     foreach(element_children($branch) as $name) {
       $col = array(
-        'data' => drupal_render($branch[$name])
+        'data' => render($branch[$name])
       );
       $row['data'][] = $col;
     }
