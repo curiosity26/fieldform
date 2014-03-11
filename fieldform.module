@@ -1217,25 +1217,25 @@ function form_namevalue_table_process($element, &$form_state, $form) {
   }
 
   $element['#row_count'] = count($options);
-  $delta = $element['#row_count'];
-  $element[$delta] = $row + array(
-      '#title' => t('Row @num', array('@num' => $delta)),
+  $add = $element['#row_count'];
+  $element[$add] = $row + array(
+      '#title' => t('Row @num', array('@num' => $add)),
       '#title_display' => 'hidden'
     );
-  $element[$delta]['weight'] = array(
+  $element[$add]['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
     '#title_display' => 'hidden',
     '#delta' => $count,
-    '#default_value' => $delta,
+    '#default_value' => $add,
     '#weight' => 2,
     '#attributes' => array(
       'class' => array('namevalue-weight')
     )
   );
 
-  dpm($delta, 'Opt Delta');
-  dpm($element[$delta], 'Opt Element');
+  dpm($add, 'Opt Add Delta');
+  dpm($element[$add], 'Opt Add Element');
 
   $element['actions'] = array(
     '#type' => 'actions'
