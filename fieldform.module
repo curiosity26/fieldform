@@ -1211,7 +1211,16 @@ function form_namevalue_table_process($element, &$form_state, $form) {
   }
 
   $element[$i] = $row;
-  $element[$i]['#weight_value'] = $i;
+  $element[$i]['weight'] = array(
+    '#type' => 'weight',
+    '#title' => t('Weight'),
+    '#title_display' => 'hidden',
+    '#delta' => $count,
+    '#default_value' => $i,
+    '#attributes' => array(
+      'class' => array('namevalue-weight')
+    )
+  );
   $element['#row_count'] = $i;
 
   $element['actions'] = array(
