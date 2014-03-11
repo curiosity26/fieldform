@@ -1186,18 +1186,17 @@ function form_namevalue_table_process($element, &$form_state, $form) {
   );
 
   $element['#attributes'] += array('id' => 'namevalue_table-'.$element['#name']);
-  $i = 0;
 
   $row = array(
     '#type' => 'namevalue_row',
   );
+
   $count = count($options);
-  dpm($options, 'Options');
-  foreach ($options as $name => $value) {
-    $element[$i] = $row;
-    $element[$i]['#default_value'] = array($name => $value);
-    $element[$i]['#weight_value'] = $i;
-    $element[$i]['weight'] = array(
+  $delta = -1;
+  foreach (element_children($options) as $delta => $option) {
+    $element[$delta] = $row;
+    $element[$delta]['#default_value'] = array($option => $option[$delta]);
+    $element[$delta]['weight'] = array(
       '#type' => 'weight',
       '#title' => t('Weight'),
       '#title_display' => 'hidden',
@@ -1207,21 +1206,20 @@ function form_namevalue_table_process($element, &$form_state, $form) {
         'class' => array('namevalue-weight')
       )
     );
-    $i++;
   }
-
-  $element[$i] = $row;
-  $element[$i]['weight'] = array(
+  $delta++;
+  $element[$delta] = $row;
+  $element[$delta]['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
     '#title_display' => 'hidden',
     '#delta' => $count,
-    '#default_value' => $i,
+    '#default_value' => $delta,
     '#attributes' => array(
       'class' => array('namevalue-weight')
     )
   );
-  $element['#row_count'] = $i;
+  $element['#row_count'] = $delta;
 
   $element['actions'] = array(
     '#type' => 'actions'
@@ -1587,11 +1585,14 @@ function theme_namevalue_table($variables) {
       $actions = &$branch;
       continue;
     }
-    $row = array('data' => array(),'class' => array('draggable', 'tabledrag-root'));
     foreach (element_children($branch) as $name) {
-      $row['data'][] = render($branch[$name]);
+      $row = array('data' => array(),'class' => array('draggable', 'tabledrag-root'));
+      $cols = &$branch[$name];
+      foreach (element_children($cols) as $col) {
+        $row['data'][] = render($cols[$col]);
+      }
+      $rows[] = $row;
     }
-    $rows[] = $row;
   }
   dpm($rows, "Rows");
 
