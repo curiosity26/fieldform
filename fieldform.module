@@ -1257,6 +1257,28 @@ function form_namevalue_table_process($element, &$form_state, $form) {
   return $element;
 }
 
+function form_namevalue_table_remove_process($element, &$form_state, $form) {
+  $options = array();
+  if (!empty($element['#values']) && !empty($element['#values']['values'])) {
+    $options = array_filter($element['#values']['values']);
+  }
+  elseif (!empty($element['#values'])) {
+    $options = array_filter($element['#values']);
+  }
+
+  $count = count($options);
+  if ($count > 0) {
+    unset($options[$count - 1]);
+  }
+  else {
+    $options = array();
+  }
+
+  $element['#values'] = $options;
+
+  return form_namevalue_table_process($element, $form_state, $form);
+}
+
 function form_namevalue_table_row_process($element, &$form_state, $form) {
   $value = isset($element['#value']) ? $element['#value'] : $element['#default_value'];
   $element['name'] = array(
@@ -1302,9 +1324,15 @@ function _namevalue_table_ajax() {
     return array('#type' => 'ajax', '#commands' => $commands);
   }
 
+  if ($op == 'remove') {
+    $element_info = element_info('namevalue_table');
+    $element['#process'] = array('form_namevalue_table_remove_process');
+  }
+
   drupal_process_form($form['#form_id'], $form, $form_state);
   $element = drupal_array_get_nested_value($form, $form_parents);
   unset($element['#prefix'], $element['#suffix']);
+
 
   if (!empty($element['#push_values'])) {
     $commands = array(ajax_command_replace('#namevalue-table-wrapper-'.$element['#name'], render($element)));
@@ -1543,18 +1571,16 @@ function theme_fieldform_elements_list($variables) {
 function theme_namevalue_table($variables) {
   $element = $variables['element'];
   $rows = array();
-  $data = array();
-  foreach(element_children($element) as $branch) {
-    if (is_numeric($branch)) {
-      $data[] = $element[$branch];
-    }
-  }
 
   //uasort($data, 'namevalue_sort_weight');
 
-  foreach ($data as $branch) {
+  foreach (element_children($element) as $key) {
+    $branch = &$element[$key];
+    if ($key == 'actions') {
+      $actions = &$branch;
+    }
     $row = array('data' => array(),'class' => array('draggable', 'tabledrag-root'));
-    foreach(element_children($branch) as $name) {
+    foreach (element_children($branch) as $name) {
       $col = array(
         'data' => render($branch[$name])
       );
@@ -1562,9 +1588,6 @@ function theme_namevalue_table($variables) {
     }
     $rows[] = $row;
   }
-
-  $element = $variables['element'];
-  $actions = $element['actions'];
 
   $table = theme('table', array(
       'header' => $element['#header'],
