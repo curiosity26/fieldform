@@ -1235,6 +1235,9 @@ function form_namevalue_table_process($element, &$form_state, $form) {
     )
   );
 
+  dpm($delta, 'Opt Delta');
+  dpm($element[$delta], 'Opt Element');
+
   $element['actions'] = array(
     '#type' => 'actions'
   );
