@@ -1576,8 +1576,10 @@ function theme_namevalue_table($variables) {
 
   foreach (element_children($element) as $key) {
     $branch = &$element[$key];
+    dpm($branch, "Branch");
     if ($key == 'actions') {
       $actions = &$branch;
+      continue;
     }
     $row = array('data' => array(),'class' => array('draggable', 'tabledrag-root'));
     foreach (element_children($branch) as $name) {
