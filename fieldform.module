@@ -997,7 +997,7 @@ function fieldform_element_info() {
     'namevalue_row' => array(
       '#input' => TRUE,
       '#tree' => TRUE,
-      '#process' => array('form_namevalue_table_row_process'),
+      '#process' => array('form_namevalue_row_process'),
       '#default_value' => array(),
       '#weight_value' => 0
     ),
