@@ -1301,7 +1301,8 @@ function form_namevalue_row_process($element, &$form_state, $form) {
     '#default_value' => $name,
     '#size' => 20,
     '#attributes' => array('style' => 'max-width: 100%;'),
-    '#weight' => 0
+    '#weight' => 0,
+    '#theme_wrappers' => array()
   );
 
   $element['value'] = array(
@@ -1311,7 +1312,8 @@ function form_namevalue_row_process($element, &$form_state, $form) {
     '#default_value' => $value,
     '#size' => 20,
     '#attributes' => array('style' => 'max-width: 100%;'),
-    '#weight' => 1
+    '#weight' => 1,
+    '#theme_wrappers' => array()
   );
 
   return $element;
@@ -1597,7 +1599,6 @@ function theme_namevalue_table($variables) {
     }
 
     $branch = &$element[$key];
-    dpm($branch, 'Branch');
     $row = array('data' => array(
       render($branch['name']),
       render($branch['value']),
