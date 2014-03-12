@@ -1325,7 +1325,7 @@ function _namevalue_table_ajax() {
   $form_parents = func_get_args();
   $form_build_id = (string) array_pop($form_parents);
   $op = array_pop($form_parents);
-  $form_parents = array_slice($form_parents, -1);
+  $form_parents = array_slice($form_parents, 0, -1);
   dpm($form_parents, 'Parents');
   if (empty($_POST['form_build_id']) || $form_build_id != $_POST['form_build_id']) {
     // Invalid request.
