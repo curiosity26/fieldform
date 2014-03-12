@@ -1682,7 +1682,7 @@ function template_preprocess_fieldform_result(&$vars) {
   $vars['content_attributes_array']['class'][] = 'content';
 
   $controller->preRender($result, $vars);
-
+  dpm($vars, 'Vars');
   if ($suggestions = theme_get_suggestions(array($view_mode, $data['type'], $data['name']),
     'fieldform_result')) {
     $vars['theme_hook_suggestions'] = $suggestions;
