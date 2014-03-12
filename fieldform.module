@@ -1356,7 +1356,7 @@ function _namevalue_table_ajax() {
 
   $element = &drupal_array_get_nested_value($form, $form_parents);
   if ($op == 'remove') {
-    $element['#process'][] = 'form_namevalue_table_remove_process';
+    array_unshift($element['#process'], 'form_namevalue_table_remove_process');
   }
 
   drupal_process_form($form['#form_id'], $form, $form_state);
