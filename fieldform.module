@@ -1228,7 +1228,8 @@ function form_namevalue_table_process($element, &$form_state, $form) {
     '#weight' => 2,
     '#attributes' => array(
       'class' => array('namevalue-weight')
-    )
+    ),
+    '#theme_wrappers' => array()
   );
 
   $element['actions'] = array(
