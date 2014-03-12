@@ -107,8 +107,8 @@ class FileResultDataController extends FieldFormResultDataController {
     $file = $result->value();
     $url = file_create_url($file->uri);
     $vars['classes_array'][] = 'no-print';
-    dpm($vars['result'], 'File');
-    if (preg_match('/(jpe?g|gif|png)$/', $file->extension) !== FALSE) {
+    dpm($file, 'File');
+    /*if (preg_match('/(jpe?g|gif|png)$/', $file->extension) !== FALSE) {
       $item = image_get_info($file->uri);
       dpm($item);
       $element = array(
@@ -119,8 +119,8 @@ class FileResultDataController extends FieldFormResultDataController {
       );
       $vars['content'] = render($element).l($file->filename, $url);
     }
-    else {
+    else {*/
       $vars['content'] = theme('file_icon', $file).l($file->filename, $url);
-    }
+    //}
   }
 }

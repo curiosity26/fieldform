@@ -1669,7 +1669,7 @@ function template_preprocess_fieldform_result(&$vars) {
   $result = $vars['element']['#result'];
   $view_mode = $vars['element']['#view_mode'];
   $controller = fieldform_result_controller($result->resultType());
-  dpm($controller, 'Controller');
+
   $vars['result'] = $result;
 
   $vars['title_attributes_array']['class'][] = 'title';
