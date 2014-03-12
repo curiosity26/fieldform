@@ -1263,7 +1263,10 @@ function form_namevalue_table_process($element, &$form_state, $form) {
 
 function form_namevalue_table_remove_process($element, &$form_state, $form) {
   $values = array_filter($element['#value']['values']);
-  $element['#value']['values'] = array_slice($values, 0, -1);
+  $input = &drupal_array_get_nested_value($form_state['input'], $element['#parents']);
+  dpm($input, 'Pre Process Input');
+  $input = $element['#value']['values'] = array_slice($values, 0, -1);
+  $input['values'] = $input;
   dpm($element['#value']['values'], 'Pre Process Options');
   return $element;
 }
