@@ -101,11 +101,16 @@ class FileResultDataController extends FieldFormResultDataController {
   }
 
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
-    $element['#default_value'] = $result->value();
+    $value = $result->value();
+    $value = !!$value ? $value : $default_value;
+    dpm($value, 'Build File');
+    $element['#default_value'] = $value;
   }
 
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $file) {
+    dpm($file, 'Process File');
+    dpm($result->value(), 'Saved File');
     return isset($file['#value']['fid']) ? $file['#value']['fid'] : $result->value();
   }
 
