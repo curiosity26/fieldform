@@ -651,6 +651,10 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       }
     }
 
+    if (isset($element['#attributes']['class'])) {
+      $element['#attributes']['class'] = (array) $element['#attributes']['class'];
+    }
+
     if ($element->hasChildren()) {
       foreach ($element->children as $child) {
         $field[$child->name] = $child->buildElement($entity, $form, $form_state);
