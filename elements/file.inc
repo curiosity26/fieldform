@@ -114,6 +114,7 @@ class FileResultDataController extends FieldFormResultDataController {
 
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $file) {
+    dpm($file, 'File');
     if (is_object($file) && $file->fid) {
       // Woo! We got fresh meat!
       $file->status = FILE_STATUS_PERMANENT;
@@ -131,6 +132,6 @@ class FileResultDataController extends FieldFormResultDataController {
   static public function preRender(FieldFormResultDataInterface $result, &$vars) {
     $file = $result->value();
     $url = file_create_url($file->uri);
-    $vars['content'] = l($file->filename, $url);
+    $vars['content'] = theme('file_icon', $file).l($file->filename, $url);
   }
 }
