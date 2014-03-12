@@ -1257,7 +1257,7 @@ function form_namevalue_table_process($element, &$form_state, $form) {
 }
 
 function form_namevalue_table_remove_process($element, &$form_state, $form) {
-  $options = array();
+  /*$options = array();
   if (!empty($element['#values']) && !empty($element['#values']['values'])) {
     $options = array_filter($element['#values']['values']);
   }
@@ -1265,15 +1265,30 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
     $options = array_filter($element['#values']);
   }
 
-  $options = array_slice($options, 0, -1); // One for the row added and one for the row
+  $options = array_slice($options, 0, -2);
   $values = &drupal_array_get_nested_value($form_state['input'], $element['#parents']);
   $values['values'] = array_slice($values['values'], 0, -2);
-  $values = array_slice($values, 0, -2);
+  $values = array_slice($values, 0, -2); // One for the row added and one for the row
   dpm($values, 'Current Options');
 
   $element['#values'] = $options;
 
-  return form_namevalue_table_process($element, $form_state, $form);
+  return form_namevalue_table_process($element, $form_state, $form);*/
+
+  $children = element_children($element);
+  // Get the add element and remove it for later use
+  $add_element_key = array_pop($children);
+  $add_element = $element[$add_element_key];
+  unset($element[$add_element_key]);
+
+  $last_element_key = array_pop($children);
+  $last_element = $element[$last_element_key];
+  unset($element[$last_element_key]);
+
+  $count = count($children);
+  $element[$count] = $add_element;
+
+  return $element;
 }
 
 function form_namevalue_row_process($element, &$form_state, $form) {
@@ -1345,7 +1360,7 @@ function _namevalue_table_ajax() {
 
   $element = &drupal_array_get_nested_value($form, $form_parents);
   if ($op == 'remove') {
-    $element['#process'] = array('form_namevalue_table_remove_process');
+    $element['#process'][] = 'form_namevalue_table_remove_process';
   }
 
   drupal_process_form($form['#form_id'], $form, $form_state);
