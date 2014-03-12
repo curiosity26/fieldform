@@ -1337,13 +1337,16 @@ function _namevalue_table_ajax() {
   }
 
   $element = &drupal_array_get_nested_value($form, $form_parents);
+
   if ($op == 'remove') {
     $element_info = element_info('namevalue_table');
     $element += $element_info;
     array_unshift($element['#process'], 'form_namevalue_table_remove_process');
   }
 
+
   drupal_process_form($form['#form_id'], $form, $form_state);
+  uasort($element, 'namevalue_sort_weight');
 
   if (!empty($element['#push_values'])) {
     $commands = array(ajax_command_replace('#namevalue-table-wrapper-'.$element['#id'], render($element)));
