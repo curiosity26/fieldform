@@ -107,7 +107,7 @@ class FileResultDataController extends FieldFormResultDataController {
     $file = $result->value();
     $url = file_create_url($file->uri);
     $vars['classes_array'][] = 'no-print';
-    dpm($file, 'File');
+    dpm($result, 'File');
     if (preg_match('/(jpe?g|gif|png)$/', $file->extension) !== FALSE) {
       $item = image_get_info($file->uri);
       dpm($item);
