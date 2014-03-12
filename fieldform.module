@@ -1266,7 +1266,6 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
   }
 
   $options = array_slice($options, 0, -2); // One for the row added and one for the row
-  dpm($values, 'Process Items');
 
   $element['#values'] = $options;
 
