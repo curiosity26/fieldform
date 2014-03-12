@@ -104,24 +104,27 @@ class FileResultDataController extends FieldFormResultDataController {
   }
 
   static public function preRender(FieldFormResultDataInterface $result, &$vars) {
-    $file = $result->value();
-    dpm($vars['result']->value(), 'File');
+    $file = file_load($result->value());
+    dpm($result->value(), 'File');
     $url = file_create_url($file->uri);
     $vars['classes_array'][] = 'no-print';
     dpm($file, 'File');
-    /*if (preg_match('/(jpe?g|gif|png)$/', $file->extension) !== FALSE) {
-      $item = image_get_info($file->uri);
-      dpm($item);
-      $element = array(
-        '#theme' => 'image_formatter',
-        '#item' => $item,
-        '#image_style' => 'thumbnail',
-        '#path' => $file->uri
-      );
-      $vars['content'] = render($element).l($file->filename, $url);
+    if (!!$file) {
+      /*if (preg_match('/(jpe?g|gif|png)$/', $file->extension) !== FALSE) {
+        $item = image_get_info($file->uri);
+        dpm($item);
+        $element = array(
+          '#theme' => 'image_formatter',
+          '#item' => $item,
+          '#image_style' => 'thumbnail',
+          '#path' => $file->uri
+        );
+        $vars['content'] = render($element).l($file->filename, $url);
+      }
+      else {*/
+        $vars['content'] = theme('file_icon', array('file' => $file)).l($file->filename, $url);
+        //}
     }
-    else {*/
-      $vars['content'] = theme('file_icon', array('file' => $file)).l($file->filename, $url);
-    //}
+
   }
 }
