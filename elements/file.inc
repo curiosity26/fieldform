@@ -84,6 +84,7 @@ class FileElementController extends FieldFormElementController {
     $output = parent::buildElement($element, $entity, $form, $form_state);
     // Have to format the name so file_save_upload can see it. This is just retarded
     $output['#name'] = 'files['.$output['#name'].']';
+    $output['#type'] = 'managed_file';
     unset($output['#settings']);
     return $output;
   }
@@ -100,40 +101,12 @@ class FileResultDataController extends FieldFormResultDataController {
   }
 
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
-    $file = $result->value();
-    if (is_object($file) && $file->fid) {
-      $url = file_create_url($file->uri);
-      $element = array(
-        '#markup' => '<h3>'.$element['#title'].'</h3>'.l($file->filename, $url),
-      );
-      $element['fid'] = array(
-        '#type' => 'hidden',
-        '#default_value' => $file->fid
-      );
-      $element['remove'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('remove file'),
-      );
-    }
+    $element['#default_value'] = $result->value();
   }
 
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $file) {
-    dpm($file, 'File');
-    if (is_object($file) && $file->fid) {
-      // Woo! We got fresh meat!
-      $file->status = FILE_STATUS_PERMANENT;
-      file_save($file);
-      return $file->fid;
-    }
-    elseif (is_array($file) && $file['remove'] == 1) {
-      // The user wishes the file to be removed.
-      $file = $result->value();
-      file_delete($file);
-      return NULL;
-    }
-    $file = $result->value();
-    return isset($file->fid) ? $file->fid : NULL;
+    return isset($file['#value']['fid']) ? $file['#value']['fid'] : FALSE;
   }
 
   static public function preRender(FieldFormResultDataInterface $result, &$vars) {
