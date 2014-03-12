@@ -1262,7 +1262,7 @@ function form_namevalue_table_process($element, &$form_state, $form) {
 }
 
 function form_namevalue_table_remove_process($element, &$form_state, $form) {
-  $element['#value']['values'] = array_slice($element['#value']['values'], 0, -1);
+  $element['#value']['values'] = array_slice($element['#value']['values'], 0, -2);
   dpm($element['#value'], 'Pre Process Options');
   return $element;
 }
