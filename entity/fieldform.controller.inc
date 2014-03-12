@@ -802,7 +802,6 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
         case FIELDFORM_PROPERTY_TABLE:
           $value = empty($value) ? array() : $value;
           $form[$name]['#type'] = 'namevalue_table';
-          $form[$name]['#values'] = $value;
           break;
         case FIELDFORM_PROPERTY_DATE:
           $form[$name]['#type'] = 'date';

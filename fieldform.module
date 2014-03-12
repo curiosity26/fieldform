@@ -986,12 +986,12 @@ function fieldform_element_info() {
       '#input' => TRUE,
       '#tree' => TRUE,
       '#process' => array('form_namevalue_table_process'),
-      '#values' => array(),
       '#header' => array(),
       '#attributes' => array(),
       '#caption' => NULL,
       '#title_display' => 'before',
-      '#theme' => 'namevalue_table'
+      '#theme' => 'namevalue_table',
+      '#default_value' => array()
     ),
     'namevalue_row' => array(
       '#input' => TRUE,
@@ -1173,11 +1173,16 @@ function namevalue_sort_weight($a, $b) {
 
 function form_namevalue_table_process($element, &$form_state, $form) {
   $options = array();
-  if (!empty($element['#values']) && !empty($element['#values']['values'])) {
-    $options = array_filter($element['#values']['values']);
+  if (!empty($element['#value'])) {
+    if (!empty($element['#value']['values'])) {
+      $options = array_filter($element['#value']['values']);
+    }
+    else {
+      $options = array_filter($element['#value']);
+    }
   }
-  elseif (!empty($element['#values'])) {
-    $options = array_filter($element['#values']);
+  elseif (!empty($element['#default_value'])) {
+    $options = array_filter($element['#default_value']);
   }
 
   $element['#header'] = array(
@@ -1275,19 +1280,8 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
 
   return form_namevalue_table_process($element, $form_state, $form);*/
 
-  $children = element_children($element);
-  // Get the add element and remove it for later use
-  $add_element_key = array_pop($children);
-  $add_element = $element[$add_element_key];
-  unset($element[$add_element_key]);
-  dpm($add_element, "Add Element");
-  $last_element_key = array_pop($children);
-  dpm($element[$last_element_key], "Last Element");
-  unset($element[$last_element_key]);
+  $values = $element['#value']['values'];
 
-  $count = count($children);
-  $element[$count] = $add_element;
-  dpm($element, "Element");
   return $element;
 }
 
