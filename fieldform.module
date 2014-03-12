@@ -1265,7 +1265,7 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
     $options = array_filter($element['#values']);
   }
 
-  $options = array_slice($options, 0, -2); // One for the row added and one for the row
+  $options = array_slice($options, 0, -1); // One for the row added and one for the row
 
   $element['#values'] = $options;
 
