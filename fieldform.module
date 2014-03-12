@@ -1375,6 +1375,7 @@ function form_type_namevalue_table_value(&$element, $input = FALSE) {
   $final = array();
   $dups = array();
   if ($input !== FALSE) {
+    dpm($input, 'Table Input');
     foreach (element_children($element) as $delta => $key) {
       $name = $input[$delta]['name'];
       $value = $input[$delta]['value'];
