@@ -882,7 +882,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
 
     if (isset($form_state['values']['attributes'])) {
       $form_state['values']['attributes'] = $form_state['values']['attributes'] +
-        array('class' => $form_state['values']['class']);
+        array('class' => explode(' ', $form_state['values']['class']));
     }
   }
 
