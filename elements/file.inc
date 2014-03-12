@@ -111,6 +111,7 @@ class FileResultDataController extends FieldFormResultDataController {
       if (preg_match('/\.(jpe?g|gif|png)$/', $file->filename) !== FALSE) {
         $item = image_get_info($url);
         dpm($item);
+        $item['path'] = $file->uri;
         $element = array(
           '#theme' => 'image_formatter',
           '#item' => $item,
