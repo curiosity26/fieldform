@@ -1264,8 +1264,11 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
   elseif (!empty($element['#values'])) {
     $options = array_filter($element['#values']);
   }
-  dpm($options, 'Current Options');
+
   $options = array_slice($options, 0, -1); // One for the row added and one for the row
+  $values = drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+  dpm($values, 'Current Options');
+  $values = array_slice($values, 0, -2);
 
   $element['#values'] = $options;
 
