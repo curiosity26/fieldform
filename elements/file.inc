@@ -120,7 +120,7 @@ class FileResultDataController extends FieldFormResultDataController {
       $vars['content'] = render($element).l($file->filename, $url);
     }
     else {*/
-      $vars['content'] = theme('file_icon', $file).l($file->filename, $url);
+      $vars['content'] = theme('file_icon', array('file' => $file)).l($file->filename, $url);
     //}
   }
 }
