@@ -998,7 +998,8 @@ function fieldform_element_info() {
       '#tree' => TRUE,
       '#process' => array('form_namevalue_row_process'),
       '#default_value' => array(),
-      '#weight_value' => 0,
+      '#weight_default' => 0,
+      '#weight_delta' => 10,
       '#attributes' => array()
     ),
     'fieldform_print_page' => array(
@@ -1199,17 +1200,8 @@ function form_namevalue_table_process($element, &$form_state, $form) {
         '#title_display' => 'hidden'
       );
     $element[$delta]['#default_value'] = array($option => $options[$option]);
-    $element[$delta]['weight'] = array(
-      '#type' => 'weight',
-      '#title' => t('Weight'),
-      '#title_display' => 'hidden',
-      '#delta' => $count,
-      '#default_value' => $delta,
-      '#weight' => 2,
-      '#attributes' => array(
-        'class' => array('namevalue-weight')
-      )
-    );
+    $element[$delta]['#weight_delta'] = $count;
+    $element[$delta]['#weight_default'] = $delta;
   }
 
   $element['#row_count'] = count($options);
@@ -1317,6 +1309,19 @@ function form_namevalue_row_process($element, &$form_state, $form) {
     '#theme_wrappers' => array()
   );
 
+  $element['weight'] = array(
+    '#type' => 'weight',
+    '#title' => t('Weight'),
+    '#title_display' => 'hidden',
+    '#theme_wrappers' => array(),
+    '#delta' => $element['#weight_delta'],
+    '#default_value' => $element['#weight_default'],
+    '#weight' => 2,
+    '#attributes' => array(
+      'class' => array('namevalue-weight')
+    )
+  );
+
   return $element;
 }
 
@@ -1350,7 +1355,6 @@ function _namevalue_table_ajax() {
 
   drupal_process_form($form['#form_id'], $form, $form_state);
   $element = drupal_array_get_nested_value($form, $form_parents);
-  //$element['#theme'] = 'namevalue_table_ajax';
 
 
   if (!empty($element['#push_values'])) {
