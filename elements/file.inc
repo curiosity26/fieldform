@@ -130,8 +130,9 @@ class FileResultDataController extends FieldFormResultDataController {
       // The user wishes the file to be removed.
       $file = $result->value();
       file_delete($file);
+      return NULL;
     }
-    return NULL;
+    return $result->value();
   }
 
   static public function preRender(FieldFormResultDataInterface $result, &$vars) {
