@@ -95,20 +95,26 @@ class FileResultDataController extends FieldFormResultDataController {
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
     $value = $result->value();
     $value = !!$value ? $value : $default_value;
-    dpm($value, 'Build File');
     $element['#default_value'] = $value;
   }
 
   static public function processResult(FieldFormResultDataInterface $result, FieldFormResultEntity $entity,
                                        FieldFormElementInterface $element, $file) {
-    dpm($file, 'Process File');
-    dpm($result->value(), 'Saved File');
     return isset($file['fid']) ? $file['fid'] : $result->value();
   }
 
   static public function preRender(FieldFormResultDataInterface $result, &$vars) {
     $file = $result->value();
     $url = file_create_url($file->uri);
-    $vars['content'] = theme('file_icon', $file).l($file->filename, $url);
+    $vars['classes_array'][] = 'no-print';
+    if (preg_match('/(jpe?g|gif|png)$/', $file->extension) !== FALSE) {
+      $vars['content'] = theme('image_style', array(
+          'style_name' => 'thumbnail',
+          'path' => $file->filepath
+        )).l($file->filename, $url);
+    }
+    else {
+      $vars['content'] = theme('file_icon', $file).l($file->filename, $url);
+    }
   }
 }

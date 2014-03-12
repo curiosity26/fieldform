@@ -1659,7 +1659,7 @@ function theme_namevalue_table_ajax($variables) {
 
 function theme_namevalue_row($variables) {
   $element = $variables['element'];
-  $output = '<div id="'.$element['#id'].'"'.drupal_attributes($element).'>';
+  $output = '<div id="'.$element['#id'].'" '.drupal_attributes($element).'>';
   $output .= drupal_render_children($element);
   $output .= '</div>';
   return $output;
