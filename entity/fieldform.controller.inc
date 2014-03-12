@@ -768,6 +768,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       if ($property['type'] === FIELDFORM_PROPERTY_NONE) {
         continue;
       }
+      dpm($values[$name], $name.' Value');
       $value = NULL;
       if (isset($values[$name])) {
         $value = $values[$name];
