@@ -1592,7 +1592,7 @@ function theme_fieldform_elements_list($variables) {
 function theme_namevalue_table($variables) {
   $element = $variables['element'];
   $rows = array();
-  uasort($element, 'drupal_sort_weight');
+  uasort($element, 'namevalue_sort_weight');
 
   foreach (element_children($element) as $key) {
     if ($key === 'actions') {
