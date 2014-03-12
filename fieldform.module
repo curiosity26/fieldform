@@ -1264,9 +1264,10 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
   elseif (!empty($element['#values'])) {
     $options = array_filter($element['#values']);
   }
-  dpm($options[$element['#row_count'] - 1]);
-  unset($options[$element['#row_count'] - 2]);
-  unset($options[$element['#row_count'] - 1]);
+
+  $options = array_slice($options, 0, -1);
+
+  dpm($options, 'Next to Last Item');
 
   $element['#values'] = $options;
 
