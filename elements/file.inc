@@ -91,14 +91,6 @@ class FileElementController extends FieldFormElementController {
 }
 
 class FileResultDataController extends FieldFormResultDataController {
-  public function create($resultType, $values = array()) {
-    $result = parent::create($resultType, $values);
-    if (is_numeric($result->value())) {
-      $file = file_load($result->value());
-      $result->value($file);
-    }
-    return $result;
-  }
 
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
     $value = $result->value();
