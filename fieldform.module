@@ -1210,18 +1210,8 @@ function form_namevalue_table_process($element, &$form_state, $form) {
       '#title' => t('Row @num', array('@num' => $delta)),
       '#title_display' => 'hidden'
     );
-  $element[$delta]['weight'] = array(
-    '#type' => 'weight',
-    '#title' => t('Weight'),
-    '#title_display' => 'hidden',
-    '#delta' => $count,
-    '#default_value' => $delta,
-    '#weight' => 2,
-    '#attributes' => array(
-      'class' => array('namevalue-weight')
-    ),
-    '#theme_wrappers' => array()
-  );
+  $element[$delta]['#weight_delta'] = $count;
+  $element[$delta]['#weight_default'] = $delta;
 
   $element['actions'] = array(
     '#type' => 'actions'
