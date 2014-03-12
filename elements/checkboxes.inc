@@ -9,7 +9,6 @@
 class CheckboxesElementController extends FieldFormElementController {
   static public function settingsForm($form, &$form_state, FieldFormElement $element = NULL, $op = NULL) {
     $form = parent::settingsForm($form, $form_state, $element, $op);
-    dpm($form['options']['#values'], 'Check Values');
     $form['options']['#values'] = is_array($form['options']['#values']) ?
       $form['options']['#values'] : array();
 
