@@ -108,8 +108,8 @@ class FileResultDataController extends FieldFormResultDataController {
     $url = file_create_url($file->uri);
     $vars['classes_array'][] = 'no-print';
     if (!!$file) {
+      dpm($file, 'File');
       if (preg_match('/\.(jpe?g|gif|png)$/', $file->filename) !== FALSE) {
-        dpm($file);
         $item = image_get_info($file->path);
         $element = array(
           '#theme' => 'image_formatter',
