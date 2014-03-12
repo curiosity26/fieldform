@@ -18,7 +18,7 @@ class CheckboxesElementController extends FieldFormElementController {
       )
     );
 
-    $form['default_value']['#options'] = $form['options']['#default_value'];
+    $form['default_value']['#options'] = array_filter($form['options']['#default_value']);
     $form['default_value']['#prefix'] = '<div id="default-value-element-ajax">';
     $form['default_value']['#suffix'] = '</div>';
 
