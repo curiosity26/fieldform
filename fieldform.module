@@ -1222,17 +1222,6 @@ function form_namevalue_table_process($element, &$form_state, $form) {
     '#type' => 'actions'
   );
 
-  $element['actions']['save'] = array(
-    '#type' => 'button',
-    '#value' => 'Save',
-    '#executes_submit_callback' => FALSE,
-    '#ajax' => array(
-      'wrapper' => 'namevalue-table-wrapper-'.$element['#id'],
-      'path' => 'fieldform/namevalue-table/'.implode('/', array_merge($element['#array_parents'],
-          array('actions', 'save', $form['form_build_id']['#value'])))
-    )
-  );
-
   $element['actions']['add'] = array(
     '#type' => 'button',
     '#value' => '+',
@@ -1264,10 +1253,8 @@ function form_namevalue_table_process($element, &$form_state, $form) {
 function form_namevalue_table_remove_process($element, &$form_state, $form) {
   $values = array_filter($element['#value']['values']);
   $input = &drupal_array_get_nested_value($form_state['input'], $element['#parents']);
-  dpm($input, 'Pre Process Input');
   $input = $element['#value']['values'] = array_slice($values, 0, -1);
   $input['values'] = $input;
-  dpm($element['#value']['values'], 'Pre Process Options');
   return $element;
 }
 
