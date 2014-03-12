@@ -104,10 +104,15 @@ class FileResultDataController extends FieldFormResultDataController {
     if (is_object($file) && $file->fid) {
       $url = file_create_url($file->uri);
       $element = array(
+        '#markup' => '<h3>'.$element['#title'].'</h3>'.l($file->filename, $url),
+      );
+      $element['fid'] = array(
+        '#type' => 'hidden',
+        '#default_value' => $file->fid
+      );
+      $element['remove'] = array(
         '#type' => 'checkbox',
         '#title' => t('remove file'),
-        '#prefix' => '<h3>'.$element['#title'].'</h3>'.l($file->filename, $url),
-        '#return_value' => 'remove'
       );
     }
   }
@@ -121,7 +126,7 @@ class FileResultDataController extends FieldFormResultDataController {
       file_save($file);
       return $file->fid;
     }
-    elseif ($file == 'remove' &&  $result->value() !== FALSE) {
+    elseif (is_array($file) && $file['remove'] == 1) {
       // The user wishes the file to be removed.
       $file = $result->value();
       file_delete($file);
