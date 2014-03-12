@@ -1253,7 +1253,7 @@ function form_namevalue_table_process($element, &$form_state, $form) {
     '#executes_submit_callback' => FALSE,
     '#ajax' => array(
       'wrapper' => 'namevalue-table-wrapper-'.$element['#id'],
-      'path' => 'fieldform/namevalue-table/add/'.implode('/', array_merge($element['#array_parents'],
+      'path' => 'fieldform/namevalue-table/'.implode('/', array_merge($element['#array_parents'],
           array('actions', 'add', $form['form_build_id']['#value'])))
     )
   );
@@ -1264,7 +1264,7 @@ function form_namevalue_table_process($element, &$form_state, $form) {
     '#executes_submit_callback' => FALSE,
     '#ajax' => array(
       'wrapper' => 'namevalue-table-wrapper-'.$element['#id'],
-      'path' => 'fieldform/namevalue-table/remove/'.implode('/', array_merge($element['#array_parents'],
+      'path' => 'fieldform/namevalue-table/'.implode('/', array_merge($element['#array_parents'],
           array('actions', 'remove', $form['form_build_id']['#value'])))
     )
   );
@@ -1325,7 +1325,7 @@ function _namevalue_table_ajax() {
   $form_parents = func_get_args();
   $form_build_id = (string) array_pop($form_parents);
   $op = array_pop($form_parents);
-  array_pop($form_parents);
+  array_pop($form_parents); // Kick off the 'actions' wrapper
   dpm($form_parents, 'Parents');
   if (empty($_POST['form_build_id']) || $form_build_id != $_POST['form_build_id']) {
     // Invalid request.
