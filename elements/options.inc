@@ -18,8 +18,8 @@ class OptionsElementController extends FieldFormElementController {
 
     $form = parent::settingsForm($form, $form_state, $element, $op);
 
-    $form['options']['#values'] = is_array($form['options']['#values']) ?
-      $form['options']['#values'] : array();
+    $form['options']['#value'] = isset($form['options']['#value']['values']) ?
+      $form['options']['#value']['values'] : array();
 
     $form['options']['#push_values'] = array(
       '#default-value-element-ajax' => array(
@@ -27,7 +27,7 @@ class OptionsElementController extends FieldFormElementController {
       )
     );
 
-    $options = isset($values['options']) ? (array)$values['options'] : array();
+    $options = $form['options']['#value'];
 
     $form['default_value']['#prefix'] = '<div id="default-value-element-ajax">';
     $form['default_value']['#suffix'] = '</div>';

@@ -1370,9 +1370,13 @@ function form_type_namevalue_table_value(&$element, $input = FALSE) {
   $final = array();
   $dups = array();
   if ($input !== FALSE) {
+    $input = array_filter($input);
     foreach (element_children($input) as $delta => $key) {
       $name = $input[$delta]['name'];
       $value = $input[$delta]['value'];
+      if (!isset($name)) {
+        continue;
+      }
       if (array_key_exists($name, $final)) {
         $dups[$name] = isset($dups[$name]) ? $dups[$name]++ : 0;
         $name = $name.'_'.$dups[$name];
