@@ -1352,7 +1352,7 @@ function _namevalue_table_ajax() {
 
 
   if (!empty($element['#push_values'])) {
-    $commands = array(ajax_command_replace('#namevalue-table-wrapper-'.$element['#name'], render($element)));
+    $commands = array(ajax_command_replace('#namevalue-table-wrapper-'.$element['#id'], render($element)));
     reset($values);
     foreach($element['#push_values'] as $selector => $ops) {
       foreach ($ops as $op => $callbacks) {
@@ -1595,7 +1595,6 @@ function theme_namevalue_table($variables) {
 
   foreach (element_children($element) as $key) {
     if ($key === 'actions') {
-      $actions = &$element[$key];
       continue;
     }
 
@@ -1616,11 +1615,10 @@ function theme_namevalue_table($variables) {
       'caption' => $element['#caption']
     )
   );
-  $output = isset($element['#prefix']) ? $element['#prefix'] : '';
-  $output .= theme('form_element_label', array('element' => $element));
+
+  $output = theme('form_element_label', array('element' => $element));
   $output .= $table;
   $output .= drupal_render_children($element);
-  $output .= isset($element['#suffix']) ? $element['#suffix'] : '';
 
   drupal_add_tabledrag($element['#attributes']['id'], 'order', 'sibling', 'namevalue-weight');
 
