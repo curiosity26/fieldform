@@ -1280,14 +1280,14 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
   $add_element_key = array_pop($children);
   $add_element = $element[$add_element_key];
   unset($element[$add_element_key]);
-
+  dpm($add_element, "Add Element");
   $last_element_key = array_pop($children);
-  $last_element = $element[$last_element_key];
+  dpm($element[$last_element_key], "Last Element");
   unset($element[$last_element_key]);
 
   $count = count($children);
   $element[$count] = $add_element;
-
+  dpm($element, "Element");
   return $element;
 }
 
