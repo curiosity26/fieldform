@@ -1236,6 +1236,9 @@ function form_namevalue_table_process($element, &$form_state, $form) {
     '#type' => 'actions'
   );
 
+  dpm(array_merge($element['#array_parents'],
+    array('actions', 'save', $form['form_build_id']['#value'])));
+
   $element['actions']['save'] = array(
     '#type' => 'button',
     '#value' => 'Save',
