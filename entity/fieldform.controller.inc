@@ -731,7 +731,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       $form_state['input'] : get_object_vars($element);
     $element_info = $element->elementInfo();
     $properties = $element_info['properties'];
-    dpm($properties, 'Props yo!');
+
     $form['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Title'),
@@ -765,7 +765,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     );
 
     foreach ($properties as $name => $property) {
-      if ($property['type'] !== FIELDFORM_PROPERTY_NONE) {
+      if ($property['type'] === FIELDFORM_PROPERTY_NONE) {
         continue;
       }
       $value = NULL;
