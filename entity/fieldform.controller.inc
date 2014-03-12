@@ -766,62 +766,62 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
 
     foreach ($properties as $name => $property) {
       if ($property['type'] !== FIELDFORM_PROPERTY_NONE) {
-        $value = NULL;
-        if (isset($values[$name])) {
-          $value = $values[$name];
-        }
-        elseif (isset($property['default_value'])) {
-          $value = $property['default_value'];
-        }
-        $form[$name] = array();
-        switch ($property['type']) {
-          case FIELDFORM_PROPERTY_TEXT:
-            $form[$name]['#type'] = 'textarea';
-            break;
-          case FIELDFORM_PROPERTY_MARKUP:
-            $form[$name]['#type'] = 'text_format';
-            break;
-          case FIELDFORM_PROPERTY_SELECT:
-            $value = empty($value) ? array() : $value;
-            $form[$name]['#type'] = 'select';
-            $form[$name]['#options'] = isset($value) ? $value : $form['options']['#options'];
-            break;
-          case FIELDFORM_PROPERTY_RADIOS:
-            $value = empty($value) ? array() : $value;
-            $form[$name]['#type'] = 'radios';
-            $form[$name]['#options'] = isset($value) ? $value : $form['options']['#options'];
-            break;
-          case FIELDFORM_PROPERTY_CHECKBOXES:
-            $value = empty($value) ? array() : $value;
-            $form[$name]['#type'] = 'checkboxes';
-            $form[$name]['#options'] = isset($value) ? $value : $form['options']['#options'];
-            break;
-          case FIELDFORM_PROPERTY_TABLE:
-            dpm($value, 'Table Value');
-            $value = isset($value['values']) ? $value['values'] : $value;
-            $value = empty($value) ? array() : $value;
-            $form[$name]['#type'] = 'namevalue_table';
-            $form[$name]['#values'] = $value;
-            break;
-          case FIELDFORM_PROPERTY_DATE:
-            $form[$name]['#type'] = 'date';
-            $form[$name]['#default_value'] = isset($value) ?
-              $value : array('month' => date('n'), 'day' => array('j'), 'year' => date('Y'));
-            break;
-          case FIELDFORM_PROPERTY_BOOL:
-            $form[$name]['#type'] = 'checkbox';
-            $form[$name]['#default_value'] = ($value === TRUE);
-            break;
-        }
-
-        $form[$name] += array(
-          '#type' => 'textfield',
-          '#title' => isset($property['title']) ? $property['title']
-              : t('@name', array('@name' => ucwords(str_replace('_', ' ', $name)))),
-          '#default_value' => $value,
-          '#weight' => $i++
-        );
+        continue;
       }
+      $value = NULL;
+      if (isset($values[$name])) {
+        $value = $values[$name];
+      }
+      elseif (isset($property['default_value'])) {
+        $value = $property['default_value'];
+      }
+      $form[$name] = array();
+      switch ($property['type']) {
+        case FIELDFORM_PROPERTY_TEXT:
+          $form[$name]['#type'] = 'textarea';
+          break;
+        case FIELDFORM_PROPERTY_MARKUP:
+          $form[$name]['#type'] = 'text_format';
+          break;
+        case FIELDFORM_PROPERTY_SELECT:
+          $value = empty($value) ? array() : $value;
+          $form[$name]['#type'] = 'select';
+          $form[$name]['#options'] = isset($value) ? $value : $form['options']['#options'];
+          break;
+        case FIELDFORM_PROPERTY_RADIOS:
+          $value = empty($value) ? array() : $value;
+          $form[$name]['#type'] = 'radios';
+          $form[$name]['#options'] = isset($value) ? $value : $form['options']['#options'];
+          break;
+        case FIELDFORM_PROPERTY_CHECKBOXES:
+          dpm($value, 'Check Values');
+          $value = empty($value) ? array() : $value;
+          $form[$name]['#type'] = 'checkboxes';
+          $form[$name]['#options'] = isset($value) ? $value : $form['options']['#options'];
+          break;
+        case FIELDFORM_PROPERTY_TABLE:
+          $value = empty($value) ? array() : $value;
+          $form[$name]['#type'] = 'namevalue_table';
+          $form[$name]['#values'] = $value;
+          break;
+        case FIELDFORM_PROPERTY_DATE:
+          $form[$name]['#type'] = 'date';
+          $form[$name]['#default_value'] = isset($value) ?
+            $value : array('month' => date('n'), 'day' => array('j'), 'year' => date('Y'));
+          break;
+        case FIELDFORM_PROPERTY_BOOL:
+          $form[$name]['#type'] = 'checkbox';
+          $form[$name]['#default_value'] = ($value === TRUE);
+          break;
+      }
+
+      $form[$name] += array(
+        '#type' => 'textfield',
+        '#title' => isset($property['title']) ? $property['title']
+            : t('@name', array('@name' => ucwords(str_replace('_', ' ', $name)))),
+        '#default_value' => $value,
+        '#weight' => $i++
+      );
     }
 
     $form['details'] = array(
