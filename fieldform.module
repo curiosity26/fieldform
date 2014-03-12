@@ -1348,6 +1348,7 @@ function _namevalue_table_ajax() {
 
   drupal_process_form($form['#form_id'], $form, $form_state);
   $element = drupal_array_get_nested_value($form, $form_parents);
+  dpm($element);
   unset($element['#prefix'], $element['#suffix']);
 
 
