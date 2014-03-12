@@ -1265,10 +1265,7 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
     $options = array_filter($element['#values']);
   }
 
-  $options = array_slice($options, 0, -1);
-  $values = &drupal_array_get_nested_value($form_state['input'], $element['#parents']);
-  $values = array_slice($values, 0, -1);
-  $values['values'] = array_slice($values['values'], 0, -1);
+  $options = array_slice($options, 0, -2); // One for the row added and one for the row
   dpm($values, 'Process Items');
 
   $element['#values'] = $options;
