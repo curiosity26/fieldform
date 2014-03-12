@@ -32,6 +32,7 @@ class CheckboxesElementController extends FieldFormElementController {
   }
 
   static public function settingsSubmitForm(&$form, &$form_state, $entity_type, $entity, $element_type, $element) {
+    dpm($form_state['values']['options']);
     $form_state['values']['options'] = $form_state['values']['options']['values'];
     parent::settingsSubmitForm($form, $form_state, $entity_type, $entity, $element_type, $element);
   }
