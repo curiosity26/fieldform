@@ -1236,15 +1236,14 @@ function form_namevalue_table_process($element, &$form_state, $form) {
     '#type' => 'actions'
   );
 
-  $name_parameter = check_plain(implode('/', $element['#array_parents'])).'/'.$form['form_build_id']['#value'];
-
   $element['actions']['save'] = array(
     '#type' => 'button',
     '#value' => 'Save',
     '#executes_submit_callback' => FALSE,
     '#ajax' => array(
       'wrapper' => 'namevalue-table-wrapper-'.$element['#id'],
-      'path' => 'fieldform/namevalue-table/save/'.$name_parameter
+      'path' => 'fieldform/namevalue-table/'.implode('/', array_merge($element['#array_parents'],
+          array('actions', 'save', $form['form_build_id']['#value'])))
     )
   );
 
@@ -1254,7 +1253,8 @@ function form_namevalue_table_process($element, &$form_state, $form) {
     '#executes_submit_callback' => FALSE,
     '#ajax' => array(
       'wrapper' => 'namevalue-table-wrapper-'.$element['#id'],
-      'path' => 'fieldform/namevalue-table/add/'.$name_parameter
+      'path' => 'fieldform/namevalue-table/add/'.implode('/', array_merge($element['#array_parents'],
+          array('actions', 'add', $form['form_build_id']['#value'])))
     )
   );
 
@@ -1264,7 +1264,8 @@ function form_namevalue_table_process($element, &$form_state, $form) {
     '#executes_submit_callback' => FALSE,
     '#ajax' => array(
       'wrapper' => 'namevalue-table-wrapper-'.$element['#id'],
-      'path' => 'fieldform/namevalue-table/remove/'.$name_parameter
+      'path' => 'fieldform/namevalue-table/remove/'.implode('/', array_merge($element['#array_parents'],
+          array('actions', 'remove', $form['form_build_id']['#value'])))
     )
   );
 
@@ -1323,7 +1324,9 @@ function form_namevalue_row_process($element, &$form_state, $form) {
 function _namevalue_table_ajax() {
   $form_parents = func_get_args();
   $form_build_id = (string) array_pop($form_parents);
-  $op = array_shift($form_parents);
+  $op = array_pop($form_parents);
+  $form_parents = array_slice($form_parents, -1);
+  dpm($form_parents, 'Parents');
   if (empty($_POST['form_build_id']) || $form_build_id != $_POST['form_build_id']) {
     // Invalid request.
     drupal_set_message(t('An unrecoverable error occurred. The uploaded file likely exceeded the maximum file size (@size) that this server supports.', array('@size' => format_size(file_upload_max_size()))), 'error');
