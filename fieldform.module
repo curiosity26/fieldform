@@ -1268,6 +1268,9 @@ function form_namevalue_table_process($element, &$form_state, $form) {
     )
   );
 
+  $element['#prefix'] = '<div id="namevalue-table-wrapper-'.$element['#id'].'">';
+  $element['#suffix'] = '</div>';
+
   return $element;
 }
 
@@ -1347,7 +1350,7 @@ function _namevalue_table_ajax() {
 
   drupal_process_form($form['#form_id'], $form, $form_state);
   $element = drupal_array_get_nested_value($form, $form_parents);
-  $element['#theme'] = 'namevalue_table_ajax';
+  //$element['#theme'] = 'namevalue_table_ajax';
 
 
   if (!empty($element['#push_values'])) {
@@ -1620,7 +1623,7 @@ function theme_namevalue_table($variables) {
   );
 
   $output = theme('form_element_label', array('element' => $element));
-  $output .= '<div id="namevalue-table-wrapper-'.$element['#id'].'">'.$table.'</div>';
+  $output .= $table;
   $output .= drupal_render_children($element);
 
   drupal_add_tabledrag($element['#attributes']['id'], 'order', 'sibling', 'namevalue-weight');
