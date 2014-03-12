@@ -1282,6 +1282,8 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
 
   $values = $element['#value']['values'];
 
+  $element['#value']['values'] = array_slice($element['#value']['values'], -2);
+
   return $element;
 }
 
