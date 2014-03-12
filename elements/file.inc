@@ -111,7 +111,7 @@ class FileResultDataController extends FieldFormResultDataController {
                                        FieldFormElementInterface $element, $file) {
     dpm($file, 'Process File');
     dpm($result->value(), 'Saved File');
-    return isset($file['#value']['fid']) ? $file['#value']['fid'] : $result->value();
+    return isset($file['fid']) ? $file['fid'] : $result->value();
   }
 
   static public function preRender(FieldFormResultDataInterface $result, &$vars) {
