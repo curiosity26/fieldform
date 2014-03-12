@@ -1669,6 +1669,7 @@ function template_preprocess_fieldform_result(&$vars) {
   $result = $vars['element']['#result'];
   $view_mode = $vars['element']['#view_mode'];
   $controller = fieldform_result_controller($result->resultType());
+  dpm($controller, 'Controller');
   $vars['result'] = $result;
 
   $vars['title_attributes_array']['class'][] = 'title';
@@ -1682,7 +1683,7 @@ function template_preprocess_fieldform_result(&$vars) {
   $vars['content_attributes_array']['class'][] = 'content';
 
   $controller->preRender($result, $vars);
-  dpm($vars, 'Vars');
+
   if ($suggestions = theme_get_suggestions(array($view_mode, $data['type'], $data['name']),
     'fieldform_result')) {
     $vars['theme_hook_suggestions'] = $suggestions;
