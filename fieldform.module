@@ -1266,9 +1266,10 @@ function form_namevalue_table_remove_process($element, &$form_state, $form) {
   }
 
   $options = array_slice($options, 0, -1); // One for the row added and one for the row
-  $values = &drupal_array_get_nested_value($form_state['values'], $element['#parents']);
+  $values = &drupal_array_get_nested_value($form_state['input'], $element['#parents']);
+  $values['values'] = array_slice($values['values'], 0, -2);
+  $values = array_slice($values, 0, -2);
   dpm($values, 'Current Options');
-  $values = array_slice($values['values'], 0, -2);
 
   $element['#values'] = $options;
 
