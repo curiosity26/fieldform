@@ -729,7 +729,8 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
     $i = 0;
     $values = isset($form_state['input']) && !empty($form_state['input']) ?
       $form_state['input'] : get_object_vars($element);
-    $properties = $element->elementInfo()['properties'];
+    $element_info = $element->elementInfo();
+    $properties = $element_info['properties'];
 
     $form['title'] = array(
       '#type' => 'textfield',
@@ -798,7 +799,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
           case FIELDFORM_PROPERTY_TABLE:
             $value = empty($value) ? array() : $value;
             $form[$name]['#type'] = 'namevalue_table';
-            $form[$name]['#values'] = $value;
+            $form[$name]['#values'] = isset($value['values']) ? $value['values'] : $value;
             break;
           case FIELDFORM_PROPERTY_DATE:
             $form[$name]['#type'] = 'date';
@@ -813,7 +814,8 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
 
         $form[$name] += array(
           '#type' => 'textfield',
-          '#title' => isset($property['title']) ? $property['title'] : t(ucwords(str_replace('_', ' ', $name))),
+          '#title' => isset($property['title']) ? $property['title']
+              : t('@name', array('@name' => ucwords(str_replace('_', ' ', $name)))),
           '#default_value' => $value,
           '#weight' => $i++
         );
