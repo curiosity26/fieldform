@@ -123,7 +123,6 @@ class OptionsElementController extends FieldFormElementController {
     }
     unset($form_state['complete_form']['default_value']);
     form_builder($form['#form_id'], $form['default_value'], $form_state);
-    unset($form['default_value']['#printed']);
     return render($form['default_value']);
   }
 

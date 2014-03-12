@@ -1350,12 +1350,11 @@ function _namevalue_table_ajax() {
 
   if (!empty($element['#push_values'])) {
     $commands = array(ajax_command_replace('#namevalue-table-wrapper-'.$element['#id'], render($element)));
-    reset($values);
     foreach($element['#push_values'] as $selector => $ops) {
       foreach ($ops as $op => $callbacks) {
         foreach ($callbacks as $callback) {
           $func = 'ajax_command_'.$op;
-          $ret = $callback($form, $form_state, $element['#value']['values']);
+          $ret = $callback($form, $form_state, (array)$element['#value']['values']);
           $commands[] = $func($selector, $ret);
         }
       }
