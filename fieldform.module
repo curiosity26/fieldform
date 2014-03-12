@@ -1619,8 +1619,7 @@ function theme_namevalue_table($variables) {
 
   $output = theme('form_element_label', array('element' => $element));
   $output .= $table;
-  $output .= render($actions);
-
+  $output .= drupal_render_children($element);
   drupal_add_tabledrag($element['#attributes']['id'], 'order', 'sibling', 'namevalue-weight');
 
   return $output;
