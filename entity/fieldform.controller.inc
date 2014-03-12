@@ -797,6 +797,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
             $form[$name]['#options'] = isset($value) ? $value : $form['options']['#options'];
             break;
           case FIELDFORM_PROPERTY_TABLE:
+            dpm($value, 'Table Value');
             $value = isset($value['values']) ? $value['values'] : $value;
             $value = empty($value) ? array() : $value;
             $form[$name]['#type'] = 'namevalue_table';
