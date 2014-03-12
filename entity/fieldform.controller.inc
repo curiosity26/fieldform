@@ -768,7 +768,7 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
       if ($property['type'] === FIELDFORM_PROPERTY_NONE) {
         continue;
       }
-      dpm($values[$name], $name.' Value');
+
       $value = NULL;
       if (isset($values[$name])) {
         $value = $values[$name];
@@ -795,7 +795,6 @@ class FieldFormElementController implements FieldFormElementControllerInterface 
           $form[$name]['#options'] = isset($value) ? $value : $form['options']['#options'];
           break;
         case FIELDFORM_PROPERTY_CHECKBOXES:
-          dpm($value, 'Check Values');
           $value = empty($value) ? array() : $value;
           $form[$name]['#type'] = 'checkboxes';
           $form[$name]['#options'] = isset($value) ? $value : $form['options']['#options'];
