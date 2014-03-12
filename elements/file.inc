@@ -105,6 +105,7 @@ class FileResultDataController extends FieldFormResultDataController {
 
   static public function preRender(FieldFormResultDataInterface $result, &$vars) {
     $file = $result->value();
+    dpm($vars['result']->value(), 'File');
     $url = file_create_url($file->uri);
     $vars['classes_array'][] = 'no-print';
     dpm($file, 'File');
