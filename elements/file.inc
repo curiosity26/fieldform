@@ -56,30 +56,6 @@ class FileElementController extends FieldFormElementController {
     parent::settingsSubmitForm($form, $form_state, $entity_type, $entity, $element_type, $element);
   }
 
-  static public function validate(FieldFormElementInterface $element, &$form, &$form_state) {
-    $form_element = &drupal_array_get_nested_value($form, $element->parents);
-    if (!empty($form_element['#parents']) && $form_element['#type'] == 'file') {
-      $value = &drupal_array_get_nested_value($form_state['values'], $form_element['#parents']);
-
-      $validators = array(
-        'file_validate_extensions' => array($element->settings['extensions'])
-      );
-
-      if ($element->settings['is_image']) {
-        $validators['file_validate_is_image'] = array();
-      }
-
-      $destination = file_build_uri($element->settings['path']);
-      $file = file_save_upload($element->name, $validators, $destination);
-      if ($file) {
-        $value = $file;
-      }
-      else {
-        form_error($form_element, t('Unable to upload the attached file'));
-      }
-    }
-  }
-
   static public function buildElement(FieldFormElementInterface $element, FieldFormEntity $entity,
                                       $form = array(), &$form_state = array()) {
     $output = parent::buildElement($element, $entity, $form, $form_state);
@@ -87,7 +63,7 @@ class FileElementController extends FieldFormElementController {
     $output['#name'] = 'files['.$output['#name'].']';
     $output['#type'] = 'managed_file';
     $output['#upload_validators'] = $output['#settings']['extensions'];
-    $output['#upload_location'] = 'public://'.$output['#settings']['path'];
+    $output['#upload_location'] = file_build_uri($output['#settings']['path']);
     unset($output['#settings']);
     return $output;
   }
