@@ -63,7 +63,7 @@ class FileElementController extends FieldFormElementController {
     // Have to format the name so file_save_upload can see it. This is just retarded
     $output['#name'] = 'files['.$output['#name'].']';
     $output['#type'] = 'managed_file';
-    $output['#upload_validators'] = $output['#settings']['extensions'];
+    $output['#upload_validators']['file_validate_extensions'] = array($output['#settings']['extensions']);
     $output['#upload_location'] = file_build_uri($output['#settings']['path']);
     unset($output['#settings']);
     return $output;
