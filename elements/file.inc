@@ -53,6 +53,7 @@ class FileElementController extends FieldFormElementController {
         $form_state['values']['settings']['extensions'] = implode(' ', $matches['valid']);
       }
     }
+    parent::settingsSubmitForm($form, $form_state, $entity_type, $entity, $element_type, $element);
   }
 
   static public function validate(FieldFormElementInterface $element, &$form, &$form_state) {
