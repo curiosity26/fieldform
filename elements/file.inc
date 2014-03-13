@@ -39,7 +39,8 @@ class FileElementController extends FieldFormElementController {
       '#title' => t('Folder Path'),
       '#description' => t('Files uploaded using this element will be saved to the above folder path within %root',
         array('%root' => file_build_uri(''))),
-      '#element_prefix' => file_default_scheme().'://'
+      '#element_prefix' => file_default_scheme().'://',
+      '#default_value' => isset($element->settings['path']) ? $element->settings['path'] : '',
     );
 
     return $form;
