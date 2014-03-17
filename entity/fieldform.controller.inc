@@ -293,7 +293,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $iterator = new ArrayIterator($entity->elements);
     $ret = array();
 
-    $trigger = $form_state['triggering_element'];
+    $trigger = isset($form_state['triggering_element']) ? $form_state['triggering_element'] : NULL;
 
     if (!empty($separators) && count($separators) > 1) {
       if (isset($form_state['values'])
