@@ -349,7 +349,8 @@ class FieldFormController extends EntityAPIControllerExportable {
       );
     }
 
-    if (end($elements)->elementType() === 'separator' && end($elements)->name !== 'form_complete') {
+    if (method_exists(end($elements), 'elementType') && end($elements)->elementType() === 'separator'
+      && end($elements)->name !== 'form_complete') {
       // If the last element processed was a form separator
       // Process the Continue button
 
