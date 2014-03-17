@@ -297,7 +297,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
     if (!empty($separators) && count($separators) > 1) {
       if (isset($form_state['values'])
-        && ((isset($trigger) && in_array($trigger['#value'], array('Upload', $entity->settings['back_button_text'])))
+        && ((isset($trigger) && in_array($trigger['#value'], array('Remove', 'Upload', $entity->settings['back_button_text'])))
           || (isset($form_state['values']['op'])
         && $form_state['values']['op'] === $entity->settings['back_button_text']))) {
         $separator = self::getPreviousSeparatorId($entity, $separator); // The current page
