@@ -165,20 +165,6 @@ function fieldform_entity_property_info() {
     'type' => 'date'
   );
 
-  $result['data'] = array(
-    'label' => t('Form Data'),
-    'description' => t('The result data from each field of the form'),
-    'type' => 'struct',
-    'schema field' => 'data',
-    'property info' => array(
-      'value' => array(
-        'label' => t('Value'),
-        'type' => 'text',
-        'getter callback' => 'fieldform_entity_result_value_getter'
-      )
-    )
-  );
-
   return $info;
 }
 
@@ -235,14 +221,6 @@ function fieldform_result_fieldform_getter($data, array $options, $name, $type, 
     return fieldform_load($data->form_name);
   }
   return NULL;
-}
-
-function fieldform_entity_result_type_getter($data, array $options, $name, $type, $info) {
-  return $data->resultType();
-}
-
-function fieldform_entity_result_value_getter($data, array $options, $name, $type, $info) {
-  return $data->data;
 }
 
 function fieldform_permission() {
