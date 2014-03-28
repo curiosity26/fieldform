@@ -114,6 +114,7 @@ function _fieldform_menu_rebuild($instance) {
 function fieldform_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $i => &$item) {
+      dpm($item, 'Fieldform Item load');
       if ($item['fieldform_form'] !== '--') {
         $fieldform = fieldform_load($item['fieldform_form']);
         $fieldform->entity = $entity;
