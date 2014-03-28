@@ -247,6 +247,7 @@ function fieldform_entity_result_type_getter($data, array $options, $name, $type
 }
 
 function fieldform_entity_result_value_getter($data, array $options, $name, $type, $info) {
+  dpm($data, 'Data for '.$name);
   $elements = array_values($data->data);
   dpm($elements, 'Elements for '.$name);
   if (isset($elements[$name])) {
