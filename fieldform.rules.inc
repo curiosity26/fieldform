@@ -16,11 +16,11 @@ function fieldform_rules_event_info() {
     'group' => t('Field Form Result'),
     'variables' => array(
       'fieldform_result' => array(
-        'type' => 'entity',
+        'type' => 'fieldform_result',
         'label' => t('Field Form Result')
       ),
       'fieldform' => array(
-        'type' => 'entity',
+        'type' => 'fieldform',
         'label' => t('Field Form')
       )
     )
