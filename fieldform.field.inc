@@ -121,5 +121,4 @@ function fieldform_field_load($entity_type, $entities, $field, $instances, $lang
       }
     }
   }
-  dpm($items, 'Fieldform Item load');
 }
