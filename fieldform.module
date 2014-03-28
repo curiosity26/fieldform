@@ -168,22 +168,28 @@ function fieldform_entity_property_info() {
   $result['data'] = array(
     'label' => t('Form Data'),
     'description' => t('The result data from each field of the form'),
-    'type' => 'list<struct>',
+    'type' => 'struct',
     'schema field' => 'data',
     'property info' => array(
-      'name' => array(
-        'label' => t('Name'),
-        'type' => 'text'
-      ),
-      'type' => array(
-        'label' => t('Type'),
-        'type' => 'text',
-        'getter callback' => 'fieldform_entity_result_type_getter'
-      ),
       'value' => array(
-        'label' => t('Value'),
-        'type' => 'text',
-        'getter callback' => 'fieldform_entity_result_value_getter'
+        'label' => t('Data value'),
+        'type' => 'struct',
+        'property info' => array(
+          'name' => array(
+            'label' => t('Name'),
+            'type' => 'text'
+          ),
+          'type' => array(
+            'label' => t('Type'),
+            'type' => 'text',
+            'getter callback' => 'fieldform_entity_result_type_getter'
+          ),
+          'value' => array(
+            'label' => t('Value'),
+            'type' => 'text',
+            'getter callback' => 'fieldform_entity_result_value_getter'
+          )
+        )
       )
     )
   );
@@ -251,29 +257,7 @@ function fieldform_entity_result_type_getter($data, array $options, $name, $type
 }
 
 function fieldform_entity_result_value_getter($data, array $options, $name, $type, $info) {
-  watchdog('fieldform', '<pre>!code</pre>', array('!code' => print_r(func_get_args(), TRUE)));
-  /*$name = is_string($name) ? str_replace('-', '_', $name) : $name;
-  if (isset($data->data[$name])) {
-    $element = $data->data[$name];
-  }
-  else {
-    $elements = array_values($data->data);
-    $element = $elements[$name];
-  }
-
-  if (isset($element)) {
-    $value = $element->value();
-    if (is_object($value)) {
-      $value = get_object_vars($value);
-    }
-
-    if (is_array($value)) {
-      return implode(', ', $value);
-    }
-    return $value;
-  }
-  return NULL;*/
-  return $data->data[$name];
+  return $data->data;
 }
 
 function fieldform_permission() {
