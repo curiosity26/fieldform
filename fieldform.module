@@ -110,8 +110,8 @@ function fieldform_entity_property_info() {
   $info = array('fieldform' => array('properties' => array()), 'fieldform_result' => array('properties' => array()));
   $form = &$info['fieldform']['properties'];
   $result = &$info['fieldform_result']['properties'];
-  $user = entity_metadata_wrapper('user');
-  dpm($user, 'User Meta Data');
+  //$user = entity_metadata_wrapper('user');
+  //dpm($user, 'User Meta Data');
 
   $form['id'] = array(
     'label' => t('Field Form ID'),
