@@ -251,6 +251,7 @@ function fieldform_entity_result_type_getter($data, array $options, $name, $type
 }
 
 function fieldform_entity_result_value_getter($data, array $options, $name, $type, $info) {
+  dpm($data, 'Data for '.$name);
   $name = is_string($name) ? str_replace('-', '_', $name) : $name;
   if (isset($data->data[$name])) {
     $element = $data->data[$name];
