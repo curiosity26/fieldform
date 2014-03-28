@@ -119,7 +119,7 @@ function fieldform_field_load($entity_type, $entities, $field, $instances, $lang
         $fieldform->entity = $entity;
         $item['form'] = $fieldform;
       }
-      dpm($item, 'Fieldform Item load');
     }
   }
+  dpm($items, 'Fieldform Item load');
 }
