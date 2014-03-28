@@ -85,10 +85,14 @@ class FileResultDataController extends FieldFormResultDataController {
 
   static public function preRender(FieldFormResultDataInterface $result, &$vars) {
     $file = file_load($result->value());
-    $url = file_create_url($file->uri);
     $vars['classes_array'][] = 'no-print';
     if (!!$file) {
-        $vars['content'] = theme('file_icon', array('file' => $file)).l($file->filename, $url);
+      $url = file_create_url($file->uri);
+      $vars['content'] = theme('file_icon', array('file' => $file)).l($file->filename, $url);
+    }
+    else {
+      $vars['classes_array'][] = 'element-hidden';
+      $vars['content'] = NULL;
     }
   }
 }
