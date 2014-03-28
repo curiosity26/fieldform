@@ -133,7 +133,7 @@ function fieldform_entity_property_info() {
     'type' => 'integer'
   );
 
-  $form['create'] = array(
+  $form['created'] = array(
     'label' => t('Field Form Created Date'),
     'type' => 'date'
   );
@@ -163,7 +163,7 @@ function fieldform_entity_property_info() {
     'schema field' => 'rid'
   );
 
-  $result['create'] = array(
+  $result['created'] = array(
     'label' => t('Field Form Result Created Date'),
     'type' => 'date'
   );
