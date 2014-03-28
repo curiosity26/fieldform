@@ -165,6 +165,24 @@ function fieldform_entity_property_info() {
     'type' => 'date'
   );
 
+  $result['data'] = array(
+    'label' => t('Field Form Result Data'),
+    'type' => 'list<struct>',
+    'property info' => array(
+      'name' => array(
+        'label' => t('Name'),
+        'type' => 'text'
+      ),
+      'value' => array(
+        'label' => t('Value'),
+        'type' => 'text',
+        'getter callback' => 'fieldform_result_element_getter'
+      )
+    ),
+    'schema field' => 'data'
+    ,'getter callback' => 'fieldform_result_data_getter'
+  );
+
   return $info;
 }
 
@@ -221,6 +239,14 @@ function fieldform_result_fieldform_getter($data, array $options, $name, $type, 
     return fieldform_load($data->form_name);
   }
   return NULL;
+}
+
+function fieldform_result_data_getter($data, array $options, $name, $type, $info) {
+  return array_values($data->data);
+}
+
+function fieldform_result_element_getter($data, array $options, $name, $type, $info) {
+  return $data->value();
 }
 
 function fieldform_permission() {
