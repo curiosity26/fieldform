@@ -149,14 +149,6 @@ function fieldform_entity_property_info() {
     'type' => 'list<list>'
   );
 
-  $result['form'] = array(
-    'label' => t('Field Form'),
-    'description' => t('The form the results belong to'),
-    'type' => 'entity',
-    'schema field' => 'form_name',
-    'getter callback' => 'fieldform_result_fieldform_getter'
-  );
-
   $result['id'] = array(
     'label' => t('Field Form Result ID'),
     'type' => 'integer',
@@ -220,6 +212,14 @@ function fieldform_entity_property_info_alter(&$info) {
     'property info' => $user->getPropertyInfo(),
     'getter callback' => 'fieldform_entity_uid_getter',
     'setter callback' => 'fieldform_entity_uid_setter'
+  );
+
+  $result['form'] = array(
+    'label' => t('Field Form'),
+    'description' => t('The form the results belong to'),
+    'type' => 'entity',
+    'schema field' => 'form_name',
+    'getter callback' => 'fieldform_result_fieldform_getter'
   );
 }
 
