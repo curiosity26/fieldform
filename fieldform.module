@@ -110,8 +110,6 @@ function fieldform_entity_property_info() {
   $info = array('fieldform' => array('properties' => array()), 'fieldform_result' => array('properties' => array()));
   $form = &$info['fieldform']['properties'];
   $result = &$info['fieldform_result']['properties'];
-  //$user = entity_metadata_wrapper('user');
-  //dpm($user, 'User Meta Data');
 
   $form['id'] = array(
     'label' => t('Field Form ID'),
@@ -123,15 +121,6 @@ function fieldform_entity_property_info() {
     'label' => t('Field Form Name'),
     'type' => 'text'
   );
-
-  /*$form['user'] = array(
-    'label' => t('Field Form Creator Account'),
-    'type' => 'struct',
-    'schema field' => 'uid',
-    'property info' => $user['properties'],
-    'getter callback' => 'fieldform_entity_uid_getter',
-    'setter callback' => 'fieldform_entity_uid_setter'
-  );*/
 
   $form['entity'] = array(
     'label' => t('Entity'),
@@ -174,15 +163,6 @@ function fieldform_entity_property_info() {
     'schema field' => 'rid'
   );
 
-  /*$result['user'] = array(
-    'label' => t('Field Form User'),
-    'type' => 'struct',
-    'schema field' => 'uid',
-    'property info' => $user['properties'],
-    'getter callback' => 'fieldform_entity_uid_getter',
-    'setter callback' => 'fieldform_entity_uid_setter'
-  );*/
-
   $result['create'] = array(
     'label' => t('Field Form Result Created Date'),
     'type' => 'date'
@@ -217,6 +197,30 @@ function fieldform_entity_property_info() {
   );
 
   return $info;
+}
+
+function fieldform_entity_property_info_alter(&$info) {
+  $form = &$info['fieldform']['properties'];
+  $result = &$info['fieldform_result']['properties'];
+  $user = entity_metadata_wrapper('user');
+
+  $form['user'] = array(
+    'label' => t('Field Form Creator Account'),
+    'type' => 'struct',
+    'schema field' => 'uid',
+    'property info' => $user->getPropertyInfo(),
+    'getter callback' => 'fieldform_entity_uid_getter',
+    'setter callback' => 'fieldform_entity_uid_setter'
+  );
+
+  $result['user'] = array(
+    'label' => t('Field Form User'),
+    'type' => 'struct',
+    'schema field' => 'uid',
+    'property info' => $user->getPropertyInfo(),
+    'getter callback' => 'fieldform_entity_uid_getter',
+    'setter callback' => 'fieldform_entity_uid_setter'
+  );
 }
 
 function fieldform_entity_uid_getter($data, array $options, $name, $type, $info) {
