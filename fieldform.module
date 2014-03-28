@@ -110,11 +110,48 @@ function fieldform_entity_property_info() {
   $info = array('fieldform' => array('properties' => array()), 'fieldform_result' => array('properties' => array()));
   $form = &$info['fieldform']['properties'];
   $result = &$info['fieldform_result']['properties'];
+  $user = entity_metadata_wrapper('user');
+
+
+  $form['id'] = array(
+    'label' => t('Field Form ID'),
+    'type' => 'integer',
+    'schema field' => 'fid'
+  );
+
+  $form['name'] = array(
+    'label' => t('Field Form Name'),
+    'type' => 'text'
+  );
+
+  $form['user'] = array(
+    'label' => t('Field Form Creator Account'),
+    'type' => 'struct',
+    'schema field' => 'uid',
+    'property info' => $user['properties'],
+    'getter callback' => 'fieldform_entity_uid_getter',
+    'setter callback' => 'fieldform_entity_uid_setter'
+  );
 
   $form['entity'] = array(
     'label' => t('Entity'),
     'description' => t('The entity the form is attached to when viewing the form via a field'),
     'type' => 'entity'
+  );
+
+  $form['status'] = array(
+    'label' => t('Field Form Status'),
+    'type' => 'integer'
+  );
+
+  $form['create'] = array(
+    'label' => t('Field Form Created Date'),
+    'type' => 'date'
+  );
+
+  $form['changed'] = array(
+    'label' => t('Field Form Updated Date'),
+    'type' => 'date'
   );
 
   $form['elements'] = array(
@@ -123,11 +160,37 @@ function fieldform_entity_property_info() {
     'type' => 'list<list>'
   );
 
-  $result['fieldform'] = array(
+  $result['form'] = array(
     'label' => t('Field Form'),
     'description' => t('The form the results belong to'),
     'type' => 'entity',
+    'schema field' => 'form_name',
     'getter callback' => 'fieldform_result_fieldform_getter'
+  );
+
+  $result['id'] = array(
+    'label' => t('Field Form Result ID'),
+    'type' => 'integer',
+    'schema field' => 'rid'
+  );
+
+  $result['user'] = array(
+    'label' => t('Field Form User'),
+    'type' => 'struct',
+    'schema field' => 'uid',
+    'property info' => $user['properties'],
+    'getter callback' => 'fieldform_entity_uid_getter',
+    'setter callback' => 'fieldform_entity_uid_setter'
+  );
+
+  $result['create'] = array(
+    'label' => t('Field Form Result Created Date'),
+    'type' => 'date'
+  );
+
+  $result['changed'] = array(
+    'label' => t('Field Form Result Updated Date'),
+    'type' => 'date'
   );
 
   $result['data'] = array(
@@ -154,6 +217,19 @@ function fieldform_entity_property_info() {
   );
 
   return $info;
+}
+
+function fieldform_entity_uid_getter($data, array $options, $name, $type, $info) {
+  return user_load($data->uid);
+}
+
+function fieldform_entity_uid_setter(&$data, $name, $value, $langcode, $type, $info) {
+  if (is_object($value) && isset($value->uid)) {
+    $data->uid = $value->uid;
+  }
+  if (is_integer($value)) {
+    $data->uid = $value;
+  }
 }
 
 function fieldform_result_fieldform_getter($data, array $options, $name, $type, $info) {
