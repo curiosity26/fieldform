@@ -18,6 +18,10 @@ function fieldform_rules_event_info() {
       'fieldform_result' => array(
         'type' => 'entity',
         'label' => t('Field Form Result')
+      ),
+      'fieldform' => array(
+        'type' => 'entity',
+        'label' => t('Field Form')
       )
     )
   );
