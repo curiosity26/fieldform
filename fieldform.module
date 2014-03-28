@@ -172,24 +172,9 @@ function fieldform_entity_property_info() {
     'schema field' => 'data',
     'property info' => array(
       'value' => array(
-        'label' => t('Data value'),
-        'type' => 'struct',
-        'property info' => array(
-          'name' => array(
-            'label' => t('Name'),
-            'type' => 'text'
-          ),
-          'type' => array(
-            'label' => t('Type'),
-            'type' => 'text',
-            'getter callback' => 'fieldform_entity_result_type_getter'
-          ),
-          'value' => array(
-            'label' => t('Value'),
-            'type' => 'text',
-            'getter callback' => 'fieldform_entity_result_value_getter'
-          )
-        )
+        'label' => t('Value'),
+        'type' => 'text',
+        'getter callback' => 'fieldform_entity_result_value_getter'
       )
     )
   );
