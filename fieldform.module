@@ -1099,7 +1099,7 @@ function fieldform_view_form($form, &$form_state, $entity_type, Entity $entity) 
   $result_controller::buildForm($result, $entity, $form, $form_state);
 
   if (isset($form_state['storage']['complete'])) {
-    rules_invoke_event_by_args('fieldform_complete', array('fieldform_result' => $result));
+    rules_invoke_event_by_args('fieldform_completed', array('fieldform_result' => $result));
   }
 
   $form_state['result'] = $result;
