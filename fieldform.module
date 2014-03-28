@@ -106,6 +106,86 @@ function fieldform_entity_info() {
   return $entities;
 }
 
+function fieldform_entity_property_info() {
+  $info = array('fieldform' => array('properties' => array()), 'fieldform_result' => array('properties' => array()));
+  $form = &$info['fieldform']['properties'];
+  $result = &$info['fieldform_result']['properties'];
+
+  $form['entity'] = array(
+    'label' => t('Entity'),
+    'description' => t('The entity the form is attached to when viewing the form via a field'),
+    'type' => 'entity'
+  );
+
+  $form['elements'] = array(
+    'label' => t('Form Elements'),
+    'description' => t('The elements within the form'),
+    'type' => 'list<list>'
+  );
+
+  $result['fieldform'] = array(
+    'label' => t('Field Form'),
+    'description' => t('The form the results belong to'),
+    'type' => 'entity',
+    'getter callback' => 'fieldform_result_fieldform_getter'
+  );
+
+  $result['data'] = array(
+    'label' => t('Form Data'),
+    'description' => t('The result data from each field of the form'),
+    'type' => 'list<struct>',
+    'schema field' => 'data',
+    'property info' => array(
+      'fieldform_result_data' => array(
+        'properties' => array(
+          'name' => array(
+            'label' => t('Name'),
+            'type' => 'text'
+          ),
+          'type' => array(
+            'label' => t('Type'),
+            'type' => 'text',
+            'getter callback' => 'fieldform_entity_result_type_getter'
+          ),
+          'value' => array(
+            'label' => t('Value'),
+            'type' => 'text',
+            'getter callback' => 'fieldform_entity_result_value_getter'
+          )
+        )
+      )
+    )
+  );
+
+  return $info;
+}
+
+function fieldform_result_fieldform_getter($data, array $options, $name, $type, $info) {
+  if (isset($data->fieldform)) {
+    return $data->fieldform;
+  }
+  if (!!$data->form_name) {
+    return fieldform_load($data->form_name);
+  }
+  return NULL;
+}
+
+function fieldform_entity_result_type_getter($data, array $options, $name, $type, $info) {
+  return $data->resultType();
+}
+
+function fieldform_entity_result_value_getter($data, array $options, $name, $type, $info) {
+  $value = $data->value();
+  if (is_object($value)) {
+    $value = get_object_vars($value);
+  }
+
+  if (is_array($value)) {
+    return implode(', ', $value);
+  }
+  return $value;
+}
+
 function fieldform_permission() {
 
   /* Admin */
@@ -1021,6 +1101,11 @@ function fieldform_view_form($form, &$form_state, $entity_type, Entity $entity) 
 
   $result_controller = entity_get_controller($result->entityType());
   $result_controller::buildForm($result, $entity, $form, $form_state);
+
+  if (isset($form_state['storage']['complete'])) {
+    rules_invoke_event_by_args('fieldform_complete', array('fieldform_result' => $result));
+  }
+
   $form_state['result'] = $result;
   return $form;
 }

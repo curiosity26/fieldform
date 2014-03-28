@@ -84,8 +84,8 @@ function fieldform_field_formatter_info() {
 function fieldform_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
   if ($display['type'] === 'fieldform_field_formatter') {
-    if (isset($items[0]['fieldform_form']) && $items[0]['fieldform_form'] !== '--') {
-      $fieldform = fieldform_load($items[0]['fieldform_form']);
+    if (isset($items[0]['form'])) {
+      $fieldform = $items[0]['form'];
       if ($fieldform !== FALSE && fieldform_access('view', $fieldform)) {
         $form_state = array('build_info' => array('args' => array($fieldform->entityType(), $fieldform)));
         $form_state['field_entity'] = $entity;
@@ -108,5 +108,17 @@ function _fieldform_menu_rebuild($instance) {
   $fields = field_read_fields(array('type' => 'fieldform'));
   if (in_array($instance['field_name'], array_keys($fields))) {
     menu_rebuild();
+  }
+}
+
+function fieldform_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
+  foreach ($entities as $id => $entity) {
+    foreach ($items[$id] as $i => &$item) {
+      if ($item['fieldform_form'] !== '--') {
+        $fieldform = fieldform_load($item['fieldform_form']);
+        $fieldform->entity = $entity;
+        $item[$i]['form'] = $fieldform;
+      }
+    }
   }
 }
