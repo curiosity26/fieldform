@@ -117,7 +117,7 @@ function fieldform_field_load($entity_type, $entities, $field, $instances, $lang
       if ($item['fieldform_form'] !== '--') {
         $fieldform = fieldform_load($item['fieldform_form']);
         $fieldform->entity = $entity;
-        $item[$i]['form'] = $fieldform;
+        $item['form'] = $fieldform;
       }
       dpm($item, 'Fieldform Item load');
     }
