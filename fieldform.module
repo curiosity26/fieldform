@@ -247,15 +247,20 @@ function fieldform_entity_result_type_getter($data, array $options, $name, $type
 }
 
 function fieldform_entity_result_value_getter($data, array $options, $name, $type, $info) {
-  $value = $data->value();
-  if (is_object($value)) {
-    $value = get_object_vars($value);
-  }
+  $elements = array_values($data->data);
+  dpm($elements, 'Elements for '.$name);
+  if (isset($elements[$name])) {
+    $value = $elements[$name]->value();
+    if (is_object($value)) {
+      $value = get_object_vars($value);
+    }
 
-  if (is_array($value)) {
-    return implode(', ', $value);
+    if (is_array($value)) {
+      return implode(', ', $value);
+    }
+    return $value;
   }
-  return $value;
+  return NULL;
 }
 
 function fieldform_permission() {
