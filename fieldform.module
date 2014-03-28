@@ -251,9 +251,16 @@ function fieldform_entity_result_type_getter($data, array $options, $name, $type
 }
 
 function fieldform_entity_result_value_getter($data, array $options, $name, $type, $info) {
-  $elements = array_values($data->data);
-  if (isset($elements[$name])) {
-    $value = $elements[$name]->value();
+  if (isset($data->data[$name])) {
+    $element = $data->data[$name];
+  }
+  else {
+    $elements = array_values($data->data);
+    $element = $elements[$name];
+  }
+
+  if (isset($element)) {
+    $value = $element->value();
     if (is_object($value)) {
       $value = get_object_vars($value);
     }
