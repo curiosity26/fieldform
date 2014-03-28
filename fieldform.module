@@ -246,7 +246,11 @@ function fieldform_result_data_getter($data, array $options, $name, $type, $info
 }
 
 function fieldform_result_element_getter($data, array $options, $name, $type, $info) {
-  return $data->value();
+  $value = $data->value();
+  if (is_object($value)) {
+    $value = get_object_vars($value);
+  }
+  return is_array($value) ? implode(', ', $value) :  $value;
 }
 
 function fieldform_permission() {
