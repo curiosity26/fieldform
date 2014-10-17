@@ -722,10 +722,11 @@ function fieldform_field_results_load($entity, $limit = 0) {
     $bundle = $entity->type;
   }
 
-  $ids = db_select('fieldform_entities', 'fe');
-
   if ($limit > 0) {
-    $ids->extend('PagerDefault');
+    $ids = db_select('fieldform_entities', 'fe')->extend('PagerDefault');
+  }
+  else {
+    $ids = db_select('fieldform_entities', 'fe');
   }
 
   $ids->fields('fe', array('result'))
