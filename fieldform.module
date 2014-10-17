@@ -738,9 +738,9 @@ function fieldform_field_results_load($entity, $limit = 0) {
     $ids->limit($limit);
   }
 
-  $ids->execute()
+  $result = $ids->execute()
     ->fetchAllAssoc('result');
-  return fieldform_result_load_multiple(array_keys($ids));
+  return fieldform_result_load_multiple(array_keys($result));
 }
 
 /* View Functions */
