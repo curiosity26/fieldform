@@ -848,9 +848,9 @@ function fieldform_field_results_page($entity) {
       $results = fieldform_field_results_load($entity);
       foreach ($results as $result) {
         if (fieldform_result_access('view', $result)) {
-          $user = user_load($result->uid);
-          if (!isset($user)) {
+          if (($user = user_load($result->uid)) !== FALSE) {
             $user = new stdClass();
+            $user->name = '';
           }
 
           if (!$user->name) {
