@@ -710,7 +710,7 @@ function fieldform_result_create($resultType, $values = array()) {
   return $controller->create($resultType, $values);
 }
 
-function fieldform_field_results_load($entity) {
+function fieldform_field_results_load($entity, $limit = 0) {
   if (method_exists($entity, 'entityType')) {
     $type = $entity->entityType();
     $id = $entity->identifier();
@@ -722,12 +722,22 @@ function fieldform_field_results_load($entity) {
     $bundle = $entity->type;
   }
 
-  $ids = db_select('fieldform_entities', 'fe')
-    ->fields('fe', array('result'))
+  $ids = db_select('fieldform_entities', 'fe');
+
+  if ($limit > 0) {
+    $ids->extend('PagerDefault');
+  }
+
+  $ids->fields('fe', array('result'))
     ->condition('entity_type', $type)
     ->condition('entity', $id)
-    ->condition('bundle', $bundle)
-    ->execute()
+    ->condition('bundle', $bundle);
+
+  if ($limit > 0) {
+    $ids->limit($limit);
+  }
+
+  $ids->execute()
     ->fetchAllAssoc('result');
   return fieldform_result_load_multiple(array_keys($ids));
 }
@@ -845,12 +855,12 @@ function fieldform_field_results_page($entity) {
   foreach ($field_names as $field_name) {
     $items = field_get_items($type, $entity, $field_name);
     if (isset($items[0]['fieldform_form'])) {
-      $results = fieldform_field_results_load($entity);
+      $results = fieldform_field_results_load($entity, 10);
       foreach ($results as $result) {
         if (fieldform_result_access('view', $result)) {
           if (($user = user_load($result->uid)) !== FALSE) {
             $user = new stdClass();
-            $user->name = '';
+            $user->name = t('Anonymous');
           }
 
           if (!$user->name) {
@@ -885,7 +895,20 @@ function fieldform_field_results_page($entity) {
     }
   }
 
-  return theme('table', array('header' => $header, 'rows' => $rows));
+  $output = array();
+  $output['table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => array_reverse($rows),
+    '#empty' => t('There are no form submissions available'),
+  );
+
+  $output['pager'] = array(
+    '#theme' => 'pager'
+  );
+
+  //return theme('table', array('header' => $header, 'rows' => $rows));
+  return $output;
 }
 
 function fieldform_field_results_view_page($entity, $result) {
