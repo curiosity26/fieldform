@@ -849,6 +849,10 @@ function fieldform_field_results_page($entity) {
       foreach ($results as $result) {
         if (fieldform_result_access('view', $result)) {
           $user = user_load($result->uid);
+          if (!isset($user)) {
+            $user = new stdClass();
+          }
+
           if (!$user->name) {
             $user->name = t('Anonymous');
           }
