@@ -729,7 +729,7 @@ function fieldform_field_results_load($entity, $limit = 0) {
     $ids = db_select('fieldform_entities', 'fe');
   }
 
-  $ids->fields('fe', array('result', 'created'))
+  $ids->fields('fe', array('result', 'id'))
     ->condition('entity_type', $type)
     ->condition('entity', $id)
     ->condition('bundle', $bundle);
@@ -738,7 +738,7 @@ function fieldform_field_results_load($entity, $limit = 0) {
     $ids->limit($limit);
   }
 
-  $result = $ids->orderBy('created', 'DESC')->execute()
+  $result = $ids->orderBy('id', 'DESC')->execute()
     ->fetchAllAssoc('result');
   return fieldform_result_load_multiple(array_keys($result));
 }
