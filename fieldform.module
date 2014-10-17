@@ -738,7 +738,7 @@ function fieldform_field_results_load($entity, $limit = 0) {
     $ids->limit($limit);
   }
 
-  $result = $ids->execute()
+  $result = $ids->orderBy('created', 'DESC')->execute()
     ->fetchAllAssoc('result');
   return fieldform_result_load_multiple(array_keys($result));
 }
@@ -900,7 +900,7 @@ function fieldform_field_results_page($entity) {
   $output['table'] = array(
     '#theme' => 'table',
     '#header' => $header,
-    '#rows' => array_reverse($rows),
+    '#rows' => $rows,
     '#empty' => t('There are no form submissions available')
   );
 
