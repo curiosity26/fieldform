@@ -900,8 +900,8 @@ function fieldform_field_results_page($entity) {
   $output['table'] = array(
     '#theme' => 'table',
     '#header' => $header,
-    '#rows' => $rows,
-    '#empty' => t('There are no form submissions available'),
+    '#rows' => array_reverse($rows),
+    '#empty' => t('There are no form submissions available')
   );
 
   $output['pager'] = array(
