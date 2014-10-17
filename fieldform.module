@@ -729,7 +729,7 @@ function fieldform_field_results_load($entity, $limit = 0) {
     $ids = db_select('fieldform_entities', 'fe');
   }
 
-  $ids->fields('fe', array('result'))
+  $ids->fields('fe', array('result', 'created'))
     ->condition('entity_type', $type)
     ->condition('entity', $id)
     ->condition('bundle', $bundle);
@@ -858,6 +858,9 @@ function fieldform_field_results_page($entity) {
     if (isset($items[0]['fieldform_form'])) {
       $results = fieldform_field_results_load($entity, 10);
       foreach ($results as $result) {
+        if (is_array($result)) {
+          $result = $result['result'];
+        }
         if (fieldform_result_access('view', $result)) {
           if (($user = user_load($result->uid)) !== FALSE) {
             $user = new stdClass();
