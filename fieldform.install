@@ -63,6 +63,92 @@ function fieldform_schema() {
     )
   );
 
+  $schema['fieldform_elements'] = array(
+    'fields' => array(
+      'eid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'unsigned' => TRUE
+      ),
+      'fid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE
+      ),
+      'pid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE,
+        'default' => 0
+      ),
+      'id' => array(
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE
+      ),
+      'elementType' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE
+      ),
+      'title_display' => array(
+        'type' => 'varchar',
+        'length' => 20,
+        'not null' => TRUE,
+        'default' => 'before'
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'length' => 50,
+        'not null' => TRUE
+      ),
+      'default_value' => array(
+        'type' => 'text',
+        'size' => 'medium',
+        'serialize' => TRUE,
+        'not null' => FALSE
+      ),
+      'description' => array(
+        'type' => 'text',
+        'not null' => FALSE
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0
+      ),
+      'attributes' => array(
+        'type' => 'text',
+        'size' => 'medium',
+        'serialize' => TRUE,
+        'not null' => FALSE
+      ),
+      'extra' => array(
+        'type' => 'text',
+        'size' => 'medium',
+        'serialize' => TRUE,
+        'not null' => FALSE
+      )
+    ),
+    'foreign keys' => array(
+      'fid' => array(
+        'table' => 'fieldform',
+        'columns' => array('fid' => 'fid')
+      )
+    ),
+    'primary key' => array('eid')
+  );
+
   $schema['fieldform_result'] = array(
     'fields' => array(
       'rid' => array(
@@ -99,12 +185,6 @@ function fieldform_schema() {
         'type' => 'varchar',
         'length' => 255,
         'not null' => FALSE,
-      ),
-      'data' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'serialize' => TRUE,
-        'size' => 'medium'
       )
     ),
     'foreign keys' => array(
@@ -118,6 +198,49 @@ function fieldform_schema() {
       )
     ),
     'primary key' => array('rid')
+  );
+
+  $schema['fieldform_result_value'] = array(
+    'fields' => array(
+      'rvid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'unsigned' => TRUE
+      ),
+      'rid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'unsigned' => TRUE
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'length' => 100,
+        'not null' => TRUE
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE
+      ),
+      'value' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'serialize' => TRUE,
+        'size' => 'medium'
+      )
+    ),
+    'foreign keys' => array(
+      'rid' => array(
+        'table' => 'fieldform_result',
+        'columns' => array('rid' => 'rid')
+      )
+    ),
+    'primary key' => array('rvid')
   );
 
   $schema['fieldform_entities'] = array(
@@ -158,6 +281,115 @@ function fieldform_schema() {
   );
 
   return $schema;
+}
+
+function fieldform_update_7200(&$sandbox) {
+  if (db_field_exists('fieldform_result', 'data')) {
+    if (!isset($sandbox['progress'])) {
+      $sandbox['progress'] = 0;
+      $sandbox['current_rid'] = 0;
+      $sandbox['max'] = db_query('SELECT COUNT(DISTINCT rid) FROM {fieldform_result}')->fetchField() - 1;
+    }
+
+    $results = db_select('fieldfrom_result', 'r')->fields('r', array('rid', 'data'))->condition('rid', $sandbox['current_uid'], '>')->range(0, 1)->orderBy('rid', 'ASC')->execute();
+
+    foreach ($results as $result) {
+      $data = unserialize($result->data);
+
+      foreach ($data as $datum) {
+        $save = array(
+          'rid' => $result->rid,
+          'name' => $datum['name'],
+          'type' => $datum['type'],
+          'title' => $datum['title'],
+          'value' => $datum['value']
+        );
+        drupal_write_record('fieldform_result_value', $save);
+      }
+
+      $sandbox['progress']++;
+      $sandbox['current_rid'] = $result->rid;
+    }
+
+    $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
+
+    if ($sandbox['#finished']) {
+      db_drop_field('fieldform_result', 'data');
+      return t('Migrating result data from bulk serialization to row data is complete');
+    }
+  }
+  else {
+    return t('No need to update result data');
+  }
+}
+
+function fieldform_update_7201(&$sandbox) {
+  if (db_field_exists('fieldform', 'elements')) {
+    if (!isset($sandbox['progress'])) {
+      $sandbox['progress'] = 0;
+      $sandbox['current_fid'] = 0;
+      $sandbox['max'] = db_query('SELECT COUNT(DISTINCT fid) FROM {fieldform}')->fetchField() - 1;
+    }
+
+    $forms = db_select('fieldfrom', 'f')
+      ->fields('f', array('fid', 'elements'))
+      ->condition('fid', $sandbox['current_fid'], '>')->range(0, 1)
+      ->orderBy('fid', 'ASC')->execute();
+
+    $schema = drupal_get_schema('fieldform_elements');
+    unset($schema['fields']['eid']);
+    $fields = array_keys($schema['fields']);
+
+    foreach ($forms as $form) {
+      $elements = unserialize($form->elements);
+
+      _fieldform_process_element_7201($elements, $fields, $form->fid);
+
+      $sandbox['progress']++;
+      $sandbox['current_fid'] = $form->fid;
+    }
+
+    $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
+
+    if ($sandbox['#finished']) {
+      db_drop_field('fieldform', 'elements');
+      return t('Succesfully mapped form elements to independent row data');
+    }
+  }
+  else {
+    return t('No update needed');
+  }
+}
+
+function _fieldform_process_element_7201($elements, $fields, $fid, $pid = 0) {
+
+  foreach ($elements as $element) {
+    $save = array();
+    $children = $element['children'];
+    $id = $element['_id'];
+    unset($element['_id'], $element['parent']);
+
+    foreach ($fields as $field) {
+      if (!empty($element[$field])) {
+        $save[$field] = $element[$field];
+        unset($element[$field]);
+      }
+    }
+
+    $save += array(
+      'fid' => $fid,
+      'pid' => $pid,
+      'id' => $id,
+      'extra' => $element
+    );
+
+    $save = (object)$save;
+    drupal_write_record('fieldform_elements', $save);
+
+    if (!empty($children)) {
+      _fieldform_process_element_7201($children, $fields, $fid, $save->eid);
+    }
+  }
 }
 
 function fieldform_field_schema($field) {

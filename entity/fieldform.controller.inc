@@ -14,18 +14,8 @@ class FieldFormController extends EntityAPIControllerExportable {
   public function load($ids = array(), $conditions = array()) {
     $entities = parent::load($ids, $conditions);
     foreach ($entities as $entity) {
-      if (!empty($entity->elements) && is_array($entity->elements)) {
-        if (is_string(current($entity->elements))) {
-          $elements = array();
-          foreach ($entity->elements as $value) {
-            if (is_string($value)) {
-              $value = unserialize($value);
-            }
-            $element = is_array($value) ? fieldform_element_create($value['type'], $value) : $value;
-            $elements[$element->_id] = $element;
-          }
-          $entity->elements = $elements;
-        }
+      if (empty($entity->elements)) {
+        $entity->elements = self::loadElements($entity->identifier());
       }
 
       if (!isset($entity->settings) || !is_array($entity->settings)) {
@@ -45,16 +35,53 @@ class FieldFormController extends EntityAPIControllerExportable {
     return $entities;
   }
 
+  static private function loadElements($fid, $pid = 0) {
+    $elements = array();
+    $results = db_select('fieldform_elements', 'e')
+      ->fields('e')
+      ->where('e WHERE e.fid = :fid AND e.pid = :pid',
+        array('fid' => $fid, 'pid' => $pid))
+      ->execute();
+
+    while ($result = $results->fetchAssoc()) {
+      $extra = $result['extra'];
+      $id = $result['id'];
+      $keys = array_keys($result);
+      $element = array('_id' => $id);
+
+      unset($keys['id'], $keys['extra']);
+
+      foreach ($keys as $key) {
+        $element[$key] = $result[$key];
+      }
+
+      foreach ($extra as $key => $value) {
+        $element[$key] = $value;
+      }
+
+      $element['children'] = self::loadElements($fid, $result['eid']);
+
+      $elements[$id] = fieldform_element_create($element['type'], $element);
+    }
+
+    return $elements;
+  }
+
   public function create(array $values = array()) {
     $values += array('is_new' => TRUE);
-    if (isset($this->entityInfo['entity class']) && $class = $this->entityInfo['entity class']) {
+    if (isset($this->entityInfo['entity class'])
+      && $class = $this->entityInfo['entity class']) {
       $entity = new $class($values, $this->entityType);
       $elements = array();
       foreach ($entity->elements as $element) {
         if (is_string($element)) {
           $element = unserialize($element);
         }
-        $element = is_array($element) ? fieldform_element_create($element['type'], $element) : $element;
+
+        $element = is_array($element)
+          ? fieldform_element_create($element['type'], $element)
+          : $element;
+
         $elements[$element->_id] = $element;
       }
       $entity->elements = $elements;
@@ -463,8 +490,41 @@ class FieldFormController extends EntityAPIControllerExportable {
       $entity->addElement($clone);
     }
     $return = parent::save($entity);
+    self::saveElements($entity->elements, $entity->identifier());
     $this->resetCache(array($entity->identifier()));
     return $return;
+  }
+
+  static public function saveElements($elements, $fid, $pid = 0) {
+    $schema = drupal_get_schema('fieldform_elements');
+    $fields = array_keys($schema['fields']);
+
+    foreach ($elements as $element) {
+      $children = $element['children'];
+      unset($element['children']);
+      $element['extra'] = array();
+
+      foreach ($element as $key => $value) {
+        if (!in_array($key, $fields)) {
+          $element['extra'][$key] = $value;
+          unset($element[$key]);
+        }
+      }
+
+      $element = (object)$element;
+      $element->fid = $fid;
+      $element->pid = $pid;
+      if (!empty($element->eid)) {
+        drupal_write_record('fieldform_elements', $element, array('eid'));
+      }
+      else {
+        drupal_write_record('fieldform_elements', $element);
+      }
+
+      if (!empty($children)) {
+        self::saveElements($children, $fid, $element->eid);
+      }
+    }
   }
 }
 

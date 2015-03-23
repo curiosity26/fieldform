@@ -17,18 +17,26 @@ class FieldFormResultController extends EntityAPIController {
       if (!isset($entity->module)) {
         $entity->module = 'fieldform';
       }
-      if (!empty($entity->data)) {
-        $data = (array) $entity->data;
-        $tmp = array();
-        foreach ($data as $name => $value) {
-          $type = is_array($value) ? $value['type'] : $value->type;
-          $tmp[$name] = fieldform_result_create($type, $value);
-        }
-        $entity->data = $tmp;
+      if (empty($entity->data)) {
+        $entity->data = self::loadResults($entity->identifier());
       }
     }
     reset($entities);
     return $entities;
+  }
+
+  static public function loadResults($rid) {
+    $results = db_select('fieldform_result_values', 'v')
+      ->fields('v')
+      ->where('rid = :rid', array(':rid' => $rid))->execute();
+
+    $data = array();
+
+    while($result = $results->fetchAssoc()) {
+      $data[$result['name']] = fieldform_result_create($result['type'], $result);
+    }
+
+    return $data;
   }
 
   public function save($entity) {
@@ -41,17 +49,13 @@ class FieldFormResultController extends EntityAPIController {
       $entity->module = 'fieldform';
     }
 
-    $data = $entity->data;
-    if (!empty($data)) {
-      $tmp = array();
-      foreach ($data as $name => $value) {
-        $tmp[$name] = $value->save();
+    if (!empty($entity->data)) {
+      foreach ($entity->data as $name => $value) {
+        $value->save();
       }
-      $entity->data = $tmp;
     }
 
     parent::save($entity);
-    $entity->data = $data;
   }
 
   public function buildContent($entity, $view_mode = 'full', $langcode = NULL, $content = array()) {
@@ -250,7 +254,13 @@ class FieldFormResultDataController implements FieldFormResultDataControllerInte
   static public function save(FieldFormResultDataInterface $result) {
     $data = self::data($result);
     $data['value'] = $result->value();
-    return $data;
+
+    if (!empty($data['rvid'])) {
+      drupal_write_record('fieldform_result_value', $data, array('rvid'));
+    }
+    else {
+      drupal_write_record('fieldform_result_value', $data);
+    }
   }
 
   static public function buildElement(FieldFormResultDataInterface $result, &$element, $default_value = NULL) {
