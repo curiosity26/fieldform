@@ -47,10 +47,11 @@ class FieldFormController extends EntityAPIControllerExportable {
     while ($result = $results->fetchAssoc()) {
       $extra = is_string($result['extra']) ? unserialize($result['extra']) : $result['extra'];
       $id = $result['id'];
+      unset($result['extra']);
       $keys = array_keys($result);
       $element = array('_id' => $id);
 
-      unset($keys['id'], $keys['extra']);
+      unset($keys['id']);
 
       foreach ($keys as $key) {
         $element[$key] = $result[$key];

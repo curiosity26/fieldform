@@ -150,10 +150,9 @@ function fieldform_elements_list($form, &$form_state, $entity) {
   $values = isset($form_state['input']) ? $form_state['input'] : array();
   $elements = db_select('fieldform_elements', 'e')
     ->fields('e')->where('e.fid = :fid and e.pid = 0',
-      array('fid' => $entity->identifier()))
+      array('fid' => $entity->fid))
     ->execute()->fetchAllAssoc('eid');
 
-  dpm($entity);
   dpm($elements);
 
   $form['#element_base_uri'] = $entity->entityInfo()['admin ui']['path'];
