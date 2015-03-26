@@ -42,6 +42,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       ->fields('e')
       ->where('e.fid = :fid AND e.pid = :pid',
         array('fid' => $fid, 'pid' => $pid))
+      ->orderBy('e.weight')
       ->execute();
 
     while ($result = $results->fetchAssoc()) {
