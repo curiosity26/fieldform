@@ -1192,9 +1192,10 @@ function fieldform_view_form($form, &$form_state, $entity_type, Entity $entity) 
     'uid' => $GLOBALS['user']->uid,
     'hostname' => $GLOBALS['user']->hostname
   ));
+  dpm($entity);
 
   $form = $controller::buildForm($entity, $form, $form_state);
-
+ dpm($form);
   $result_controller = entity_get_controller($result->entityType());
   $result_controller::buildForm($result, $entity, $form, $form_state);
 
