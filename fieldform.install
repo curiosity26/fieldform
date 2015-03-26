@@ -419,9 +419,6 @@ function _fieldform_process_element_7202($elements, $fields, $fid, $pid = 0) {
     );
 
     $save = (object)$save;
-    if (function_exists('dpm')) {
-      dpm($save, 'Save');
-    }
     if (drupal_write_record('fieldform_elements', $save) === FALSE) {
       throw new DrupalUpdateException();
     }
