@@ -223,7 +223,8 @@ function _fieldform_element_form_row(&$form, $elements, $pid = 0, $depth = 0) {
   $temp = array();
   if (!empty($elements)) {
     foreach ($elements as $element) {
-      if (!is_object($element) || $element->_id === 'form_complete') {
+      $element = (array)$element;
+      if ($element['name'] === 'form_complete') {
         continue;
       }
 
