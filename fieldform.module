@@ -143,11 +143,11 @@ function fieldform_entity_property_info() {
     'type' => 'date'
   );
 
-  $form['elements'] = array(
+/*  $form['elements'] = array(
     'label' => t('Form Elements'),
     'description' => t('The elements within the form'),
     'type' => 'list<list>'
-  );
+  );*/
 
   $result['id'] = array(
     'label' => t('Field Form Result ID'),
@@ -165,7 +165,7 @@ function fieldform_entity_property_info() {
     'type' => 'date'
   );
 
-  $result['data'] = array(
+  /*$result['data'] = array(
     'label' => t('Field Form Result Data'),
     'type' => 'list<struct>',
     'property info' => array(
@@ -181,7 +181,7 @@ function fieldform_entity_property_info() {
     ),
     'schema field' => 'data'
     ,'getter callback' => 'fieldform_result_data_getter'
-  );
+  );*/
 
   return $info;
 }
