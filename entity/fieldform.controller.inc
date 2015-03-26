@@ -37,9 +37,6 @@ class FieldFormController extends EntityAPIControllerExportable {
 
   static private function loadElements($fid, $pid = 0) {
 
-    dpm($fid, 'Form ID');
-    dpm($pid, 'Parent Id');
-
     $elements = array();
     $results = db_select('fieldform_elements', 'e')
       ->fields('e')
@@ -48,8 +45,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       ->execute();
 
     while ($result = $results->fetchAssoc()) {
-      dpm($result, 'Element Result');
-      $extra = $result['extra'];
+      $extra = is_string($result['extra']) ? unserialize($result['extra']) : $result['extra'];
       $id = $result['id'];
       $keys = array_keys($result);
       $element = array('_id' => $id);
