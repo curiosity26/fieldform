@@ -277,7 +277,7 @@ function fieldform_schema() {
   return $schema;
 }
 
-function fieldform_update_7200(&$sandbox) {
+function fieldform_update_7100(&$sandbox) {
   if (db_field_exists('fieldform_result', 'data')) {
     if (!isset($sandbox['progress'])) {
       $sandbox['progress'] = 0;
@@ -285,7 +285,11 @@ function fieldform_update_7200(&$sandbox) {
       $sandbox['max'] = db_query('SELECT COUNT(DISTINCT rid) FROM {fieldform_result}')->fetchField() - 1;
     }
 
-    $results = db_select('fieldfrom_result', 'r')->fields('r', array('rid', 'data'))->condition('rid', $sandbox['current_uid'], '>')->range(0, 1)->orderBy('rid', 'ASC')->execute();
+    $results = db_select('fieldfrom_result', 'r',
+      array('fetch' => PDO::FETCH_ASSOC))
+      ->fields('r', array('rid', 'data'))
+      ->condition('rid', $sandbox['current_uid'], '>')
+      ->range(0, 1)->orderBy('rid', 'ASC')->execute();
 
     foreach ($results as $result) {
       $data = unserialize($result->data);
@@ -317,15 +321,16 @@ function fieldform_update_7200(&$sandbox) {
   }
 }
 
-function fieldform_update_7201(&$sandbox) {
+function fieldform_update_7101(&$sandbox) {
   if (db_field_exists('fieldform', 'elements')) {
     if (!isset($sandbox['progress'])) {
       $sandbox['progress'] = 0;
       $sandbox['current_fid'] = 0;
-      $sandbox['max'] = db_query('SELECT COUNT(DISTINCT fid) FROM {fieldform}')->fetchField() - 1;
+      $sandbox['max'] = db_query('SELECT COUNT(DISTINCT fid) FROM {fieldform}')
+          ->fetchField() - 1;
     }
 
-    $forms = db_select('fieldfrom', 'f')
+    $forms = db_select('fieldfrom', 'f', array('fetch' => PDO::FETCH_ASSOC))
       ->fields('f', array('fid', 'elements'))
       ->condition('fid', $sandbox['current_fid'], '>')->range(0, 1)
       ->orderBy('fid', 'ASC')->execute();
@@ -337,7 +342,7 @@ function fieldform_update_7201(&$sandbox) {
     foreach ($forms as $form) {
       $elements = unserialize($form->elements);
 
-      _fieldform_process_element_7201($elements, $fields, $form->fid);
+      _fieldform_process_element_7101($elements, $fields, $form->fid);
 
       $sandbox['progress']++;
       $sandbox['current_fid'] = $form->fid;
@@ -355,7 +360,7 @@ function fieldform_update_7201(&$sandbox) {
   }
 }
 
-function _fieldform_process_element_7201($elements, $fields, $fid, $pid = 0) {
+function _fieldform_process_element_7101($elements, $fields, $fid, $pid = 0) {
 
   foreach ($elements as $element) {
     $save = array();
