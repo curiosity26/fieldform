@@ -296,7 +296,7 @@ function fieldform_update_7201(&$sandbox) {
     if (!isset($sandbox['progress'])) {
       $sandbox['progress'] = 0;
       $sandbox['current_rid'] = 0;
-      $sandbox['max'] = db_query('SELECT COUNT(DISTINCT rid) FROM {fieldform_result}')->fetchField() - 1;
+      $sandbox['max'] = db_query('SELECT COUNT(DISTINCT rid) FROM {fieldform_result}')->fetchField();
     }
 
     $results = db_select('fieldform_result', 'r',
@@ -306,18 +306,9 @@ function fieldform_update_7201(&$sandbox) {
       ->range(0, 1)->orderBy('rid', 'ASC')->execute();
 
     while($result = $results->fetchAssoc()) {
-      if (function_exists('dpm')) {
-        dpm($result, 'Result');
-      }
-
       $data = is_array($result['data'])
         ? $result['data']
         : unserialize($result['data']);
-
-      // Devel print to see what we can see
-      if (function_exists('dpm')) {
-        dpm($data, 'Data');
-      }
 
       foreach ($data as $datum) {
         $save = array(
@@ -338,9 +329,6 @@ function fieldform_update_7201(&$sandbox) {
 
     $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
 
-    if (function_exists('dpm')) {
-      dpm($sandbox, 'Sandbox');
-    }
     if ($sandbox['#finished']) {
       db_drop_field('fieldform_result', 'data');
       return t('Migrating result data from bulk serialization to row data is complete');
@@ -357,7 +345,7 @@ function fieldform_update_7202(&$sandbox) {
       $sandbox['progress'] = 0;
       $sandbox['current_fid'] = 0;
       $sandbox['max'] = db_query('SELECT COUNT(DISTINCT fid) FROM {fieldform}')
-          ->fetchField() - 1;
+          ->fetchField();
     }
 
     $forms = db_select('fieldform', 'f', array('fetch' => PDO::FETCH_ASSOC))
