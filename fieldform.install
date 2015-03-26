@@ -330,7 +330,7 @@ function fieldform_update_7201(&$sandbox) {
           ->fetchField() - 1;
     }
 
-    $forms = db_select('fieldfrom', 'f', array('fetch' => PDO::FETCH_ASSOC))
+    $forms = db_select('fieldform', 'f', array('fetch' => PDO::FETCH_ASSOC))
       ->fields('f', array('fid', 'elements'))
       ->condition('fid', $sandbox['current_fid'], '>')->range(0, 1)
       ->orderBy('fid', 'ASC')->execute();
