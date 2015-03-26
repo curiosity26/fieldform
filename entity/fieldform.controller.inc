@@ -373,6 +373,8 @@ class FieldFormController extends EntityAPIControllerExportable {
     foreach ($elements as $element) {
       $form[$element->name] = $element->buildElement($entity, $form, $form_state);
     }
+    dpm($elements);
+    dpm($form);
 
     $form['actions'] = array(
       '#type' => 'actions'
