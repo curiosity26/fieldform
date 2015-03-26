@@ -309,7 +309,9 @@ function fieldform_update_7201(&$sandbox) {
           'title' => $datum['title'],
           'value' => $datum['value']
         );
-        drupal_write_record('fieldform_result_value', $save);
+        if (drupal_write_record('fieldform_result_value', $save) === FALSE) {
+          throw new DrupalUpdateException();
+        }
       }
 
       $sandbox['progress']++;
@@ -390,7 +392,9 @@ function _fieldform_process_element_7202($elements, $fields, $fid, $pid = 0) {
     );
 
     $save = (object)$save;
-    drupal_write_record('fieldform_elements', $save);
+    if (drupal_write_record('fieldform_elements', $save) === FALSE) {
+      throw new DrupalUpdateException();
+    }
 
     if (!empty($children)) {
       _fieldform_process_element_7202($children, $fields, $fid, $save->eid);
