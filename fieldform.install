@@ -306,11 +306,11 @@ function fieldform_update_7201(&$sandbox) {
       ->range(0, 1)->orderBy('rid', 'ASC')->execute();
 
     while($result = $results->fetchAssoc()) {
+      $data = unserialize($result->data);
       // Devel print to see what we can see
       if (function_exists('dpm')) {
-        dpm($result);
+        dpm($data, 'Data');
       }
-      $data = unserialize($result->data);
 
       foreach ($data as $datum) {
         $save = array(
@@ -331,6 +331,9 @@ function fieldform_update_7201(&$sandbox) {
 
     $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
 
+    if (function_exists('dpm')) {
+      dpm($sandbox, 'Sandbox');
+    }
     if ($sandbox['#finished']) {
       db_drop_field('fieldform_result', 'data');
       return t('Migrating result data from bulk serialization to row data is complete');
@@ -360,11 +363,13 @@ function fieldform_update_7202(&$sandbox) {
     $fields = array_keys($schema['fields']);
 
     while($form = $forms->fetchAssoc()) {
+
+      $elements = unserialize($form->elements);
+
       // Devel print to see what we can see
       if (function_exists('dpm')) {
-        dpm($form);
+        dpm($elements, 'Elements');
       }
-      $elements = unserialize($form->elements);
 
       _fieldform_process_element_7202($elements, $fields, $form->fid);
 
@@ -387,6 +392,10 @@ function fieldform_update_7202(&$sandbox) {
 function _fieldform_process_element_7202($elements, $fields, $fid, $pid = 0) {
 
   foreach ($elements as $element) {
+    if (function_exists('dpm')) {
+      dpm($element, 'Element');
+    }
+
     $save = array();
     $children = $element['children'];
     $id = $element['_id'];
