@@ -306,7 +306,14 @@ function fieldform_update_7201(&$sandbox) {
       ->range(0, 1)->orderBy('rid', 'ASC')->execute();
 
     while($result = $results->fetchAssoc()) {
-      $data = unserialize($result->data);
+      if (function_exists('dpm')) {
+        dpm($result, 'Form');
+      }
+
+      $data = is_array($result['data'])
+        ? $result['data']
+        : unserialize($result['data']);
+
       // Devel print to see what we can see
       if (function_exists('dpm')) {
         dpm($data, 'Data');
@@ -363,15 +370,20 @@ function fieldform_update_7202(&$sandbox) {
     $fields = array_keys($schema['fields']);
 
     while($form = $forms->fetchAssoc()) {
+      if (function_exists('dpm')) {
+        dpm($form, 'Form');
+      }
 
-      $elements = unserialize($form->elements);
+      $elements = is_array($form['elements'])
+        ? $form['elements']
+        : unserialize($form['elements']);
 
       // Devel print to see what we can see
       if (function_exists('dpm')) {
         dpm($elements, 'Elements');
       }
 
-      _fieldform_process_element_7202($elements, $fields, $form->fid);
+      _fieldform_process_element_7202($elements, $fields, $form['fid']);
 
       $sandbox['progress']++;
       $sandbox['current_fid'] = $form->fid;
@@ -379,6 +391,9 @@ function fieldform_update_7202(&$sandbox) {
 
     $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
 
+    if (function_exists('dpm')) {
+      dpm($sandbox, 'Sandbox - Elements');
+    }
     if ($sandbox['#finished']) {
       db_drop_field('fieldform', 'elements');
       return t('Succesfully mapped form elements to independent row data');
