@@ -305,12 +305,7 @@ function fieldform_update_7201(&$sandbox) {
       ->condition('rid', $sandbox['current_rid'], '>')
       ->range(0, 1)->orderBy('rid', 'ASC')->execute();
 
-    // Devel print to see what we can see
-    if (function_exists('dpm')) {
-      dpm($results);
-    }
-
-    foreach ($results as $result) {
+    while($result = $results->fetchAssoc()) {
       $data = unserialize($result->data);
 
       foreach ($data as $datum) {
@@ -356,11 +351,16 @@ function fieldform_update_7202(&$sandbox) {
       ->condition('fid', $sandbox['current_fid'], '>')->range(0, 1)
       ->orderBy('fid', 'ASC')->execute();
 
+    // Devel print to see what we can see
+    if (function_exists('dpm')) {
+      dpm($forms);
+    }
+
     $schema = drupal_get_schema('fieldform_elements');
     unset($schema['fields']['eid']);
     $fields = array_keys($schema['fields']);
 
-    foreach ($forms as $form) {
+    while($form = $forms->fetchAssoc()) {
       $elements = unserialize($form->elements);
 
       _fieldform_process_element_7202($elements, $fields, $form->fid);
