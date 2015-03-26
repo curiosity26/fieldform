@@ -148,10 +148,12 @@ function fieldform_name_exists($value, $element, $form_state) {
 function fieldform_elements_list($form, &$form_state, $entity) {
   $form['#fid']  = $form_state['fid'] = $entity->identifier();
   $values = isset($form_state['input']) ? $form_state['input'] : array();
-  $elements = db_select('fieldform_elements', 'e', array('fetch' => PDO::FETCH_ASSOC))
-    ->fields('e')->where('e.fid = :fid and e.pid = 0', array('fid' => $entity->identifier()))
+  $elements = db_select('fieldform_elements', 'e')
+    ->fields('e')->where('e.fid = :fid and e.pid = 0',
+      array('fid' => $entity->identifier()))
     ->execute()->fetchAllAssoc('eid');
 
+  dpm($entity);
   dpm($elements);
 
   $form['#element_base_uri'] = $entity->entityInfo()['admin ui']['path'];
