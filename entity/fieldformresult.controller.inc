@@ -26,9 +26,10 @@ class FieldFormResultController extends EntityAPIController {
   }
 
   static public function loadResults($rid) {
-    $results = db_select('fieldform_result_values', 'v')
+    $results = db_select('fieldform_result_value', 'v')
       ->fields('v')
-      ->where('rid = :rid', array(':rid' => $rid))->execute();
+      ->where('rid = :rid', array(':rid' => $rid))
+      ->execute();
 
     $data = array();
 
