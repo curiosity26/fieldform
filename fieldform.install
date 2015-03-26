@@ -277,7 +277,7 @@ function fieldform_schema() {
   return $schema;
 }
 
-function fieldform_update_7100(&$sandbox) {
+function fieldform_update_7000(&$sandbox) {
   if (db_field_exists('fieldform_result', 'data')) {
     if (!isset($sandbox['progress'])) {
       $sandbox['progress'] = 0;
@@ -321,7 +321,7 @@ function fieldform_update_7100(&$sandbox) {
   }
 }
 
-function fieldform_update_7101(&$sandbox) {
+function fieldform_update_7001(&$sandbox) {
   if (db_field_exists('fieldform', 'elements')) {
     if (!isset($sandbox['progress'])) {
       $sandbox['progress'] = 0;
@@ -342,7 +342,7 @@ function fieldform_update_7101(&$sandbox) {
     foreach ($forms as $form) {
       $elements = unserialize($form->elements);
 
-      _fieldform_process_element_7101($elements, $fields, $form->fid);
+      _fieldform_process_element_7001($elements, $fields, $form->fid);
 
       $sandbox['progress']++;
       $sandbox['current_fid'] = $form->fid;
@@ -360,7 +360,7 @@ function fieldform_update_7101(&$sandbox) {
   }
 }
 
-function _fieldform_process_element_7101($elements, $fields, $fid, $pid = 0) {
+function _fieldform_process_element_7001($elements, $fields, $fid, $pid = 0) {
 
   foreach ($elements as $element) {
     $save = array();
@@ -386,7 +386,7 @@ function _fieldform_process_element_7101($elements, $fields, $fid, $pid = 0) {
     drupal_write_record('fieldform_elements', $save);
 
     if (!empty($children)) {
-      _fieldform_process_element_7201($children, $fields, $fid, $save->eid);
+      _fieldform_process_element_7001($children, $fields, $fid, $save->eid);
     }
   }
 }
