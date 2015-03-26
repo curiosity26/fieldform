@@ -414,7 +414,8 @@ function _fieldform_process_element_7202($elements, $fields, $fid, $pid = 0) {
     $save += array(
       'fid' => $fid,
       'pid' => $pid,
-      'id' => $id
+      'id' => $id,
+      'elementType' => $element->elementType()
     );
 
     $save = (object)$save;
