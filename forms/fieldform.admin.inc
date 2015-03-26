@@ -146,7 +146,7 @@ function fieldform_name_exists($value, $element, $form_state) {
 }
 
 function fieldform_elements_list($form, &$form_state, $entity) {
-  $form['#fid']  = $form_state['fid'] = $entity->identifier();
+  $form['#fid']  = $form_state['fid'] = $entity->fid;
   $values = isset($form_state['input']) ? $form_state['input'] : array();
   $elements = db_select('fieldform_elements', 'e')
     ->fields('e')->where('e.fid = :fid and e.pid = 0',

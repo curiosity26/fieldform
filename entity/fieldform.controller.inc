@@ -15,7 +15,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $entities = parent::load($ids, $conditions);
     foreach ($entities as $entity) {
       if (empty($entity->elements)) {
-        $entity->elements = self::loadElements($entity->identifier());
+        $entity->elements = self::loadElements($entity->fid);
       }
 
       if (!isset($entity->settings) || !is_array($entity->settings)) {
