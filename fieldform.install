@@ -307,7 +307,7 @@ function fieldform_update_7201(&$sandbox) {
 
     while($result = $results->fetchAssoc()) {
       if (function_exists('dpm')) {
-        dpm($result, 'Form');
+        dpm($result, 'Result');
       }
 
       $data = is_array($result['data'])
@@ -321,7 +321,7 @@ function fieldform_update_7201(&$sandbox) {
 
       foreach ($data as $datum) {
         $save = array(
-          'rid' => $result->rid,
+          'rid' => $result['rid'],
           'name' => $datum['name'],
           'type' => $datum['type'],
           'title' => $datum['title'],
@@ -333,7 +333,7 @@ function fieldform_update_7201(&$sandbox) {
       }
 
       $sandbox['progress']++;
-      $sandbox['current_rid'] = $result->rid;
+      $sandbox['current_rid'] = $result['rid'];
     }
 
     $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
@@ -386,7 +386,7 @@ function fieldform_update_7202(&$sandbox) {
       _fieldform_process_element_7202($elements, $fields, $form['fid']);
 
       $sandbox['progress']++;
-      $sandbox['current_fid'] = $form->fid;
+      $sandbox['current_fid'] = $form['fid'];
     }
 
     $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
