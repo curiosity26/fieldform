@@ -146,13 +146,18 @@ function fieldform_name_exists($value, $element, $form_state) {
 }
 
 function fieldform_elements_list($form, &$form_state, $entity) {
-  $form_state['fieldform'] = $entity;
+  $form['#fid']  = $form_state['fid'] = $entity->identifier();
   $values = isset($form_state['input']) ? $form_state['input'] : array();
-  $elements = $entity->elements;
+  $elements = db_select('fieldform_elements', 'e', array('fetch' => PDO::FETCH_ASSOC))
+    ->fields('e')->where('e.fid = :fid and e.pid = 0', array('fid' => $entity->identifier()))
+    ->execute();
+
+  $form['#element_base_uri'] = $entity->entityInfo()['admin ui']['path'];
+
   $form['elements'] = array(
     '#tree' => TRUE
   );
-  _fieldform_element_form_row($form, $elements, $entity);
+  _fieldform_element_form_row($form, $elements);
 
   $form['elements']['add_new_element']['title'] = array(
     '#type' => 'textfield',
@@ -190,7 +195,7 @@ function fieldform_elements_list($form, &$form_state, $entity) {
     '#value' => 'add_new_element'
   );
 
-  $form['elements']['add_new_element']['parent'] = array(
+  $form['elements']['add_new_element']['pid'] = array(
     '#type' => 'hidden',
     '#value' => ''
   );
@@ -209,82 +214,84 @@ function fieldform_elements_list($form, &$form_state, $entity) {
   return $form;
 }
 
-function _fieldform_element_form_row(&$form, $elements, $entity) {
-  $base_url = $entity->entityInfo()['admin ui']['path'];
+function _fieldform_element_form_row(&$form, $elements, $pid = 0, $depth = 0) {
+  $base_url = $form['#element_base_uri'];
+
   $temp = array();
   if (!empty($elements)) {
     foreach ($elements as $element) {
-      if (is_string($element)) {
-        $element = unserialize($element);
-      }
       if (!is_object($element) || $element->_id === 'form_complete') {
         continue;
       }
 
-      $parents = $element->parents;
-      array_pop($parents);
-      $parent = $entity->findElementByName(array_pop($parents));
-
       $temp['title_label'] = array(
-        '#markup' => $element->title
+        '#markup' => $element['title']
       );
 
       $temp['title'] = array(
         '#type' => 'hidden',
-        '#value' => $element->title
+        '#value' => $element['title']
       );
 
       $temp['name_label'] = array(
-        '#markup' => $element->name
+        '#markup' => $element['name']
       );
 
       $temp['name'] = array(
         '#type' => 'hidden',
-        '#value' => $element->name
+        '#value' => $element['name']
       );
 
       $temp['type_label'] = array(
-        '#markup' => $element->type
+        '#markup' => $element['type']
       );
 
       $temp['type'] = array(
         '#type' => 'hidden',
-        '#value' => $element->elementType()
+        '#value' => $element['elementType']
       );
 
-      $temp['id'] = array(
+      /*$temp['id'] = array(
         '#type' => 'hidden',
-        '#value' => $element->_id
+        '#value' => $element['id']
+      );*/
+
+      $temp['eid'] = array(
+        '#type' => 'hidden',
+        '#value' => $element['eid']
       );
 
       $temp['weight'] = array(
         '#type' => 'weight',
-        '#value' => is_numeric($element->weight) ? $element->weight : 0,
+        '#value' => is_numeric($element['weight']) ? $element['weight'] : 0,
         '#delta' => 100
       );
 
-      $temp['parent'] = array(
+      $temp['pid'] = array(
         '#type' => 'hidden',
-        '#value' => $parent !== FALSE ? $parent->_id : ''
-      );
-
-      $temp['depth'] = array(
-        '#type' => 'hidden',
-        '#value'=> count($element->parents) - 1
+        '#value' => $element['pid']
       );
 
       $temp['operations']['edit'] = array(
-        '#markup' => l('edit', $base_url.'/manage/'.$entity->identifier().'/elements/'.$element->name.'/edit')
+        '#markup' => l('edit', $base_url.'/manage/'.$form['#fid'].'/elements/'.$element['name'].'/edit')
       );
 
       $temp['operations']['delete'] = array(
-        '#markup' => l('delete', $base_url.'/manage/'.$entity->identifier().'/elements/'.$element->name.'/delete')
+        '#markup' => l('delete', $base_url.'/manage/'.$form['#fid'].'/elements/'.$element['name'].'/delete')
       );
 
-      $form['elements'][$element->name] = $temp;
+      $temp['#depth'] = $depth;
 
-      if ($element->hasChildren()) {
-        _fieldform_element_form_row($form, $element->children, $entity);
+      $form['elements'][$element['name']] = $temp;
+
+      $children = $elements = db_select('fieldform_elements', 'e',
+        array('fetch' => PDO::FETCH_ASSOC))
+        ->fields('e')->where('e.fid = :fid and e.pid = :pid',
+          array('fid' => $form['#fid'], 'pid' => $pid))
+        ->execute();
+
+      if ($element['pid'] !== $pid && !empty($children)) {
+        _fieldform_element_form_row($form, $children, $element['pid'], $depth + 1);
       }
     }
   }
@@ -318,82 +325,18 @@ function fieldform_type_select_ajax($form, $form_state) {
 }
 
 function fieldform_elements_list_submit($form, &$form_state) {
-  $entity = $form_state['fieldform'];
-  $form_state['redirect'] = $entity->entityInfo()['admin ui']['path'].'/manage/'.$entity->identifier().'/elements';
+  $form_state['redirect'] = $form['#element_base_uri'].'/manage/'.$form['#fid'].'/elements';
   $values = $form_state['input'];
   $elements = $values['elements'];
-  $process = array();
-  $old_elements = $entity->elements;
 
-  foreach ($elements as $name => $value) {
-    if ($name !== 'add_new_element') {
-      $element = $entity->findElementByID($value['id']);
-      if (!$element) {
-        $entity->elements = $old_elements;
-        throw new DrupalUpdateException();
-      }
-      $arr = get_object_vars($element);
-      unset($arr['parents'], $arr['children'], $arr['weight']); // Ensure that these are made new
-      $process[] = array_merge($arr, $value);
+  foreach ($elements as $name => $element) {
+    if ($name === 'add_new_element') {
+      drupal_write_record('fieldform_elements', $element);
     }
-    elseif($value['name'] !== '') {
-      $process[] = $value;
-      $form_state['redirect'] .= '/'.$value['name'].'/edit';
+    else {
+      drupal_write_record('fieldform_elements', $element, array('eid'));
     }
-  }
-
-  $entity->elements = array();
-
-  try {
-    _fieldform_process_elements($entity, $process);
-    entity_save($entity->entityType(), $entity);
-  }
-  catch(Exception $e) {
-    $entity->elements = $old_elements;
-    throw $e;
   }
 
   drupal_redirect_form($form_state);
-}
-
-function _fieldform_process_elements(FieldFormEntity $entity, $elements) {
-  while($current = array_shift($elements)) {
-    if (isset($current['parent']) && $current['parent'] != NULL && $current['parent'] !== 'add_new_element') {
-      $parent_id = $current['parent'];
-      unset($current['parent']);
-      $parent = $entity->findElementByID($parent_id);
-      if (!$parent) {
-        _fieldform_process_elements($entity, $elements);
-        $parent = $entity->findElementByID($parent_id);
-      }
-      if ($parent) {
-        $current['parents'] = array_merge($parent->parents, array($current['name']));
-        $parent->addElement($current);
-      }
-    }
-    elseif (isset($current['name']) && isset($current['type'])) {
-      $id = $current['id'];
-      $element = _fieldform_update_entity($entity, $current);
-      if ($element && $id === 'add_new_element') {
-        foreach ($elements as &$process) {
-          if ($process['parent'] === 'add_new_element') {
-            $process['parent'] = $element->_id;
-          }
-        }
-      }
-    }
-  }
-}
-
-function _fieldform_update_entity(FieldFormEntity $entity, $element) {
-  unset($element['id']);
-  $element = fieldform_element_create($element['type'], $element);
-  if ($element) {
-    $success = elements_add($entity, $element);
-    if ($success === FALSE) {
-      drupal_set_message('Failed to add element', 'error');
-    }
-    return $success;
-  }
-  return FALSE;
 }

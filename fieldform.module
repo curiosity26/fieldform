@@ -401,11 +401,12 @@ function fieldform_menu() {
     'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
-  foreach (fieldform_get_instances() as $instance) {
-    $type = $instance['entity_type'];
-    $menu[$type.'/%entity_object/results'] = array(
+  foreach (fieldform_get_menu_items() as $entity) {
+    $type = $entity['entity_type'];
+    $id = $entity['id'];
+    $menu[$type.'/'.$id.'/results'] = array(
       'title' => 'Form Results',
-      'load arguments' => array($type),
+      'load arguments' => array($type, array($id)),
       'page callback' => 'fieldform_field_results_page',
       'page arguments' => array(1),
       'access callback' => 'fieldform_field_result_access',
@@ -413,9 +414,9 @@ function fieldform_menu() {
       'type' => MENU_LOCAL_TASK
     );
 
-    $menu[$type.'/%entity_object/results/export'] = array(
+    $menu[$type.'/'.$id.'/results/export'] = array(
       'title' => 'Export Results',
-      'load arguments' => array($type),
+      'load arguments' => array($type, array($id)),
       'page callback' => 'fieldform_field_results_export_page',
       'page arguments' => array(1),
       'access callback' => 'fieldform_field_result_access',
@@ -424,9 +425,9 @@ function fieldform_menu() {
       'weight' => 1
     );
 
-    $menu[$type.'/%entity_object/results/clear'] = array(
+    $menu[$type.'/'.$id.'/results/clear'] = array(
       'title' => 'Clear All Results',
-      'load arguments' => array($type),
+      'load arguments' => array($type, array($id)),
       'page callback' => 'drupal_get_form',
       'page arguments' => array('fieldform_field_clear_form', 1),
       'access callback' => 'fieldform_field_result_access',
@@ -435,9 +436,9 @@ function fieldform_menu() {
       'weight' => 2
     );
 
-    $menu[$type.'/%entity_object/results/%fieldform_result/view'] = array(
+    $menu[$type.'/'.$id.'/results/%fieldform_result/view'] = array(
       'title' => 'View Result',
-      'load arguments' => array($type),
+      'load arguments' => array($type, array($id)),
       'page callback' => 'fieldform_field_results_view_page',
       'page arguments' => array(1, 3),
       'access callback' => 'fieldform_result_access',
@@ -445,9 +446,9 @@ function fieldform_menu() {
       'type' => MENU_CALLBACK
     );
 
-    $menu[$type.'/%entity_object/results/%fieldform_result/edit'] = array(
+    $menu[$type.'/'.$id.'/results/%fieldform_result/edit'] = array(
       'title' => 'Edit Result',
-      'load arguments' => array($type),
+      'load arguments' => array($type, array($id)),
       'page callback' => 'fieldform_field_results_edit_page',
       'page arguments' => array(1, 3),
       'access callback' => 'fieldform_result_access',
@@ -455,9 +456,9 @@ function fieldform_menu() {
       'type' => MENU_CALLBACK
     );
 
-    $menu[$type.'/%entity_object/results/%fieldform_result/print'] = array(
+    $menu[$type.'/'.$id.'/results/%fieldform_result/print'] = array(
       'title' => 'Print Result',
-      'load arguments' => array($type),
+      'load arguments' => array($type, array($id)),
       'page callback' => 'fieldform_field_results_print_page',
       'page arguments' => array(1, 3),
       'access callback' => 'fieldform_result_access',
@@ -466,9 +467,9 @@ function fieldform_menu() {
       'delivery callback' => 'fieldform_print_page_delivery'
     );
 
-    $menu[$type.'/%entity_object/results/%fieldform_result/delete'] = array(
+    $menu[$type.'/'.$id.'/results/%fieldform_result/delete'] = array(
       'title' => 'Delete Result',
-      'load arguments' => array($type),
+      'load arguments' => array($type, array($id)),
       'page callback' => 'drupal_get_form',
       'page arguments' => array('fieldform_field_delete_form', 1, 3),
       'access callback' => 'fieldform_result_access',
@@ -480,17 +481,14 @@ function fieldform_menu() {
   return $menu;
 }
 
-function fieldform_get_instances($params = array()) {
-  $fields = field_read_fields(array('type' => 'fieldform'));
-  $instances = array();
-  if (!empty($fields)) {
-    $field_name = array(
-      'field_name' => array_keys($fields)
-    );
-    $params = array_merge($field_name, $params);
-    $instances = field_read_instances($params);
-  }
-  return $instances;
+function fieldform_get_menu_items() {
+  $entities = db_select('fieldform_entities', 'e',
+    array('fetch' => PDO::FETCH_ASSOC))
+    ->fields('f', array('entity_type', 'id'))
+    ->distinct()
+    ->execute();
+
+  return $entities;
 }
 
 /* Fieldform Info Calls */
@@ -1680,22 +1678,21 @@ function theme_fieldform_elements_list($variables) {
       isset($info[$element['type']['#value']]['has children']) &&
       $info[$element['type']['#value']]['has children'] === TRUE ? 'tabledrag' : 'tabledrag-leaf';
 
-    $size = isset($element['depth']) ? $element['depth']['#value'] : 0;
+    $size = isset($element['#depth']) ? $element['#depth'] : 0;
     $indent = theme('indentation', array('size' => $size));
-    unset($element['depth']);
 
     if ($name !== 'add_new_element') {
-      $element['id']['#attributes']['class'] = array('elements-list-id');
+      $element['eid']['#attributes']['class'] = array('elements-list-id');
       $element['weight']['#attributes']['class'] = array('elements-list-weight');
-      $element['parent']['#attributes']['class'] = array('elements-list-parents');
+      $element['pid']['#attributes']['class'] = array('elements-list-parents');
 
       $rows[] = array(
         'data' => array(
           $indent.drupal_render($element['title_label']).drupal_render($element['title']),
-          drupal_render($element['parent']),
+          drupal_render($element['pid']),
           drupal_render($element['weight']),
           drupal_render($element['name_label']).drupal_render($element['name']),
-          drupal_render($element['type_label']).drupal_render($element['type']).drupal_render($element['id']),
+          drupal_render($element['type_label']).drupal_render($element['type']).drupal_render($element['eid']),
           drupal_render($element['operations']['edit']),
           drupal_render($element['operations']['delete'])
         ),
@@ -1703,19 +1700,19 @@ function theme_fieldform_elements_list($variables) {
       );
     }
   }
-  $form['elements']['add_new_element']['id']['#attributes']['class'] = array('elements-list-id');
+  $form['elements']['add_new_element']['eid']['#attributes']['class'] = array('elements-list-id');
   $form['elements']['add_new_element']['weight']['#attributes']['class'] = array('elements-list-weight');
-  $form['elements']['add_new_element']['parent']['#attributes']['class'] = array('elements-list-parents');
+  $form['elements']['add_new_element']['pid']['#attributes']['class'] = array('elements-list-parents');
 
   if (empty($rows)) {
     $add_row = array(
       drupal_render($form['elements']['add_new_element']['title']).
       drupal_render($form['elements']['add_new_element']['name']),
-      drupal_render($form['elements']['add_new_element']['parent']),
+      drupal_render($form['elements']['add_new_element']['pid']),
       drupal_render($form['elements']['add_new_element']['weight']),
       '',
       drupal_render($form['elements']['add_new_element']['type']).
-      drupal_render($form['elements']['add_new_element']['id']),
+      drupal_render($form['elements']['add_new_element']['eid']),
       ''
     );
     $header = array(
@@ -1736,10 +1733,10 @@ function theme_fieldform_elements_list($variables) {
         drupal_render($form['elements']['add_new_element']['name']),
         'colspan' => '2'
       ),
-      drupal_render($form['elements']['add_new_element']['parent']),
+      drupal_render($form['elements']['add_new_element']['pid']),
       drupal_render($form['elements']['add_new_element']['weight']),
       drupal_render($form['elements']['add_new_element']['type']).
-      drupal_render($form['elements']['add_new_element']['id']),
+      drupal_render($form['elements']['add_new_element']['eid']),
       '',
       ''
     );
