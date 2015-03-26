@@ -279,8 +279,15 @@ function fieldform_schema() {
 
 function fieldform_update_7200(&$sandbox) {
   $schema = fieldform_schema();
-  db_create_table('fieldform_elements', $schema['fieldform_elements']);
-  db_create_table('fieldform_result_value', $schema['fieldform_result_value']);
+  if (!db_table_exists('fieldform_elements')) {
+    db_create_table('fieldform_elements', $schema['fieldform_elements']);
+  }
+  if (!db_table_exists('fieldform_result_value')) {
+    db_create_table(
+      'fieldform_result_value',
+      $schema['fieldform_result_value']
+    );
+  }
   return t('Created new element and value tables');
 }
 
@@ -297,6 +304,11 @@ function fieldform_update_7201(&$sandbox) {
       ->fields('r', array('rid', 'data'))
       ->condition('rid', $sandbox['current_rid'], '>')
       ->range(0, 1)->orderBy('rid', 'ASC')->execute();
+
+    // Devel print to see what we can see
+    if (function_exists('dpm')) {
+      dpm($results);
+    }
 
     foreach ($results as $result) {
       $data = unserialize($result->data);
