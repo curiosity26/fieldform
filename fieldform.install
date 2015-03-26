@@ -370,18 +370,10 @@ function fieldform_update_7202(&$sandbox) {
     $fields = array_keys($schema['fields']);
 
     while($form = $forms->fetchAssoc()) {
-      if (function_exists('dpm')) {
-        dpm($form, 'Form');
-      }
 
       $elements = is_array($form['elements'])
         ? $form['elements']
         : unserialize($form['elements']);
-
-      // Devel print to see what we can see
-      if (function_exists('dpm')) {
-        dpm($elements, 'Elements');
-      }
 
       _fieldform_process_element_7202($elements, $fields, $form['fid']);
 
@@ -391,9 +383,6 @@ function fieldform_update_7202(&$sandbox) {
 
     $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
 
-    if (function_exists('dpm')) {
-      dpm($sandbox, 'Sandbox - Elements');
-    }
     if ($sandbox['#finished']) {
       db_drop_field('fieldform', 'elements');
       return t('Succesfully mapped form elements to independent row data');
@@ -411,23 +400,24 @@ function _fieldform_process_element_7202($elements, $fields, $fid, $pid = 0) {
       dpm($element, 'Element');
     }
 
-    $save = array();
-    $children = $element['children'];
+    $save = array('extra' => array());
+    $children = $element->children;
     $id = $element['_id'];
-    unset($element['_id'], $element['parent']);
 
-    foreach ($fields as $field) {
-      if (!empty($element[$field])) {
-        $save[$field] = $element[$field];
-        unset($element[$field]);
+    $keys = get_object_vars($element);
+    foreach ($keys as $key => $value) {
+      if (in_array($key, $fields)) {
+        $save[$key] = $value;
+      }
+      else {
+        $save['extra'][$key] = $value;
       }
     }
 
     $save += array(
       'fid' => $fid,
       'pid' => $pid,
-      'id' => $id,
-      'extra' => $element
+      'id' => $id
     );
 
     $save = (object)$save;
