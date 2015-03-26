@@ -39,7 +39,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $elements = array();
     $results = db_select('fieldform_elements', 'e')
       ->fields('e')
-      ->where('e WHERE e.fid = :fid AND e.pid = :pid',
+      ->where('e.fid = :fid AND e.pid = :pid',
         array('fid' => $fid, 'pid' => $pid))
       ->execute();
 
