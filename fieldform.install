@@ -288,7 +288,7 @@ function fieldform_update_7200(&$sandbox) {
     $results = db_select('fieldform_result', 'r',
       array('fetch' => PDO::FETCH_ASSOC))
       ->fields('r', array('rid', 'data'))
-      ->condition('rid', $sandbox['current_uid'], '>')
+      ->condition('rid', $sandbox['current_rid'], '>')
       ->range(0, 1)->orderBy('rid', 'ASC')->execute();
 
     foreach ($results as $result) {
