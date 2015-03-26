@@ -49,12 +49,6 @@ function fieldform_schema() {
         'type' => 'text',
         'not null' => FALSE,
         'serialize' => TRUE,
-      ),
-      'elements' => array(
-        'type' => 'text',
-        'not null' => FALSE,
-        'serialize' => TRUE,
-        'size' => 'medium'
       )
     ),
     'primary key' => array('fid'),
