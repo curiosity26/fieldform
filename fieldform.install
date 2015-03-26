@@ -285,7 +285,7 @@ function fieldform_update_7200(&$sandbox) {
       $sandbox['max'] = db_query('SELECT COUNT(DISTINCT rid) FROM {fieldform_result}')->fetchField() - 1;
     }
 
-    $results = db_select('fieldfrom_result', 'r',
+    $results = db_select('fieldform_result', 'r',
       array('fetch' => PDO::FETCH_ASSOC))
       ->fields('r', array('rid', 'data'))
       ->condition('rid', $sandbox['current_uid'], '>')
