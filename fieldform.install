@@ -278,11 +278,10 @@ function fieldform_schema() {
 }
 
 function fieldform_update_7200(&$sandbox) {
-  $elements_schema = drupal_get_schema('fieldform_elements');
-  db_create_table('fieldform_elements', $elements_schema);
-
-  $results_schema = drupal_get_schema('fieldform_result_value');
-  db_create_table('fieldform_result_value', $results_schema);
+  $schema = fieldform_schema();
+  db_create_table('fieldform_elements', $schema['fieldform_elements']);
+  db_create_table('fieldform_result_value', $schema['fieldform_result_value']);
+  return t('Created new element and value tables');
 }
 
 function fieldform_update_7201(&$sandbox) {
