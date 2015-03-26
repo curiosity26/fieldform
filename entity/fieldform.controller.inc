@@ -14,7 +14,6 @@ class FieldFormController extends EntityAPIControllerExportable {
   public function load($ids = array(), $conditions = array()) {
     $entities = parent::load($ids, $conditions);
     foreach ($entities as $entity) {
-      dpm($entity, 'Loading Entity');
       if (empty($entity->elements)) {
         $entity->elements = self::loadElements($entity->identifier());
       }
@@ -37,6 +36,10 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static private function loadElements($fid, $pid = 0) {
+
+    dpm($fid, 'Form ID');
+    dpm($pid, 'Parent Id');
+
     $elements = array();
     $results = db_select('fieldform_elements', 'e')
       ->fields('e')
@@ -45,6 +48,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       ->execute();
 
     while ($result = $results->fetchAssoc()) {
+      dpm($result, 'Element Result');
       $extra = $result['extra'];
       $id = $result['id'];
       $keys = array_keys($result);
