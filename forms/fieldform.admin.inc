@@ -153,8 +153,6 @@ function fieldform_elements_list($form, &$form_state, $entity) {
       array('fid' => $entity->fid))
     ->execute()->fetchAllAssoc('eid');
 
-  dpm($elements);
-
   $form['#element_base_uri'] = $entity->entityInfo()['admin ui']['path'];
 
   $form['elements'] = array(
