@@ -496,7 +496,7 @@ class FieldFormController extends EntityAPIControllerExportable {
       $entity->addElement($clone);
     }
     $return = parent::save($entity);
-    self::saveElements($entity->elements, $entity->identifier());
+    self::saveElements($entity->elements, $entity->fid);
     $this->resetCache(array($entity->identifier()));
     return $return;
   }
@@ -506,29 +506,36 @@ class FieldFormController extends EntityAPIControllerExportable {
     $fields = array_keys($schema['fields']);
 
     foreach ($elements as $element) {
-      $children = $element['children'];
-      unset($element['children']);
-      $element['extra'] = array();
+      $save = array();
+      $children = $element->children;
+      $save['extra'] = array();
 
-      foreach ($element as $key => $value) {
+      $keys = get_object_vars($element);
+
+      foreach ($keys as $key) {
+        $value = $element->$key;
         if (!in_array($key, $fields)) {
-          $element['extra'][$key] = $value;
-          unset($element[$key]);
+          $save['extra'][$key] = $value;
+        }
+        else {
+          $save[$key] = $value;
         }
       }
 
-      $element = (object)$element;
-      $element->fid = $fid;
-      $element->pid = $pid;
+      $save['fid'] = $fid;
+      $save['pid'] = $pid;
+      $save = (object)$save;
+
       if (!empty($element->eid)) {
-        drupal_write_record('fieldform_elements', $element, array('eid'));
+        $save->eid = $element->eid;
+        drupal_write_record('fieldform_elements', $save, array('eid'));
       }
       else {
-        drupal_write_record('fieldform_elements', $element);
+        drupal_write_record('fieldform_elements', $save);
       }
 
       if (!empty($children)) {
-        self::saveElements($children, $fid, $element->eid);
+        self::saveElements($children, $fid, $save->eid);
       }
     }
   }
