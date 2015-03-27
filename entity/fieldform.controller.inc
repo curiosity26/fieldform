@@ -506,7 +506,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $fields = array_keys($schema['fields']);
 
     foreach ($elements as $element) {
-      $save = array('id' => $element->_id, 'type' => $element->elementType());
+      $save = array('id' => $element->_id, 'elementType' => $element->elementType());
       $children = $element->children;
       $save['extra'] = array();
 
