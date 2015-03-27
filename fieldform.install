@@ -323,6 +323,8 @@ function fieldform_update_7201(&$sandbox) {
           ->fields($save)
           ->execute();
 
+        dpm($rvid);
+
         if (!is_integer($rvid)) {
           throw new DrupalUpdateException('Failed to save the result data');
         }
