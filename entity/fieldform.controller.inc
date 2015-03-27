@@ -512,7 +512,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
       $keys = get_object_vars($element);
 
-      foreach ($keys as $key) {
+      foreach ($keys as $key => $value) {
         $value = $element->$key;
         if (!in_array($key, $fields)) {
           $save['extra'][$key] = $value;
