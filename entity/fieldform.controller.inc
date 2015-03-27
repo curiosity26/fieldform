@@ -55,14 +55,15 @@ class FieldFormController extends EntityAPIControllerExportable {
       unset($keys['id']);
 
       foreach ($keys as $key) {
-        $element[$key] = in_array($key, array('default_value', 'attributes'))
-        && is_string($result[$key]) ? unserialize($result[$key]) : $result[$key];
+        $element[$key] = $result[$key];
       }
 
       foreach ($extra as $key => $value) {
-        $element[$key] = in_array($key, array('default_value', 'attributes'))
-        && is_string($value) ? unserialize($value) : $value;
+        $element[$key] = $value;
       }
+
+      $element['default_value'] = unserialize($element['default_value']);
+      $element['attributes'] = unserialize($element['attributes']);
 
       $element['children'] = self::loadElements($fid, $result['eid']);
 
