@@ -331,7 +331,7 @@ function fieldform_update_7201(&$sandbox) {
     }
 
     $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
-
+    dpm($sandbox, 'Sandbox');
     if ($sandbox['#finished']) {
       db_drop_field('fieldform_result', 'data');
       return t('Migrating result data from bulk serialization to row data is complete');
