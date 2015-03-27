@@ -20,7 +20,6 @@ class FieldFormResultController extends EntityAPIController {
 
       if (empty($entity->data)) {
         $entity->data = self::loadResults($entity->rid);
-        dpm($entity->data);
       }
     }
     reset($entities);
@@ -36,7 +35,7 @@ class FieldFormResultController extends EntityAPIController {
     $data = array();
 
     while($result = $results->fetchAssoc()) {
-      dpm($result);
+      $result['value'] = unserialize($result['value']);
       $data[$result['name']] = fieldform_result_create($result['type'], $result);
     }
 

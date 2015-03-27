@@ -918,7 +918,7 @@ function fieldform_field_results_view_page($entity, $result) {
   $title = method_exists($entity, 'label') ? $entity->label() : $entity->title;
   drupal_set_title(t('@title', array('@title' => $title)));
   $output = array();
-  dpm($result);
+
   foreach ($result->data as $render) {
     $output[] = $render->render();
   }
