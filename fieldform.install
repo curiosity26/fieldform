@@ -321,7 +321,7 @@ function fieldform_update_7201(&$sandbox) {
 
         dpm($save);
 
-        if (drupal_write_record('fieldform_result_value', $save) === FALSE) {
+        if (drupal_write_record('fieldform_result_value', $save) !== SAVED_NEW) {
           throw new DrupalUpdateException();
         }
       }
@@ -410,7 +410,7 @@ function _fieldform_process_element_7202($elements, $fields, $fid, $pid = 0) {
     );
 
     $save = (object)$save;
-    if (drupal_write_record('fieldform_elements', $save) === FALSE) {
+    if (drupal_write_record('fieldform_elements', $save) !== SAVED_NEW) {
       throw new DrupalUpdateException();
     }
 
