@@ -34,6 +34,7 @@ class FieldFormResultController extends EntityAPIController {
     $data = array();
 
     while($result = $results->fetchAssoc()) {
+      dpm($result);
       $data[$result['name']] = fieldform_result_create($result['type'], $result);
     }
 
