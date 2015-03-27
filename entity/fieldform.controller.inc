@@ -506,7 +506,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $fields = array_keys($schema['fields']);
 
     foreach ($elements as $element) {
-      $save = array();
+      $save = array('id' => $element->_id);
       $children = $element->children;
       $save['extra'] = array();
 
@@ -514,7 +514,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
       foreach ($keys as $key => $value) {
         $value = $element->$key;
-        if (!in_array($key, $fields)) {
+        if (!in_array($key, $fields) && $key !== '_id') {
           $save['extra'][$key] = $value;
         }
         else {
