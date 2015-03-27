@@ -55,7 +55,8 @@ class FieldFormController extends EntityAPIControllerExportable {
       unset($keys['id']);
 
       foreach ($keys as $key) {
-        $element[$key] = $result[$key];
+        $element[$key] = in_array($key, array('default_value', 'attributes'))
+        && is_string($result[$key]) ? unserialize($result[$key]) : $result[$key];
       }
 
       foreach ($extra as $key => $value) {
@@ -373,7 +374,6 @@ class FieldFormController extends EntityAPIControllerExportable {
     foreach ($elements as $element) {
       $form[$element->name] = $element->buildElement($entity, $form, $form_state);
     }
-    dpm($elements);
     dpm($form);
 
     $form['actions'] = array(

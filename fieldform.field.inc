@@ -86,7 +86,6 @@ function fieldform_field_formatter_view($entity_type, $entity, $field, $instance
   if ($display['type'] === 'fieldform_field_formatter') {
     if (isset($items[0]['form'])) {
       $fieldform = $items[0]['form'];
-      dpm($fieldform);
       if ($fieldform !== FALSE && fieldform_access('view', $fieldform)) {
         $form_state = array('build_info' => array('args' => array($fieldform->entityType(), $fieldform)));
         $form_state['field_entity'] = $entity;
