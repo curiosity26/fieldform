@@ -325,9 +325,9 @@ function fieldform_update_7201(&$sandbox) {
 
         dpm($rvid, 'RVID');
 
-        if (!is_integer($rvid)) {
+        /*if (!is_integer($rvid)) {
           throw new DrupalUpdateException('Failed to save the result data');
-        }
+        }*/
       }
 
       $sandbox['progress']++;
@@ -422,9 +422,9 @@ function _fieldform_process_element_7202($elements, $fields, $fid, $pid = 0) {
         _fieldform_process_element_7202($children, $fields, $fid, $eid);
       }
     }
-    else {
+    /*else {
       throw new DrupalUpdateException('Failed to save the element data');
-    }
+    }*/
   }
 }
 
