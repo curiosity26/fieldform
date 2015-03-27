@@ -316,14 +316,12 @@ function fieldform_update_7201(&$sandbox) {
           'name' => $datum['name'],
           'type' => $datum['type'],
           'title' => $datum['title'],
-          'value' => $datum['value']
+          'value' => serialize($datum['value'])
         );
 
         $rvid = db_insert('fieldform_result_value')
           ->fields($save)
           ->execute();
-
-        dpm($rvid, 'RVID');
 
         /*if (!is_integer($rvid)) {
           throw new DrupalUpdateException('Failed to save the result data');
@@ -412,6 +410,10 @@ function _fieldform_process_element_7202($elements, $fields, $fid, $pid = 0) {
       'id' => $id,
       'elementType' => $element->elementType()
     );
+
+    $save['default_value'] = serialize($save['default_value']);
+    $save['attributes'] = serialize($save['attributes']);
+    $save['extra'] = serialize($save['extra']);
 
     $eid = db_insert('fieldform_elements')
       ->fields($save)
