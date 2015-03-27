@@ -18,7 +18,7 @@ class FieldFormResultController extends EntityAPIController {
         $entity->module = 'fieldform';
       }
       if (empty($entity->data)) {
-        $entity->data = self::loadResults($entity->identifier());
+        $entity->data = self::loadResults($entity->rid);
       }
     }
     reset($entities);
