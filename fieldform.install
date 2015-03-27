@@ -319,9 +319,14 @@ function fieldform_update_7201(&$sandbox) {
           'value' => $datum['value']
         );
 
-        dpm($save);
+        $rvid = db_insert('fieldform_result_value')
+          ->fields($save)
+          ->execute();
 
-        if (drupal_write_record('fieldform_result_value', $save) !== SAVED_NEW) {
+        dpm($save);
+        dpm($rvid);
+
+        if (!is_integer($rvid)) {
           throw new DrupalUpdateException('Failed to save the result data');
         }
       }
@@ -409,13 +414,17 @@ function _fieldform_process_element_7202($elements, $fields, $fid, $pid = 0) {
       'elementType' => $element->elementType()
     );
 
-    $save = (object)$save;
-    if (drupal_write_record('fieldform_elements', $save) !== SAVED_NEW) {
-      throw new DrupalUpdateException('Failed to save the element data');
-    }
+    $eid = db_insert('fieldform_elements')
+      ->fields($save)
+      ->execute();
 
-    if (!empty($children)) {
-      _fieldform_process_element_7202($children, $fields, $fid, $save->eid);
+    if (is_integer($eid)) {
+      if (!empty($children)) {
+        _fieldform_process_element_7202($children, $fields, $fid, $eid);
+      }
+    }
+    else {
+      throw new DrupalUpdateException('Failed to save the element data');
     }
   }
 }
