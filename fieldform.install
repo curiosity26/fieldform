@@ -322,7 +322,7 @@ function fieldform_update_7201(&$sandbox) {
         dpm($save);
 
         if (drupal_write_record('fieldform_result_value', $save) !== SAVED_NEW) {
-          throw new DrupalUpdateException();
+          throw new DrupalUpdateException('Failed to save the result data');
         }
       }
 
@@ -332,7 +332,7 @@ function fieldform_update_7201(&$sandbox) {
 
     $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
     dpm($sandbox, 'Sandbox');
-    if ($sandbox['#finished']) {
+    if ($sandbox['#finished'] == 1) {
       db_drop_field('fieldform_result', 'data');
       return t('Migrating result data from bulk serialization to row data is complete');
     }
@@ -374,7 +374,7 @@ function fieldform_update_7202(&$sandbox) {
 
     $sandbox['#finished'] = empty($sandbox['max']) ? 1 : ($sandbox['progress'] / $sandbox['max']);
 
-    if ($sandbox['#finished']) {
+    if ($sandbox['#finished'] == 1) {
       db_drop_field('fieldform', 'elements');
       return t('Succesfully mapped form elements to independent row data');
     }
@@ -411,7 +411,7 @@ function _fieldform_process_element_7202($elements, $fields, $fid, $pid = 0) {
 
     $save = (object)$save;
     if (drupal_write_record('fieldform_elements', $save) !== SAVED_NEW) {
-      throw new DrupalUpdateException();
+      throw new DrupalUpdateException('Failed to save the element data');
     }
 
     if (!empty($children)) {
