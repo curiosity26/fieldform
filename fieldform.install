@@ -318,6 +318,7 @@ function fieldform_update_7201(&$sandbox) {
           'title' => $datum['title'],
           'value' => $datum['value']
         );
+        dpm($save);
         if (drupal_write_record('fieldform_result_value', $save) === FALSE) {
           throw new DrupalUpdateException();
         }
