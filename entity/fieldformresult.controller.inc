@@ -54,7 +54,7 @@ class FieldFormResultController extends EntityAPIController {
 
     if (!empty($entity->data)) {
       foreach ($entity->data as $name => $value) {
-        $value->rid = $entity->rid;
+        $value->rid = $entity->identifier();
         $value->save();
       }
     }
