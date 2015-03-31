@@ -289,7 +289,7 @@ function _fieldform_element_form_row(&$form, $elements, $pid = 0, $depth = 0) {
       $children = $elements = db_select('fieldform_elements', 'e',
         array('fetch' => PDO::FETCH_ASSOC))
         ->fields('e')->where('e.fid = :fid and e.pid = :pid',
-          array('fid' => $form['#fid'], 'pid' => $pid))
+          array('fid' => $form['#fid'], 'pid' => $element['eid']))
         ->execute();
 
       if (!empty($children)) {
