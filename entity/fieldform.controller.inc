@@ -409,6 +409,7 @@ class FieldFormController extends EntityAPIControllerExportable {
   }
 
   static public function buildForm($entity, $form, &$form_state) {
+    dpm($entity, 'Fieldform');
     $entity->processElements($form, $form_state);
 
     $form_state += array(
