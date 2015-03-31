@@ -292,8 +292,8 @@ function _fieldform_element_form_row(&$form, $elements, $pid = 0, $depth = 0) {
           array('fid' => $form['#fid'], 'pid' => $pid))
         ->execute();
 
-      if ($element['pid'] !== $pid && !empty($children)) {
-        _fieldform_element_form_row($form, $children, $element['pid'], $depth + 1);
+      if (!empty($children)) {
+        _fieldform_element_form_row($form, $children, $element['eid'], $depth + 1);
       }
     }
   }

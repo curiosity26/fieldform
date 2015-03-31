@@ -15,11 +15,7 @@ class FieldFormController extends EntityAPIControllerExportable {
     $entities = parent::load($ids, $conditions);
     foreach ($entities as $entity) {
       if (empty($entity->elements)) {
-        $entity->elements = array();
-        $elements = self::loadElements($entity->fid);
-        foreach ($elements as $id => $element) {
-          $entity->elements[$id] = fieldform_element_create($element['type'], $element);
-        }
+        $entity->elements = self::loadElements($entity->fid);
       }
 
       if (!isset($entity->settings) || !is_array($entity->settings)) {
@@ -71,7 +67,7 @@ class FieldFormController extends EntityAPIControllerExportable {
 
       $element['children'] = self::loadElements($fid, $result['eid']);
 
-      $elements[$id] = $element;
+      $elements[$id] = fieldform_element_create($element['type'], $element);
     }
 
     return $elements;
