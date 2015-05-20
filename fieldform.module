@@ -406,6 +406,13 @@ function fieldform_menu() {
   foreach ($form_items as $entity) {
     $type = $entity['entity_type'];
     $id = $entity['id'];
+
+    $menu[$type.'/'.$id.'/view'] = array(
+      'title' => 'View',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+      'weight' => -100
+    );
+
     $menu[$type.'/'.$id.'/results'] = array(
       'title' => 'Form Results',
       'page callback' => 'fieldform_field_results_page',
@@ -413,8 +420,8 @@ function fieldform_menu() {
       'access callback' => 'fieldform_field_result_access',
       'access arguments' => array('view', 1),
       'type' => MENU_LOCAL_TASK,
-      'tab_root' => "$type/%",
-      'tab_parent' => "$type/%",
+      'tab_root' => "$type/$id/view",
+      'tab_parent' => "$type/$id/view",
       'weight' => 3
     );
 
