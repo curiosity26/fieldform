@@ -414,7 +414,7 @@ function fieldform_menu() {
       'access arguments' => array('view', 1),
       'type' => MENU_LOCAL_TASK,
       'tab_root' => "$type/$id",
-      'tab_parent' => "$type/$id"
+      'tab_parent' => "$type/$id/view"
     );
 
     $menu[$type.'/'.$id.'/results/export'] = array(
