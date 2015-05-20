@@ -405,7 +405,7 @@ function fieldform_menu() {
   $form_items = fieldform_get_menu_items();
   foreach ($form_items as $entity) {
     $type = $entity['entity_type'];
-    $id = $entity['entity'];
+    $id = $entity['id'];
     $menu[$type.'/'.$id.'/results'] = array(
       'title' => 'Form Results',
       'load arguments' => array($type, array($id)),
