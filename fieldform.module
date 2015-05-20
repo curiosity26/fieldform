@@ -484,13 +484,23 @@ function fieldform_menu() {
 }
 
 function fieldform_get_menu_items() {
-  $entities = db_select('fieldform_entities', 'e',
-    array('fetch' => PDO::FETCH_ASSOC))
-    ->fields('e', array('entity_type', 'entity'))
-    ->distinct()
-    ->execute();
+  $fields = field_read_fields(array('type' => 'fieldform'));
+  $names = array_keys($fields);
+  $instances = field_read_instances(array('field_name'=>$names));
+  $items = array();
+  $query = new EntityFieldQuery();
+  foreach ($instances as $instance) {
+    $result = $query->entityCondition('entity_type', $instance['entity_type'])
+      ->entityCondition('bundle', $instance['bundle'])
+      ->propertyCondition('status', 1);
+    foreach ($result->execute() as $type => $entities) {
+      foreach($entities as $id => $entity) {
+        $items[] = array('entity_type' => $type, 'id' => $id);
+      }
+    }
+  }
 
-  return $entities->fetchAll();
+  return $items;
 }
 
 /* Fieldform Info Calls */
