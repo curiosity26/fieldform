@@ -408,21 +408,18 @@ function fieldform_menu() {
     $id = $entity['id'];
     $menu[$type.'/'.$id.'/results'] = array(
       'title' => 'Form Results',
-      'load arguments' => array(0, array($id)),
-      'load functions' => array('entity_load'),
       'page callback' => 'fieldform_field_results_page',
-      'page arguments' => array(1),
+      'page arguments' => array(0, 1),
       'access callback' => 'fieldform_field_result_access',
       'access arguments' => array('view', 1),
-      'type' => MENU_LOCAL_TASK
+      'type' => MENU_LOCAL_TASK,
+      'tab_root' => "$type/$id"
     );
 
     $menu[$type.'/'.$id.'/results/export'] = array(
       'title' => 'Export Results',
-      'load arguments' => array(0, array($id)),
-      'load functions' => array('entity_load'),
       'page callback' => 'fieldform_field_results_export_page',
-      'page arguments' => array(1),
+      'page arguments' => array(0, 1),
       'access callback' => 'fieldform_field_result_access',
       'access arguments' => array('view', 1),
       'type' => MENU_LOCAL_ACTION,
@@ -431,10 +428,8 @@ function fieldform_menu() {
 
     $menu[$type.'/'.$id.'/results/clear'] = array(
       'title' => 'Clear All Results',
-      'load arguments' => array(0, array($id)),
-      'load functions' => array('entity_load'),
       'page callback' => 'drupal_get_form',
-      'page arguments' => array('fieldform_field_clear_form', 1),
+      'page arguments' => array('fieldform_field_clear_form', 0, 1),
       'access callback' => 'fieldform_field_result_access',
       'access arguments' => array('delete', 1),
       'type' => MENU_LOCAL_ACTION,
@@ -830,7 +825,8 @@ function fieldform_field_result_delete($entity_type, $entity, $bundle = NULL, $r
 
 /* Page Callbacks */
 
-function fieldform_field_results_page($entity) {
+function fieldform_field_results_page($type, $entity_id) {
+  $entity = entity_object_load($entity_id, $type);
   if (method_exists($entity, 'entityType')) {
     $type = $entity->entityType();
     $id = $entity->identifier();
@@ -995,7 +991,9 @@ function fieldform_print_page_delivery($page_callback_result) {
   }
 }
 
-function fieldform_field_results_export_page($entity) {
+function fieldform_field_results_export_page($type, $entity_id) {
+  $entity = entity_object_load($entity_id, $type);
+
   if (method_exists($entity, 'entityType')) {
     $type = $entity->entityType();
     $id = $entity->identifier();
@@ -1047,7 +1045,8 @@ function fieldform_field_results_export_page($entity) {
   drupal_exit();
 }
 
-function fieldform_field_clear_form($form, &$form_state, $entity) {
+function fieldform_field_clear_form($form, &$form_state, $type, $entity_id) {
+  $entity = entity_object_load($entity_id, $type);
   if (method_exists($entity, 'entityType')) {
     $type = $entity->entityType();
     $id = $entity->identifier();
