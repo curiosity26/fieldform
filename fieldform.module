@@ -422,7 +422,7 @@ function fieldform_menu() {
     $id = $entity['id'];
 
     if (!isset($menu[$type.'/%/results'])) {
-      $menu[$type . '/' . $id . '/results'] = array(
+      $menu[$type . '/%/results'] = array(
         'title'            => 'Form Results',
         'page callback'    => 'fieldform_field_results_page',
         'page arguments'   => array(0, 1),
@@ -430,12 +430,6 @@ function fieldform_menu() {
         'access arguments' => array('view', 0, 1),
         'type'             => MENU_LOCAL_TASK,
         'weight'           => 3
-      );
-
-      $menu[$type . '/%/results/all'] = array(
-        'title'  => 'All',
-        'type'   => MENU_DEFAULT_LOCAL_TASK,
-        'weight' => -100
       );
 
       $menu[$type . '/%/results/export'] = array(
