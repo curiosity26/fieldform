@@ -485,7 +485,7 @@ function fieldform_menu() {
 function fieldform_get_menu_items() {
   $entities = db_select('fieldform_entities', 'e',
     array('fetch' => PDO::FETCH_ASSOC))
-    ->fields('f', array('entity_type', 'id'))
+    ->fields('e', array('entity_type', 'id'))
     ->distinct()
     ->execute();
 

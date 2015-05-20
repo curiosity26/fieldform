@@ -116,12 +116,12 @@ class FieldFormController extends EntityAPIControllerExportable {
 
     foreach ($entity->elements as $child) {
       if ($child->name !== 'form_complete') {
-        if (is_array($child)) {
-          $elements[] = $child;
+        if (!is_array($child)) {
+          $child = $child->toArray();
         }
-        else {
-          $elements[] = $child->toArray();
-        }
+
+        unset($child["eid"], $child["fid"], $child["pid"]);
+        $elements[] = $child;
       }
     }
     $vars['elements'] = $elements;
