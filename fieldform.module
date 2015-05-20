@@ -437,7 +437,7 @@ function fieldform_menu() {
         'page callback'    => 'fieldform_field_results_export_page',
         'page arguments'   => array(0, 1),
         'access callback'  => 'fieldform_field_result_access',
-        'access arguments' => array('view', 1),
+        'access arguments' => array('view', 0, 1),
         'type'             => MENU_LOCAL_ACTION,
         'weight'           => 1
       );
@@ -447,7 +447,7 @@ function fieldform_menu() {
         'page callback'    => 'drupal_get_form',
         'page arguments'   => array('fieldform_field_clear_form', 0, 1),
         'access callback'  => 'fieldform_field_result_access',
-        'access arguments' => array('delete', 1),
+        'access arguments' => array('delete', 0, 1),
         'type'             => MENU_LOCAL_ACTION,
         'weight'           => 2
       );
