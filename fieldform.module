@@ -402,7 +402,8 @@ function fieldform_menu() {
     'file path' => drupal_get_path('module', 'fieldform').'/elements'
   );
 
-  foreach (fieldform_get_menu_items() as $entity) {
+  $form_items = fieldform_get_menu_items();
+  foreach ($form_items as $entity) {
     $type = $entity['entity_type'];
     $id = $entity['id'];
     $menu[$type.'/'.$id.'/results'] = array(
