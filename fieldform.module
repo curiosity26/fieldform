@@ -490,7 +490,7 @@ function fieldform_get_menu_items() {
     ->distinct()
     ->execute();
 
-  return $entities;
+  return $entities->fetchAll();
 }
 
 /* Fieldform Info Calls */
