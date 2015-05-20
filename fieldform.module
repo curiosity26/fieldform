@@ -413,6 +413,8 @@ function fieldform_menu() {
       'access callback' => 'fieldform_field_result_access',
       'access arguments' => array('view', 1),
       'type' => MENU_LOCAL_TASK,
+      'tab_root' => "$type/$id/view",
+      'tab_parent' => "$type/$id/view",
       'weight' => 3
     );
 
